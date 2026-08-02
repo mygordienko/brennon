@@ -19,5 +19,7 @@
     - there can be sub-folders under `/adapter` to separate adapters by technology, ex: `/rest`, `/ws`, `/jdbc`
     - API exposed by feature module must be in feature's root package
 
+* Prefer defining Spring beans in `@Configuration` files. Avoid using @Component annotation on service/manager beans.
+
 * follow Modulith best practices
 * Thymeleaf template/js directory `/resources/templates/` MUST have a subfolder structure that matches feature structure in backend, ex: if a template or js library belongs to feature1 it must be put in `/resources/templates/feature1` folder

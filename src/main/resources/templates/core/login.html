@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brennon Login</title>
+    
+    <!-- Link to your compiled Tailwind CSS output file -->
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    
+    <style>
+        .title-text {
+            letter-spacing: 0.25em; 
+        }
+    </style>
+</head>
+<body class="bg-(--color-brand-bg) min-h-screen flex flex-col justify-center items-center relative text-white">
+
+    <!-- Main Login Container -->
+    <div class="w-full max-w-sm px-6 flex flex-col items-center">
+        
+        <!-- Title -->
+        <h1 class="title-text text-(--color-brand-pink) text-4xl uppercase mb-10 tracking-widest font-bold">
+            Brennon
+        </h1>
+
+        <!-- Form -->
+        <form th:action="@{/login}" method="post" class="w-full flex flex-col gap-5">
+            
+            <!-- Email Input -->
+            <div>
+                <label for="username" class="block text-white text-base font-medium mb-1">email</label>
+                <input type="text" id="username" name="username" 
+                       class="w-full bg-transparent border border-(--color-brand-border) rounded-sm px-4 py-2.5 text-white outline-none focus:border-white focus:ring-0 transition-colors">
+            </div>
+
+            <!-- Password Input -->
+            <div>
+                <label for="password" class="block text-white text-base font-medium mb-1">password</label>
+                <input type="password" id="password" name="password" 
+                       class="w-full bg-transparent border border-(--color-brand-border) rounded-sm px-4 py-2.5 text-white outline-none focus:border-white focus:ring-0 transition-colors">
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" 
+                    class="w-full bg-(--color-brand-blue) text-white font-bold text-base py-2.5 rounded-md mt-2 hover:bg-blue-600 transition-colors shadow-sm">
+                login
+            </button>
+            
+        </form>
+    </div>
+
+    <!-- Error Message (Bottom Left) -->
+    <div th:if="${error}" class="absolute bottom-6 left-6 text-(--color-brand-pink) text-sm font-light">
+        <span th:text="${error}">login must be 4 symbols at least</span>
+    </div>
+
+</body>
+</html>

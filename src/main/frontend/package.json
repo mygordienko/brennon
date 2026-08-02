@@ -1,0 +1,15 @@
+{
+  "name": "brennon-frontend",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "npm@11.16.0",
+  "scripts": {
+    "build": "npm run build:css",
+    "watch": "npm run watch:css",
+    "build:css": "npx @tailwindcss/cli -i ./src/styles.css -o ../resources/static/css/main.css",
+    "watch:css": "npx @tailwindcss/cli --watch -i ./src/styles.css -o ../resources/static/css/main.css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.0.0"
+  }
+}

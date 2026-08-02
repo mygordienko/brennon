@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.1.0'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.siouan.frontend-jdk21' version '10.0.0'
 }
 
 group = 'com.mygordienko.brennon'
@@ -20,9 +21,20 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+frontend {
+	nodeVersion = '24.18.1'
+	nodeInstallDirectory = project.layout.projectDirectory.dir("node")
+	packageJsonDirectory = project.layout.projectDirectory.dir("src/main/frontend")
+	corepackVersion = 'latest'
+	assembleScript = "run build"
+	verboseModeEnabled.set(true)
 }
 
 tasks.named('test') {

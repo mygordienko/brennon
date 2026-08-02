@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* It is important to note that the path passed to the @source directive is relative and should be defined based on the location of the CSS file. */
+@source "../../resources/templates";
+
+@theme {
+    /* Define custom colors as CSS variables */
+    --color-brand-bg: #1a1a1a;
+    --color-brand-pink: #ff9199;
+    --color-brand-blue: #1d9bf0;
+    --color-brand-border: #e5e7eb;
+}
