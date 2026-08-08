@@ -1,21 +1,16 @@
-package com.mygordienko.brennon.core.di;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+package com.mygordienko.brennon.core.auth.di;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.mygordienko.brennon.core.auth.adapter.jdbc.JdbcBrennonUserDetailsStorage;
 
 @Configuration
 @EnableWebSecurity
@@ -47,27 +42,8 @@ public class CoreSecurityConfiguration {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        return new InMemoryUserDetailsManager(
-                List.of(
-                        composeUser("john@mail.com", passwordEncoder.encode("ps"), List.of("admin")),
-                        composeUser("anna@mail.com", passwordEncoder.encode("ps"), List.of("user"))
-                )
-        );
-    }
-
-    private static UserDetails composeUser(String login, String password, Collection<String> authorities) {
-        return new User(
-                login,
-                password,
-                true,
-                true,
-                true,
-                true,
-                authorities.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toSet())
-        );
+    public UserDetailsService userDetailsService(NamedParameterJdbcTemplate jdbcTemplate) {
+        return new JdbcBrennonUserDetailsStorage(jdbcTemplate);
     }
 
     @Bean

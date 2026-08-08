@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - preConditions:
+      - onFail: HALT
+      - dbms:
+          - type: postgresql
+  - changeSet:
+      id: 1
+      author: liquibase
+      comment: Creating tables for user details
+      preConditions:
+        - onFail: MARK_RAN
+          and:
+            - not:
+                tableExists:
+                  tableName: user_logins
+      changes:
+        - sqlFile:
+            - path: sql/1_init.sql
+            - relativeToChangelogFile: true

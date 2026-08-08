@@ -4,3 +4,7 @@ server:
 spring:
   application:
     name: brennon
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/brennon"
+    username: "postgres"
+    password: "example"

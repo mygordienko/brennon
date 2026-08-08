@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
 <head>
-  <title>Welcome</title>
-  <meta charset="UTF-8">
+    <title>Create Ticket</title>
+    <!-- Link to compiled Tailwind CSS output file -->
+    <link rel="stylesheet" th:href="@{/css/main.css}">
 </head>
 <body>
-
-<h1 th:text="'Welcome, ' + ${username} + '!'">Welcome!</h1>
-
-<form th:action="@{/logout}" method="post">
-  <button type="submit">Logout</button>
-</form>
-
+    <th:block layout:fragment="content">
+        <div class="max-w-4xl mx-auto h-full flex flex-col">
+            <div th:text="'Welcome, ' + ${username} + '!'">NOTHING</div>
+        
+        </div>
+    </th:block>
 </body>
 </html>

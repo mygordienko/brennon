@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.core.adapter.rest;
+package com.mygordienko.brennon.core.auth.adapter.rest;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;

@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.core.adapter.rest;
+package com.mygordienko.brennon.core.auth.adapter.rest;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +8,6 @@ public class LoginController {
 
     @GetMapping("/login")
     public String login() {
-        return "core/login";
+        return "core/auth/login";
     }
 }
