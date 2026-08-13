@@ -2,7 +2,20 @@ package com.mygordienko.brennon.core.auth;
 
 /**
  * Represents a user ID in Brennon app.
- * @param value String representation.
  */
-public record BrennonUserId(String value) {
+public final class BrennonUserId {
+    private BrennonUserId(String value) {
+        this.value = value;
+    }
+
+    public static BrennonUserId from(String val) {
+        return new BrennonUserId(val);
+    }
+
+    private final String value;
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }

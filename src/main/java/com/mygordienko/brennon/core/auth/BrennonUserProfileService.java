@@ -1,7 +1,5 @@
 package com.mygordienko.brennon.core.auth;
 
-import java.util.Collection;
-
 public class BrennonUserProfileService {
     public BrennonUserProfileService(BrennonUserProfileStoragePort userStoragePort,
         CurrentUserPort currentUserPort
@@ -12,10 +10,6 @@ public class BrennonUserProfileService {
 
     private final BrennonUserProfileStoragePort userStoragePort;
     private final CurrentUserPort currentUserPort;
-
-    public Collection<BrennonUserProfile> getUsers() {
-        return userStoragePort.getUsers();
-    }
 
     public BrennonUserProfile getUser(BrennonUserId userId) {
         return userStoragePort.getById(userId).orElseThrow(() -> MissingUserException.forId(userId));
