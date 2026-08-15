@@ -31,8 +31,8 @@ public class JdbcBrennonUserDetailsStorage implements UserDetailsService {
 
         var sql = """
             select u.username, u.enabled, a.authority, u.password
-            from brennon.user_logins u
-                left join brennon.user_authorities a on u.username = a.username
+            from user_logins u
+                left join user_authorities a on u.username = a.username
             where u.username = :target
                 """;
 

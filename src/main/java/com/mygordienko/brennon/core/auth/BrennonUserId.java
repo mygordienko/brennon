@@ -8,7 +8,7 @@ public final class BrennonUserId {
         this.value = value;
     }
 
-    public static BrennonUserId from(String val) {
+    public static BrennonUserId of(String val) {
         return new BrennonUserId(val);
     }
 

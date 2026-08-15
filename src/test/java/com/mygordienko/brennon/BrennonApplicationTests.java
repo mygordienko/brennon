@@ -18,6 +18,7 @@ class BrennonApplicationTests {
 			.withDatabaseName("brennon")
 			.withUsername("postgres")
 			.withPassword("example")
+			.withUrlParam("currentSchema", "brennon")
 			.withInitScript("init.sql");
 
 	@Test

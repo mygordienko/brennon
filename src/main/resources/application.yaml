@@ -5,6 +5,9 @@ spring:
   application:
     name: brennon
   datasource:
-    url: "jdbc:postgresql://localhost:5432/brennon"
+    url: "jdbc:postgresql://localhost:5432/brennon?currentSchema=brennon"
     username: "postgres"
     password: "example"
+  # Gives the auto-configured HTML resolver a distinct order priority
+  thymeleaf:
+    template-resolver-order: 0

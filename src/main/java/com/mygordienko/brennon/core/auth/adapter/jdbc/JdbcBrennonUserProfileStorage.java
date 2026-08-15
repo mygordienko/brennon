@@ -25,7 +25,7 @@ public class JdbcBrennonUserProfileStorage implements BrennonUserProfileStorageP
 
         var sql = """
             select u.first_name, u.last_name, u.id, u.username
-            from brennon.user_profiles u
+            from user_profiles u
             where u.id = :id
                 """;
 
@@ -40,8 +40,8 @@ public class JdbcBrennonUserProfileStorage implements BrennonUserProfileStorageP
 
                 var firstName = rs.getString(1);
                 var lastName = rs.getString(2);
-                var id = BrennonUserId.from(rs.getString(3));
-                var login = BrennonUserLogin.from(rs.getString(4));
+                var id = BrennonUserId.of(rs.getString(3));
+                var login = BrennonUserLogin.of(rs.getString(4));
 
                 return new BrennonUserProfile(id, login, firstName, lastName);
             }
@@ -57,7 +57,7 @@ public class JdbcBrennonUserProfileStorage implements BrennonUserProfileStorageP
 
         var sql = """
             select u.first_name, u.last_name, u.id, u.username
-            from brennon.user_profiles u
+            from user_profiles u
             where u.username = :username
                 """;
 
@@ -72,8 +72,8 @@ public class JdbcBrennonUserProfileStorage implements BrennonUserProfileStorageP
 
                 var firstName = rs.getString(1);
                 var lastName = rs.getString(2);
-                var id = BrennonUserId.from(rs.getString(3));
-                var login = BrennonUserLogin.from(rs.getString(4));
+                var id = BrennonUserId.of(rs.getString(3));
+                var login = BrennonUserLogin.of(rs.getString(4));
 
                 return new BrennonUserProfile(id, login, firstName, lastName);
             }

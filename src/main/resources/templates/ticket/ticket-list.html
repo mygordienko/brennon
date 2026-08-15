@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}"
+    th:with="activeMenuItem='mytickets'">
+<head>
+    <title>My Tickets</title>
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-2xl font-bold mb-8">My tickets</h1>
+
+            <!-- Filters -->
+            <div class="flex space-x-4 mb-6">
+                <input type="text" placeholder="Filter by ID" class="bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6] w-40">
+                
+                <select class="bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6] w-40 appearance-none">
+                    <option>Filter by status</option>
+                    <option>Open</option>
+                    <option>Closed</option>
+                </select>
+
+                <input type="text" placeholder="Filter by subject" class="flex-1 bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6]">
+            </div>
+
+            <!-- Table Header -->
+            <div class="grid grid-cols-12 gap-4 text-[#3b82f6] pb-3 border-b border-[#333333] text-sm font-medium mb-2">
+                <div class="col-span-2 flex items-center cursor-pointer">ID <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m2 0h4m-4 4h4m-4 4h4"></path></svg></div>
+                <div class="col-span-2">Status</div>
+                <div class="col-span-4">Subject</div>
+                <div class="col-span-2 flex items-center cursor-pointer">Created <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m2 0h4m-4 4h4m-4 4h4"></path></svg></div>
+                <div class="col-span-2 flex items-center cursor-pointer">Updated <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m2 0h4m-4 4h4m-4 4h4"></path></svg></div>
+            </div>
+
+            <!-- Table Rows -->
+            <div class="flex flex-col space-y-4 mt-4 h-[400px] overflow-y-auto pr-2"> <!-- Scrollable container -->
+                <!-- Rows -->
+                <div th:each="ticket : ${tickets}" class="grid grid-cols-12 gap-4 items-center hover:bg-[#1a1a1a] p-2 rounded transition-colors cursor-pointer" th:onclick="'window.location.href=\'/tickets/10302\''">
+                    <div th:text="${ticket.id()}" class="col-span-2 text-[#3b82f6] font-bold">#10302</div>
+                    <div th:text="${ticket.status()}" class="col-span-2">open</div>
+                    <div th:text="${ticket.subject()}" class="col-span-4">Service unavailable, request for refund</div>
+                    <div th:text="${#temporals.format(ticket.created(), 'dd/MMM/yyyy HH:mm')}" class="col-span-2 text-gray-400 text-sm">2026-04-01 22:01</div>
+                    <div th:text="${#temporals.format(ticket.updated(), 'dd/MMM/yyyy HH:mm')}" class="col-span-2 text-gray-400 text-sm">2026-04-01 22:01</div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-center mt-8 border-t border-[#222222] pt-6">
+                <div class="flex border border-[#333333] rounded overflow-hidden">
+                    <!-- First page -->
+                    <button th:if="${page.currentPage gt 0}"
+                            th:onclick="|location.href='@{/tickets/my(page=0)}'|"
+                            class="px-4 py-2 bg-[#111111] hover:bg-[#222222] text-white border-r border-[#333333]"
+                            title="First page">
+                        &lt;&lt;
+                    </button>
+                    <th:block th:unless="${page.currentPage gt 0}">
+                        <span class="px-4 py-2 bg-[#111111] text-gray-600 border-r border-[#333333]">&lt;&lt;</span>
+                    </th:block>
+
+                    <!-- Previous page -->
+                    <button th:if="${page.currentPage gt 0}"
+                            th:onclick="|location.href='@{/tickets/my(page=${page.currentPage - 1})}'|"
+                            class="px-4 py-2 bg-[#111111] hover:bg-[#222222] text-white border-r border-[#333333]"
+                            title="Previous page">
+                        &lt;
+                    </button>
+                    <th:block th:unless="${page.currentPage gt 0}">
+                        <span class="px-4 py-2 bg-[#111111] text-gray-600 border-r border-[#333333]">&lt;</span>
+                    </th:block>
+
+                    <!-- Current page info -->
+                    <span class="px-4 py-2 bg-[#111111] text-gray-400 border-r border-[#333333]">
+                        [[${page.currentPage}+1]]/[[${page.totalPages}]]
+                    </span>
+
+                    <!-- Next page -->
+                    <button th:if="${page.currentPage lt page.totalPages - 1}"
+                            th:onclick="|location.href='@{/tickets/my(page=${page.currentPage + 1})}'|"
+                            class="px-4 py-2 bg-[#111111] hover:bg-[#222222] text-white border-r border-[#333333]"
+                            title="Next page">
+                        &gt;
+                    </button>
+                    <th:block th:unless="${page.currentPage lt page.totalPages - 1}">
+                        <span class="px-4 py-2 bg-[#111111] text-gray-600">></span>
+                    </th:block>
+
+                    <!-- Last page -->
+                    <button th:if="${page.currentPage lt page.totalPages - 1}"
+                            th:onclick="|location.href='@{/tickets/my(page=${page.totalPages - 1})}'|"
+                            class="px-4 py-2 bg-[#111111] hover:bg-[#222222] text-white"
+                            title="Last page">
+                        &gt;&gt;
+                    </button>
+                    <th:block th:unless="${page.currentPage lt page.totalPages - 1}">
+                        <span class="px-4 py-2 bg-[#111111] text-gray-600">&gt;&gt;</span>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

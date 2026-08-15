@@ -13,6 +13,18 @@ databaseChangeLog:
             - not:
                 tableExists:
                   tableName: user_logins
+            - not:
+                tableExists:
+                  tableName: user_authorities
+            - not:
+                tableExists:
+                  tableName: user_profiles
+            - not:
+                tableExists:
+                  tableName: tickets
+            - not:
+                tableExists:
+                  tableName: ticket_replies
       changes:
         - sqlFile:
             - path: sql/1_init.sql
