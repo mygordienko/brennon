@@ -20,6 +20,6 @@ public class CurrentUserProfileController {
 
         var dto = new UserInfoDto(userProfile.id().toString(), userProfile.getFullName(), userProfile.login().toString());
         model.addAttribute("currentUser", dto);
-        return "core/current-user-profile :: currentUserProfile";
+        return "core/auth/current-user-profile :: currentUserProfile";
     }
 }

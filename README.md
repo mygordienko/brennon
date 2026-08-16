@@ -13,9 +13,13 @@ Helpdesk platform
 
 ## Things to note
 
-* [current-user-profile.html](src\main\resources\templates\core\current-user-profile.html) 
+* [current-user-profile.html](src/main/resources/templates/core/current-user-profile.html) 
     provides a fragment showing user info (name, login, etc) which is used by main layout and
     loaded by HTMX. There is also a dedicated `CurrentUserProfileController` to serve the 
     fragment. Serving fragment via separate controllers allows to re-use them instead of 
     providing the same data (model parameters) in different controllers that use main layout.
 
+* Parametrized Thymeleaf template example, see [sidebar-buttons.html](src/main/resources/templates/fragments/sidebar-buttons.html)
+
+* [404.html](src/main/resources/templates/core/common/404.html) Custom page to handle 404 error. 
+    Configures via `ErrorPageRegistrar`, see `ErrorPageConfiguration` and `CustomErrorPageController`
