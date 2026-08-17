@@ -45,7 +45,7 @@ public class TestDataPopulator {
                     ('2', '1', 'Cant login', 'HR desk does not accept my creds', 30, '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
                     ('3', '1', 'Slow internet', 'Cant attend live meetings', 20, '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
                     ('4', '1', 'AC is not working', 'AC is not working', 20, '2026-08-15 14:10:00+03', '2026-08-15 14:26:00+03'),
-                    ('5', '1', 'Fridge is broken', 'Fridge is broken', 10, '2026-08-15 10:10:00+03', '2026-08-15 11:46:00+03');
+                    ('5', '2', 'Fridge is broken', 'Fridge is broken', 10, '2026-08-15 10:10:00+03', '2026-08-15 11:46:00+03');
                 """)
                 .update();
 

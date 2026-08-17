@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}"
+    th:with="activeMenuItem='ticketedit'">
+<head>
+    <title>Ticket Details</title>
+</head>
+<body>
+    <!-- Main Content Wrapper -->
+    <th:block layout:fragment="content">
+        <main class="flex-1 flex flex-col p-6 md:p-10 overflow-hidden relative">
+            <!-- Header Section -->
+            <header class="flex justify-end items-center mb-8 border-b border-gray-700 pb-4 relative">
+                <!-- Close Ticket Button -->
+                <button class="bg-[#b91c1c] hover:bg-[#991b1b] text-white font-medium py-1 px-4 rounded border border-red-800 transition-colors text-sm">
+                    Close ticket
+                </button>
+            </header>
+
+            <!-- Scrollable Content Area -->
+            <div class="flex-1 overflow-y-auto pr-2 pb-6 space-y-6">
+                
+                <!-- Ticket Meta Data -->
+                <div>
+                    <h1 class="text-2xl font-bold text-white mb-4" th:text="|#${ticket.id()}: ${ticket.subject()}|">#10392: Please help</h1>
+                    <div class="flex items-center gap-4 mb-1">
+                        <span class="text-gray-400 font-medium">Status:</span>
+                        <span class="text-gray-200" th:text="${ticket.status()}">open</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-gray-400 font-medium">Author:</span>
+                        <span class="text-gray-200" th:text="${ticket.auhtorFullName()}">Peter Parker</span>
+                    </div>
+                </div>
+
+                <!-- Initial Description -->
+                <div class="mt-6">
+                    <p class="text-lg font-medium text-white leading-relaxed" th:text="${ticket.text()}">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </p>
+                    <button class="mt-3 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1 px-4 rounded text-sm transition-colors">
+                        Edit
+                    </button>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="space-y-8 mt-8">
+                    
+                    <!-- Comment 1 (Other User) -->
+                    <div class="flex gap-4" th:each="reply : ${ticket.replies()}">
+                        <!-- Avatar Placeholder -->
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full border-2 border-gray-400 flex items-center justify-center bg-transparent">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-gray-300">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                        </div>
+                        <!-- Comment Content -->
+                        <div class="flex-1">
+                            <div class="italic underline" th:text="${reply.auhtorFullName()} + ' | ' + ${#temporals.format(reply.updated(), 'dd/MMM/yyyy HH:mm')}"></div>
+                            <p class="text-base text-gray-200" th:text="${reply.text()}">
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Reply Input Area -->
+                <div class="mt-10 pt-4">
+                    <textarea 
+                        class="w-full bg-transparent border border-gray-600 rounded p-4 text-gray-300 focus:outline-none focus:border-[#3b82f6] transition-colors h-32"
+                        placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                    >Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</textarea>
+                </div>
+
+            </div>
+
+            <!-- Footer Actions (Fixed at bottom) -->
+            <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-transparent">
+                <button class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
+                    Add message
+                </button>
+                <button class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
+                    Cancel
+                </button>
+            </div>
+
+        </main>
+    </th:block>
+    
+
+</body>
+</html>

@@ -3,6 +3,7 @@ package com.mygordienko.brennon.core.auth.di;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import com.mygordienko.brennon.core.auth.adapter.jdbc.JdbcBrennonUserDetailsStor
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class CoreSecurityConfiguration {
 
     @Bean

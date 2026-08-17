@@ -36,8 +36,8 @@
             <!-- Table Rows -->
             <div class="flex flex-col space-y-4 mt-4 h-[400px] overflow-y-auto pr-2"> <!-- Scrollable container -->
                 <!-- Rows -->
-                <div th:each="ticket : ${tickets}" class="grid grid-cols-12 gap-4 items-center hover:bg-[#1a1a1a] p-2 rounded transition-colors cursor-pointer" th:onclick="'window.location.href=\'/tickets/10302\''">
-                    <div th:text="${ticket.id()}" class="col-span-2 text-[#3b82f6] font-bold">#10302</div>
+                <div th:each="ticket : ${tickets}" class="grid grid-cols-12 gap-4 items-center hover:bg-[#1a1a1a] p-2 rounded transition-colors cursor-pointer">
+                    <div th:text="|#${ticket.id()}|" th:onclick="|location.href='@{/tickets/{id}(id=${ticket.id()})}'|" class="col-span-2 text-[#3b82f6] font-bold">#10302</div>
                     <div th:text="${ticket.status()}" class="col-span-2">open</div>
                     <div th:text="${ticket.subject()}" class="col-span-4">Service unavailable, request for refund</div>
                     <div th:text="${#temporals.format(ticket.created(), 'dd/MMM/yyyy HH:mm')}" class="col-span-2 text-gray-400 text-sm">2026-04-01 22:01</div>

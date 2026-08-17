@@ -1,8 +1,11 @@
 package com.mygordienko.brennon.core.auth;
 
+import lombok.EqualsAndHashCode;
+
 /**
  * Represents a user ID in Brennon app.
  */
+@EqualsAndHashCode(of = {"value"})
 public final class BrennonUserId {
     private BrennonUserId(String value) {
         this.value = value;

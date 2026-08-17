@@ -52,8 +52,12 @@ values
 
 insert into user_authorities(username, authority)
 values
-	('john@mail.com', 'admin'),
-	('anna@mail.com', 'user');
+	('john@mail.com', 'admin:read'),
+	('john@mail.com', 'admin:write'),
+	('john@mail.com', 'user:read'),
+	('john@mail.com', 'user:write'),
+	('anna@mail.com', 'user:read'),
+	('anna@mail.com', 'user:write');
 
 
 insert into user_profiles(id, username, first_name, last_name)

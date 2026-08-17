@@ -185,6 +185,48 @@ public class JdbcTicketStorageTest {
         Assertions.assertThat(page.getContent().get(0).getReplies().get(1).getText()).isEqualTo("reply 1 from 2 on ticket 1");
     }
 
+    @Test
+    @Transactional
+    @DisplayName("Returns Ticket aggregate by id")
+    public void givenDataExistsWhenRequestedByIdReturnsAggregate() {
+        final var parameterSource = new MapSqlParameterSource();
+
+        // init database
+        jdbcTemplate.update(
+                """
+                INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
+                VALUES 
+                    ('1', '1', 'Power outage in office 1', 'No power, please fix asap', 10, '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    ('2', '1', 'Cant login', 'HR desk does not accept my creds', 30, '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    ('3', '1', 'Slow internet', 'Cant attend live meetings', 20, '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
+                    ('4', '2', 'Printer problem', 'Printer got broken', 20, '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                """, parameterSource);
+
+        jdbcTemplate.update(
+                """
+                INSERT INTO ticket_replies(id, author_id, ticket_id, text, created, updated)
+                VALUES 
+                    ('1', '2', '1', 'reply 1 from 2 on ticket 1', '2026-08-15 18:00:05+03', '2026-08-15 18:00:10+03'),
+                    ('2', '2', '1', 'reply 2 from 2 on ticket 1', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    ('3', '2', '2', 'reply 1 from 2 on ticket 2', '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
+                    ('4', '2', '2', 'reply 1 from 2 on ticket 2', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                """, parameterSource);
+
+        var storage = new JdbcTicketStorage(jdbcTemplate);
+        
+        var ticket = storage.getTicketById(TicketId.of("1")).get();
+
+        Assertions.assertThat(ticket).isNotNull();
+        
+        Assertions.assertThat(ticket.getId()).isEqualTo(TicketId.of("1"));
+        Assertions.assertThat(ticket.getReplies()).hasSize(2);
+        Assertions.assertThat(ticket.getReplies().get(0).getId()).isEqualTo(TicketReplyId.of("2"));
+        Assertions.assertThat(ticket.getReplies().get(0).getText()).isEqualTo("reply 2 from 2 on ticket 1");
+        Assertions.assertThat(ticket.getReplies().get(0).getAuthor().login()).isEqualTo(BrennonUserLogin.of("anna@mail.com"));
+        Assertions.assertThat(ticket.getReplies().get(1).getId()).isEqualTo(TicketReplyId.of("1"));
+        Assertions.assertThat(ticket.getReplies().get(1).getText()).isEqualTo("reply 1 from 2 on ticket 1");
+    }
+
 
     @TestConfiguration
     public static class DbTestConfiguration {

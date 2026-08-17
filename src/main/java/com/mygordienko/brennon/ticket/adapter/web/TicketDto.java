@@ -1,0 +1,17 @@
+package com.mygordienko.brennon.ticket.adapter.web;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+public record TicketDto(
+    String id,
+    String authorId,
+    String status,
+    String subject,
+    String text,
+    String auhtorFullName,
+    OffsetDateTime created,
+    OffsetDateTime updated,
+    List<TicketReplyDto> replies
+) {
+}

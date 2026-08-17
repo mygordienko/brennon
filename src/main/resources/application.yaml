@@ -11,3 +11,4 @@ spring:
   # Gives the auto-configured HTML resolver a distinct order priority
   thymeleaf:
     template-resolver-order: 0
+    cache: false
