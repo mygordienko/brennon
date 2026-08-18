@@ -20,8 +20,12 @@ create table user_profiles (
     constraint fk_profile_username foreign key(username) references user_logins(username)
 );
 
+create sequence if not exists tickets_id_seq
+    start with 100
+    increment by 1;
+
 create table tickets (
-	id varchar not null primary key,
+	id bigint not null primary key default nextval('tickets_id_seq')::int,
 	subject varchar not null,
 	text varchar not null,
 	status integer not null,
@@ -31,9 +35,11 @@ create table tickets (
 	constraint fk_ticket_author foreign key(author_id) references user_profiles(id)
 );
 
+alter sequence tickets_id_seq owned by tickets.id;
+
 create table ticket_replies (
-	id varchar not null primary key,
-	ticket_id varchar not null,
+	id bigint not null primary key,
+	ticket_id bigint not null,
 	text varchar not null,
 	author_id varchar not null,
 	created timestamptz not null,

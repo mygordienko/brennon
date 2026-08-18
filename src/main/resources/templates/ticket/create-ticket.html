@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}"
+    th:with="activeMenuItem='createticket'">
+<head>
+    <title>Create Ticket</title>
+</head>
+<body>
+ <th:block layout:fragment="content">
+    <main class="flex-1 flex flex-col p-6 md:p-10 overflow-hidden relative">
+        
+        <!-- Page Title -->
+        <h1 class="text-2xl font-bold text-white mb-6">Create ticket</h1>
+
+        <!-- Form -->
+        <form th:action="@{/tickets/create}" th:object="${request}" method="post" class="flex flex-col flex-grow space-y-6">
+            
+            <!-- Subject Input -->
+            <div class="flex flex-col space-y-2">
+                <label for="subject" class="text-sm font-medium text-gray-400">Subject</label>
+                <input 
+                    type="text" 
+                    id="subject" 
+                    th:field="*{subject}" 
+                    class="w-full rounded-md bg-transparent border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
+                <div class="text-red-400 text-sm font-medium" th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}">Validation error</div>
+            </div>
+
+            <!-- Message Textarea -->
+            <div class="flex flex-col space-y-2 flex-grow">
+                <label for="message" class="text-sm font-medium text-gray-400">Message</label>
+                <textarea 
+                    id="message" 
+                    th:field="*{text}" 
+                    class="w-full rounded-md bg-transparent border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none h-64 md:h-96"
+                ></textarea>
+                <div class="text-red-400 text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center pt-4 mt-auto gap-4 md:gap-0">
+                
+                <!-- Validation Error Message -->
+                <div th:if="${#fields.hasErrors('*')}" class="text-red-400 text-sm font-medium">
+                    <div th:if="${#fields.hasErrors('global')}">Validation error</div>
+                </div>
+                <!-- Empty placeholder to maintain flex spacing if no error -->
+                <div th:unless="${#fields.hasErrors('*')}"></div>
+
+                <!-- Buttons -->
+                <div class="flex space-x-4">
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-8 py-2 text-sm font-medium shadow-sm transition-colors">
+                        Save
+                    </button>
+                    <button type="button" onclick="window.history.back()" class="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-8 py-2 text-sm font-medium shadow-sm transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </main>
+ </th:block>
+</body>
+</html>

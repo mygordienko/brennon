@@ -19,6 +19,10 @@ public enum TicketStatus {
         return this.name;
     }
 
+    public int getCode() {
+        return this.code;
+    }
+
     public static TicketStatus of(int code) {
         return Arrays.stream(TicketStatus.values())
         .filter(value -> value.code == code)

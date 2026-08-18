@@ -23,3 +23,5 @@ Helpdesk platform
 
 * [404.html](src/main/resources/templates/core/common/404.html) Custom page to handle 404 error. 
     Configures via `ErrorPageRegistrar`, see `ErrorPageConfiguration` and `CustomErrorPageController`
+
+* Form validation (`@NotBlank`, `@ModelAttribute`, etc) automatically uses error messages from `messages.properties`

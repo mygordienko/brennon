@@ -37,6 +37,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
     private final JdbcClient jdbcClient;
     private static final Set<String> ALLOWED_SORT_COLUMNS = Set.of("id", "created", "updated");
 
+    // TODO: do not JOIN with replies here
     @Override
     @Transactional(readOnly = true)
     public Page<Ticket> getTicketsByAuthor(BrennonUserId authorId, Pageable pageable) {
@@ -44,7 +45,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
         var totalElements = getTotalCount(authorId);
 
         var targetTicketIds = selectRelevantTickets(authorId, pageable).stream()
-            .map(ticketId -> ticketId.toString())
+            .map(ticketId -> ticketId.getValue())
             .toList();
 
         var sql = """
@@ -64,7 +65,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
             ORDER BY array_position(:ids, t.id)
             """;
 
-        var paramMap = java.util.Map.of("ids", targetTicketIds.toArray(new String[0]));
+        var paramMap = java.util.Map.of("ids", targetTicketIds.toArray(new Long[0]));
 
         var tickets = jdbcClient.sql(sql)
             .params(paramMap)
@@ -100,7 +101,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
             .query((ResultSetExtractor<List<TicketId>>) rs -> {
                 var result = new ArrayList<TicketId>();
                 while (rs.next()) {
-                    var ticketId = TicketId.of(rs.getString("ticket_id"));
+                    var ticketId = TicketId.of(rs.getLong("ticket_id"));
                     result.add(ticketId);
                 }
 
@@ -139,13 +140,18 @@ public class JdbcTicketStorage implements TicketStoragePort {
         return switch(column) {
             case "created" -> "ticket_created";
             case "updated" ->  "ticket_updated";
-            default -> "id";
+            default -> "id::bigint";
         };
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<Ticket> getTicketById(TicketId ticketId) {
+        return doGetTicketById(ticketId);
+    }
+
+    @Transactional
+    private Optional<Ticket> doGetTicketById(TicketId ticketId) {
         var sql = """
             SELECT t.id, t.subject, t.text, t.status, t.author_id AS ticket_author_id,
                    t.created AS ticket_created, t.updated AS ticket_updated,
@@ -162,7 +168,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
             WHERE t.id = :ticketId
             """;
 
-        var paramMap = Map.of("ticketId", ticketId.toString());
+        var paramMap = Map.of("ticketId", ticketId.getValue());
 
         return jdbcClient
             .sql(sql)
@@ -181,7 +187,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
             var ticketReplies = new HashMap<TicketId, List<TicketReply>>();
 
             while (rs.next()) {
-                var ticketId = TicketId.of(rs.getString("id"));
+                var ticketId = TicketId.of(rs.getLong("id"));
                 if (!ticketsLoaded.containsKey(ticketId)) {
                     var author = new BrennonUserProfile(
                         BrennonUserId.of(rs.getString("ticket_author_id")),
@@ -215,7 +221,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
                     rs.getString("reply_author_last_name"));
 
                 var reply = new TicketReply(
-                    TicketReplyId.of(rs.getString("reply_id")),
+                    TicketReplyId.of(rs.getLong("reply_id")),
                     ticketId,
                     author,
                     rs.getString("reply_text"),
@@ -244,4 +250,47 @@ public class JdbcTicketStorage implements TicketStoragePort {
         }
 
     }
+
+
+    @Override
+    @Transactional
+    public Ticket saveTicket(Ticket ticket) {
+
+        final String sql = """
+                INSERT INTO tickets(id, author_id, status, subject, text, created, updated)
+                VALUES (:id, :authorId, :status, :subject, :text, :created, :updated);
+                """;
+
+        var params = Map.of(
+            "id", ticket.getId().getValue(),
+            "authorId", ticket.getAuthor().id().toString(),
+            "status", ticket.getStatus().getCode(),
+            "subject", ticket.getSubject(),
+            "text", ticket.getText(),
+            "created", ticket.getCreated(),
+            "updated", ticket.getUpdated()
+        );
+
+        jdbcClient
+            .sql(sql)
+            .params(params)
+            .update();
+
+        return doGetTicketById(ticket.getId()).orElseThrow(() -> new IllegalStateException("Ticket was not created"));
+    }
+
+    @Override
+    public TicketId getNextTicketId() {
+        final String sql = """
+                SELECT nextval('tickets_id_seq');
+                """;
+        
+        final long nextVal = jdbcClient
+            .sql(sql)
+            .query(Long.class)
+            .single();
+
+        return TicketId.of(nextVal);
+    }
+
 }

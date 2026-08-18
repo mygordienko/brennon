@@ -4,18 +4,25 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(of = {"value"})
 public class TicketReplyId {
-    private TicketReplyId(String value) {
+    private TicketReplyId(Long value) {
         this.value = value;
     }
 
-    public static final TicketReplyId of(String value) {
+    public static final TicketReplyId of(Long value) {
         return new TicketReplyId(value);
     }
+    public static final TicketReplyId of(int value) {
+        return new TicketReplyId(Long.valueOf(value));
+    }
 
-    private final String value;
+    private final Long value;
 
     @Override
     public String toString() {
-        return value;
+        return String.valueOf(value);
     }
+
+    public Long getValue() {
+        return value;
+    } 
 }
