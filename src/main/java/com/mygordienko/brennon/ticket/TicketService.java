@@ -7,13 +7,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
 
 public class TicketService {
-    public TicketService(BrennonUserProfileService userProfileService, TicketStoragePort ticketStoragePort) {
+    public TicketService(
+        BrennonUserProfileService userProfileService, 
+        TicketStoragePort ticketStoragePort,
+        TicketSecurityManager ticketSecurityManager) {
         this.userProfileService = userProfileService;
         this.ticketStoragePort = ticketStoragePort;
+        this.ticketSecurityManager = ticketSecurityManager;
     }
 
     private final BrennonUserProfileService userProfileService;
     private final TicketStoragePort ticketStoragePort;
+    private final TicketSecurityManager ticketSecurityManager;
 
     @PreAuthorize("hasAuthority('user:read')")
     public Page<Ticket> getMyTickets(Pageable pageable) {
@@ -24,16 +29,9 @@ public class TicketService {
     @PreAuthorize("hasAuthority('user:read')")
     public Ticket getTicket(TicketId ticketId) {
         var currentUser = userProfileService.getCurrentUser();
-
-        var ti = ticketStoragePort.getTicketById(ticketId).orElse(null);
-
-        var eq = currentUser.id().equals(ti.getAuthor().id());
-
-        IO.println(eq);
-
         return ticketStoragePort.getTicketById(ticketId)
             // TODO: use AOP
-            .filter(ticket -> ticket.getAuthor().id().equals(currentUser.id()))
+            .filter(ticket -> ticketSecurityManager.userHasAccess(currentUser, ticket))
             .orElseThrow(() -> MissingTicketException.forTicket(ticketId));
     }
 }

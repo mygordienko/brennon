@@ -1,20 +1,15 @@
 package com.mygordienko.brennon.ticket;
 
-import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
+import org.jspecify.annotations.NonNull;
+
+import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 
 public class TicketSecurityManager {
-    
-    public TicketSecurityManager(BrennonUserProfileService userProfileService) {
-        this.userProfileService = userProfileService;
+
+    public TicketSecurityManager() {
     }
 
-    private final BrennonUserProfileService userProfileService;
-
-    public void filterForCurrentUser(Ticket ticket) {
-        var currentUser = userProfileService.getCurrentUser();
-
-        if (ticket.getAuthor().id().equals(currentUser.id())) {
-            return;
-        }
+    public boolean userHasAccess(@NonNull BrennonUserProfile currentUser, @NonNull Ticket ticket) {
+        return currentUser.id().equals(ticket.getAuthor().id());
     }
 }
