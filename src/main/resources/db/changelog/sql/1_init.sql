@@ -25,10 +25,10 @@ create sequence if not exists tickets_id_seq
     increment by 1;
 
 create table tickets (
-	id bigint not null primary key default nextval('tickets_id_seq')::int,
+	id bigint not null primary key default nextval('tickets_id_seq'),
 	subject varchar not null,
 	text varchar not null,
-	status integer not null,
+	status varchar not null,
 	author_id varchar not null,
 	created timestamptz not null,
 	updated timestamptz not null,

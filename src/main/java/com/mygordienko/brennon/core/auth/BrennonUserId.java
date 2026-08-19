@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
  * Represents a user ID in Brennon app.
  */
 @EqualsAndHashCode(of = {"value"})
-public final class BrennonUserId {
+public final class BrennonUserId implements Comparable<BrennonUserId> {
     private BrennonUserId(String value) {
         this.value = value;
     }
@@ -21,4 +21,10 @@ public final class BrennonUserId {
     public String toString() {
         return value;
     }
+
+    @Override
+    public int compareTo(BrennonUserId o) {
+        return this.value.compareTo(o.value);
+    }
+
 }

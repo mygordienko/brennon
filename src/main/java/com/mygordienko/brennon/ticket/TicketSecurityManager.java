@@ -10,6 +10,6 @@ public class TicketSecurityManager {
     }
 
     public boolean userHasAccess(@NonNull BrennonUserProfile currentUser, @NonNull Ticket ticket) {
-        return currentUser.id().equals(ticket.getAuthor().id());
+        return currentUser.getId().equals(ticket.getAuthor().getId());
     }
 }

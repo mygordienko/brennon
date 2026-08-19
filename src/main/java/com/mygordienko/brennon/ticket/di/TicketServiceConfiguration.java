@@ -2,7 +2,7 @@ package com.mygordienko.brennon.ticket.di;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 
 import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
 import com.mygordienko.brennon.core.common.ClockManager;
@@ -14,7 +14,7 @@ import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
 @Configuration
 public class TicketServiceConfiguration {
     @Bean
-    public TicketStoragePort ticketStoragePort(NamedParameterJdbcTemplate jdbcTemplate) {
+    public TicketStoragePort ticketStoragePort(JdbcAggregateTemplate jdbcTemplate) {
         return new JdbcTicketStorage(jdbcTemplate);
     }
 

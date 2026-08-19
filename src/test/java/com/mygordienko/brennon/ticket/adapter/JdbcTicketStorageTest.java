@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,19 +24,23 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.core.auth.BrennonUserLogin;
+import com.mygordienko.brennon.core.auth.di.BrennonUserDataJdbcConfiguration;
 import com.mygordienko.brennon.core.auth.di.LiquibaseConfiguration;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
 import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
+import com.mygordienko.brennon.ticket.di.TicketDataJdbcConfiguration;
 
 @DataJdbcTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import(LiquibaseConfiguration.class)
+@Import({LiquibaseConfiguration.class, BrennonUserDataJdbcConfiguration.class, TicketDataJdbcConfiguration.class})
 public class JdbcTicketStorageTest {
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private JdbcAggregateTemplate jdbcAggregateTemplate;
 
     @AfterEach
     public void clean() {
@@ -59,13 +64,13 @@ public class JdbcTicketStorageTest {
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
                 VALUES 
-                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', 10, '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
-                    (2, '1', 'Cant login', 'HR desk does not accept my creds', 30, '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
-                    (3, '1', 'Slow internet', 'Cant attend live meetings', 20, '2026-08-15 10:30:00+03', '2026-08-15 13:00:00+03'),
-                    (4, '2', 'Printer problem', 'Printer got broken', 20, '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', '0010', '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    (2, '1', 'Cant login', 'HR desk does not accept my creds', '0030', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (3, '1', 'Slow internet', 'Cant attend live meetings', '0020', '2026-08-15 10:30:00+03', '2026-08-15 13:00:00+03'),
+                    (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         var pageable = PageRequest.of(0, 3);
         
         var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), pageable);
@@ -88,13 +93,13 @@ public class JdbcTicketStorageTest {
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
                 VALUES 
-                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', 10, '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
-                    (2, '1', 'Cant login', 'HR desk does not accept my creds', 30, '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
-                    (3, '1', 'Slow internet', 'Cant attend live meetings', 20, '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
-                    (4, '2', 'Printer problem', 'Printer got broken', 20, '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', '0010', '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    (2, '1', 'Cant login', 'HR desk does not accept my creds', '0030', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (3, '1', 'Slow internet', 'Cant attend live meetings', '0020', '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
+                    (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         var pageable = PageRequest.of(0,3, Direction.ASC, "created");
         
         var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), pageable);
@@ -116,13 +121,13 @@ public class JdbcTicketStorageTest {
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
                 VALUES 
-                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', 10, '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
-                    (2, '1', 'Cant login', 'HR desk does not accept my creds', 30, '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
-                    (3, '1', 'Slow internet', 'Cant attend live meetings', 20, '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
-                    (4, '2', 'Printer problem', 'Printer got broken', 20, '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', '0010', '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    (2, '1', 'Cant login', 'HR desk does not accept my creds', '0030', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (3, '1', 'Slow internet', 'Cant attend live meetings', '0020', '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
+                    (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         
         var page1 = storage.getTicketsByAuthor(BrennonUserId.of("1"), PageRequest.of(0,1, Direction.ASC, "updated"));
         var page2 = storage.getTicketsByAuthor(BrennonUserId.of("1"), PageRequest.of(1,1, Direction.ASC, "updated"));
@@ -154,10 +159,10 @@ public class JdbcTicketStorageTest {
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
                 VALUES 
-                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', 10, '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
-                    (2, '1', 'Cant login', 'HR desk does not accept my creds', 30, '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
-                    (3, '1', 'Slow internet', 'Cant attend live meetings', 20, '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
-                    (4, '2', 'Printer problem', 'Printer got broken', 20, '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', '0010', '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    (2, '1', 'Cant login', 'HR desk does not accept my creds', '0030', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (3, '1', 'Slow internet', 'Cant attend live meetings', '0020', '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
+                    (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
         jdbcTemplate.update(
@@ -165,12 +170,12 @@ public class JdbcTicketStorageTest {
                 INSERT INTO ticket_replies(id, author_id, ticket_id, text, created, updated)
                 VALUES 
                     (1, '2', '1', 'reply 1 from 2 on ticket 1', '2026-08-15 18:00:05+03', '2026-08-15 18:00:10+03'),
-                    (2, '2', '1', 'reply 2 from 2 on ticket 1', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (2, '2', '1', 'reply 2 from 2 on ticket 1', '2026-08-15 13:00:00+03', '2026-08-15 18:01:45+03'),
                     (3, '2', '2', 'reply 1 from 2 on ticket 2', '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
                     (4, '2', '2', 'reply 1 from 2 on ticket 2', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         
         var page = storage.getTicketsByAuthor(BrennonUserId.of("1"), PageRequest.of(2,1));
 
@@ -180,7 +185,7 @@ public class JdbcTicketStorageTest {
         Assertions.assertThat(page.getContent().get(0).getReplies()).hasSize(2);
         Assertions.assertThat(page.getContent().get(0).getReplies().get(0).getId()).isEqualTo(TicketReplyId.of(2));
         Assertions.assertThat(page.getContent().get(0).getReplies().get(0).getText()).isEqualTo("reply 2 from 2 on ticket 1");
-        Assertions.assertThat(page.getContent().get(0).getReplies().get(0).getAuthor().login()).isEqualTo(BrennonUserLogin.of("anna@mail.com"));
+        Assertions.assertThat(page.getContent().get(0).getReplies().get(0).getAuthor().getId()).isEqualTo(BrennonUserId.of("2"));
         Assertions.assertThat(page.getContent().get(0).getReplies().get(1).getId()).isEqualTo(TicketReplyId.of(1));
         Assertions.assertThat(page.getContent().get(0).getReplies().get(1).getText()).isEqualTo("reply 1 from 2 on ticket 1");
     }
@@ -196,10 +201,10 @@ public class JdbcTicketStorageTest {
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
                 VALUES 
-                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', 10, '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
-                    (2, '1', 'Cant login', 'HR desk does not accept my creds', 30, '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
-                    (3, '1', 'Slow internet', 'Cant attend live meetings', 20, '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
-                    (4, '2', 'Printer problem', 'Printer got broken', 20, '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', '0010', '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    (2, '1', 'Cant login', 'HR desk does not accept my creds', '0030', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (3, '1', 'Slow internet', 'Cant attend live meetings', '0020', '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
+                    (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
         jdbcTemplate.update(
@@ -207,12 +212,12 @@ public class JdbcTicketStorageTest {
                 INSERT INTO ticket_replies(id, author_id, ticket_id, text, created, updated)
                 VALUES 
                     (1, '2', 1, 'reply 1 from 2 on ticket 1', '2026-08-15 18:00:05+03', '2026-08-15 18:00:10+03'),
-                    (2, '2', 1, 'reply 2 from 2 on ticket 1', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (2, '2', 1, 'reply 2 from 2 on ticket 1', '2026-08-15 13:00:00+03', '2026-08-15 18:01:45+03'),
                     (3, '2', 2, 'reply 1 from 2 on ticket 2', '2026-08-15 13:30:00+03', '2026-08-15 13:36:00+03'),
                     (4, '2', 2, 'reply 1 from 2 on ticket 2', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         
         var ticket = storage.getTicketById(TicketId.of(1)).get();
 
@@ -222,7 +227,7 @@ public class JdbcTicketStorageTest {
         Assertions.assertThat(ticket.getReplies()).hasSize(2);
         Assertions.assertThat(ticket.getReplies().get(0).getId()).isEqualTo(TicketReplyId.of(2));
         Assertions.assertThat(ticket.getReplies().get(0).getText()).isEqualTo("reply 2 from 2 on ticket 1");
-        Assertions.assertThat(ticket.getReplies().get(0).getAuthor().login()).isEqualTo(BrennonUserLogin.of("anna@mail.com"));
+        Assertions.assertThat(ticket.getReplies().get(0).getAuthor().getId()).isEqualTo(BrennonUserId.of("2"));
         Assertions.assertThat(ticket.getReplies().get(1).getId()).isEqualTo(TicketReplyId.of(1));
         Assertions.assertThat(ticket.getReplies().get(1).getText()).isEqualTo("reply 1 from 2 on ticket 1");
     }

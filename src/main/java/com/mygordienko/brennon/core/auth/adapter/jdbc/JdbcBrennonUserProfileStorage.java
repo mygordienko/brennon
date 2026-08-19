@@ -1,9 +1,12 @@
 package com.mygordienko.brennon.core.auth.adapter.jdbc;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
+import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.data.relational.core.query.Query;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserLogin;
@@ -11,74 +14,30 @@ import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 import com.mygordienko.brennon.core.auth.BrennonUserProfileStoragePort;
 
 public class JdbcBrennonUserProfileStorage implements BrennonUserProfileStoragePort {
-    public JdbcBrennonUserProfileStorage(NamedParameterJdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public JdbcBrennonUserProfileStorage(JdbcAggregateTemplate jdbcAggregateTemplate) {
+        this.jdbcAggregateTemplate = jdbcAggregateTemplate;
     }
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final JdbcAggregateTemplate jdbcAggregateTemplate;
 
 
     @Override
     public Optional<BrennonUserProfile> getById(BrennonUserId userId) {
-        final var parameterSource = new MapSqlParameterSource();
-        parameterSource.addValue("id", userId.toString());
-
-        var sql = """
-            select u.first_name, u.last_name, u.id, u.username
-            from user_profiles u
-            where u.id = :id
-                """;
-
-        BrennonUserProfile user = jdbcTemplate.query(
-            sql, 
-            parameterSource,
-            (rs) -> {
-
-                if (!rs.next()) {
-                    return null;
-                }
-
-                var firstName = rs.getString(1);
-                var lastName = rs.getString(2);
-                var id = BrennonUserId.of(rs.getString(3));
-                var login = BrennonUserLogin.of(rs.getString(4));
-
-                return new BrennonUserProfile(id, login, firstName, lastName);
-            }
-        );
-
-        return Optional.ofNullable(user);
+        var query = Query.query(Criteria.where("id").is(userId));
+        return jdbcAggregateTemplate.findOne(query, BrennonUserProfile.class);
     }
 
     @Override
     public Optional<BrennonUserProfile> getByLogin(BrennonUserLogin username) {
-        final var parameterSource = new MapSqlParameterSource();
-        parameterSource.addValue("username", username.toString());
+        var query = Query.query(Criteria.where("username").is(username));
+        return jdbcAggregateTemplate.findOne(query, BrennonUserProfile.class);
+    }
 
-        var sql = """
-            select u.first_name, u.last_name, u.id, u.username
-            from user_profiles u
-            where u.username = :username
-                """;
-
-        BrennonUserProfile user = jdbcTemplate.query(
-            sql, 
-            parameterSource,
-            (rs) -> {
-
-                if (!rs.next()) {
-                    return null;
-                }
-
-                var firstName = rs.getString(1);
-                var lastName = rs.getString(2);
-                var id = BrennonUserId.of(rs.getString(3));
-                var login = BrennonUserLogin.of(rs.getString(4));
-
-                return new BrennonUserProfile(id, login, firstName, lastName);
-            }
-        );
-
-        return Optional.ofNullable(user);
+    @Override
+    public List<BrennonUserProfile> getByIds(Collection<BrennonUserId> userIds) {
+        var query = Query.query(Criteria.where("id").in(userIds));
+        return jdbcAggregateTemplate.findAll(query, BrennonUserProfile.class).stream()
+            .sorted()
+            .toList();
     }
 }

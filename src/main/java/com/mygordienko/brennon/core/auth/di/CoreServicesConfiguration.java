@@ -2,7 +2,7 @@ package com.mygordienko.brennon.core.auth.di;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 
 import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
 import com.mygordienko.brennon.core.auth.BrennonUserProfileStoragePort;
@@ -19,7 +19,7 @@ public class CoreServicesConfiguration {
     }
 
     @Bean
-    public BrennonUserProfileStoragePort userProfileStoragePort(NamedParameterJdbcTemplate jdbcTemplate) {
+    public BrennonUserProfileStoragePort userProfileStoragePort(JdbcAggregateTemplate jdbcTemplate) {
         return new JdbcBrennonUserProfileStorage(jdbcTemplate);
     }
 

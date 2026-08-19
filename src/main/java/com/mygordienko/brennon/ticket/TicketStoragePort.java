@@ -11,5 +11,4 @@ public interface TicketStoragePort {
     Page<Ticket> getTicketsByAuthor(BrennonUserId userId, Pageable pageable);
     Optional<Ticket> getTicketById(TicketId ticketId);
     Ticket saveTicket(Ticket ticket);
-    TicketId getNextTicketId();
 }

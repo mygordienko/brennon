@@ -18,7 +18,7 @@ public class CurrentUserProfileController {
     public String getProfileInfo(Model model) {
         var userProfile = userProfileService.getCurrentUser();
 
-        var dto = new UserInfoDto(userProfile.id().toString(), userProfile.getFullName(), userProfile.login().toString());
+        var dto = new UserInfoDto(userProfile.getId().toString(), userProfile.getFullName(), userProfile.getLogin().toString());
         model.addAttribute("currentUser", dto);
         return "core/auth/current-user-profile :: currentUserProfile";
     }

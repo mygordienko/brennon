@@ -1,0 +1,38 @@
+package com.mygordienko.brennon.ticket;
+
+import java.time.OffsetDateTime;
+
+import com.mygordienko.brennon.core.auth.BrennonUserProfile;
+
+import lombok.Getter;
+
+/**
+ * Short version, supposed to be used in tables/lists. Replies are not loaded.
+ */
+public class TicketView {
+    public TicketView(TicketId id, TicketStatus status, BrennonUserProfile author, String subject, String text,
+            OffsetDateTime created, OffsetDateTime updated) {
+        this.id = id;
+        this.status = status;
+        this.author = author;
+        this.subject = subject;
+        this.text = text;
+        this.created = created;
+        this.updated = updated;
+    }
+
+    @Getter
+    private final TicketId id;
+    @Getter
+    private final TicketStatus status;
+    @Getter
+    private final BrennonUserProfile author;
+    @Getter
+    private final String subject;
+    @Getter
+    private final String text;
+    @Getter
+    private final OffsetDateTime created;
+    @Getter
+    private final OffsetDateTime updated;
+}

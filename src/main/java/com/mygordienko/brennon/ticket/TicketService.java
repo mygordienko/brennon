@@ -2,13 +2,18 @@ package com.mygordienko.brennon.ticket;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.mygordienko.brennon.core.auth.BrennonUserId;
+import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
 import com.mygordienko.brennon.core.common.ClockManager;
 
@@ -31,19 +36,69 @@ public class TicketService {
 
     @PreAuthorize("hasAuthority('user:read')")
     @Transactional(readOnly = true)
-    public Page<Ticket> getMyTickets(Pageable pageable) {
+    public Page<TicketView> getMyTickets(Pageable pageable) {
         var currentUser = userProfileService.getCurrentUser();
-        return ticketStoragePort.getTicketsByAuthor(currentUser.id(), pageable);
+
+        var tickets = ticketStoragePort.getTicketsByAuthor(currentUser.getId(), pageable);
+
+        var ticketViews = tickets.map(ticket -> {
+                return new TicketView(
+                    ticket.getId(),
+                    ticket.getStatus(),
+                    currentUser,
+                    ticket.getSubject(),
+                    ticket.getText(),
+                    ticket.getCreated(),
+                    ticket.getUpdated()
+                );
+            });
+
+        return ticketViews;
     }
 
     @PreAuthorize("hasAuthority('user:read')")
     @Transactional(readOnly = true)
-    public Ticket getTicket(TicketId ticketId) {
+    public TicketDetailsView getTicket(TicketId ticketId) {
         var currentUser = userProfileService.getCurrentUser();
-        return ticketStoragePort.getTicketById(ticketId)
+
+        var ticket = ticketStoragePort.getTicketById(ticketId)
             // TODO: use AOP
-            .filter(ticket -> ticketSecurityManager.userHasAccess(currentUser, ticket))
+            .filter(t -> ticketSecurityManager.userHasAccess(currentUser, t))
             .orElseThrow(() -> MissingTicketException.forTicket(ticketId));
+
+        var replyAuthorsIds = ticket.getReplies().stream()
+            .map(reply -> reply.getAuthor().getId())
+            .toList();
+
+        var userProfileMap = Stream.concat(
+                userProfileService.getUsers(replyAuthorsIds).stream(), 
+                Stream.of(userProfileService.getUser(ticket.getAuthor().getId())))
+            .collect(Collectors.toMap(profile -> profile.getId(), profile -> profile));
+
+        var replyViews = ticket.getReplies().stream()
+            .map(reply -> {
+                var authorProfile = userProfileMap.get(reply.getAuthor());
+                return new TicketReplyView(
+                    reply.getId(), 
+                    reply.getTicketId(), 
+                    authorProfile, 
+                    reply.getText(),
+                    reply.getCreated(),
+                    reply.getUpdated()
+                );
+            })
+            .toList();
+
+        return new TicketDetailsView(
+                ticket.getId(),
+                ticket.getStatus(),
+                userProfileMap.get(ticket.getAuthor().getId()),
+                ticket.getSubject(),
+                ticket.getText(),
+                ticket.getCreated(),
+                ticket.getUpdated(),
+                replyViews
+            );
     }
 
     @PreAuthorize("hasAuthority('user:write')")
@@ -51,9 +106,10 @@ public class TicketService {
     public Ticket createTicket(TicketCreateRequest request) {
         var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
         var currentUser = userProfileService.getCurrentUser();
-        var id = ticketStoragePort.getNextTicketId();
 
-        var ticket = new Ticket(id, TicketStatus.NEW, currentUser, request.subject(), request.text(), created, created, List.of());
+        AggregateReference<BrennonUserProfile, BrennonUserId> author = AggregateReference.to(currentUser.getId());
+
+        var ticket = new Ticket(null, TicketStatus.NEW, author, request.subject(), request.text(), created, created, Set.of());
 
         return ticketStoragePort.saveTicket(ticket);
     }

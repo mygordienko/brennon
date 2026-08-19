@@ -52,7 +52,7 @@ public class TicketController {
 
         var ticketDto = new TicketDto(
             ticket.getId().toString(), 
-            ticket.getAuthor().id().toString(), 
+            ticket.getAuthor().getId().toString(), 
             ticket.getStatus().getDisplayName(),
             ticket.getSubject(),
             ticket.getText(), 
@@ -62,7 +62,7 @@ public class TicketController {
             ticket.getReplies().stream()
             .map(reply -> new TicketReplyDto(
                     reply.getId().toString(), 
-                    reply.getAuthor().id().toString(), 
+                    reply.getAuthor().getId().toString(), 
                     reply.getText(), 
                     reply.getAuthor().getFullName(), 
                     reply.getCreated(), 

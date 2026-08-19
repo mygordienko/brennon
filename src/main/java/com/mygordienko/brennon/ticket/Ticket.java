@@ -3,14 +3,30 @@ package com.mygordienko.brennon.ticket;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.AbstractAggregateRoot;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.MappedCollection;
+import org.springframework.data.relational.core.mapping.Table;
+
+import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 
 import lombok.Getter;
 
-public class Ticket {
-    public Ticket(TicketId id, TicketStatus status, BrennonUserProfile author, String subject, String text,
-            OffsetDateTime created, OffsetDateTime updated, List<TicketReply> replies) {
+/**
+ * Ticket aggegate. 
+ * Holds invariants that belong to enforced by ticket.
+ */
+@Table(name = "tickets")
+public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable<TicketId> {
+    public Ticket(TicketId id, TicketStatus status, AggregateReference<BrennonUserProfile, BrennonUserId> author, String subject, String text,
+            OffsetDateTime created, OffsetDateTime updated, Set<TicketReply> replies) {
         this.id = id;
         this.status = status;
         this.author = author;
@@ -18,29 +34,44 @@ public class Ticket {
         this.text = text;
         this.created = created;
         this.updated = updated;
-        this.replies = List.copyOf(replies).stream()
-            .sorted(Comparator.comparing(TicketReply::getUpdated))
+        this.replies = Set.copyOf(replies).stream()
+            .collect(Collectors.toSet());
+    }
+
+    @Id
+    @Getter
+    @Column("id")
+    private final TicketId id;
+    @Getter
+    @Column("status")
+    private final TicketStatus status;
+    @Getter
+    @Column("author_id")
+    private final AggregateReference<BrennonUserProfile, BrennonUserId> author;
+    @Getter
+    @Column("subject")
+    private final String subject;
+    @Getter
+    @Column("text")
+    private final String text;
+    @Getter
+    @Column("created")
+    private final OffsetDateTime created;
+    @Getter
+    @Column("updated")
+    private final OffsetDateTime updated;
+
+    @MappedCollection(idColumn = "ticket_id")
+    private final Set<TicketReply> replies;
+
+    public List<TicketReply> getReplies() {
+        return replies.stream()
+            .sorted(Comparator.comparing(TicketReply::getUpdated).reversed())
             .toList();
     }
 
-    @Getter
-    private final TicketId id;
-    @Getter
-    private final TicketStatus status;
-    @Getter
-    private final BrennonUserProfile author;
-    @Getter
-    private final String subject;
-    @Getter
-    private final String text;
-    @Getter
-    private final OffsetDateTime created;
-    @Getter
-    private final OffsetDateTime updated;
-
-    private final List<TicketReply> replies;
-
-    public List<TicketReply> getReplies() {
-        return List.copyOf(replies);
+    @Override
+    public boolean isNew() {
+        return this.id == null;
     }
 }
