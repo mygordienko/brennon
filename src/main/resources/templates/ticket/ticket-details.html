@@ -9,17 +9,17 @@
 <body>
     <!-- Main Content Wrapper -->
     <th:block layout:fragment="content">
-        <main class="flex-1 flex flex-col p-6 md:p-10 overflow-hidden relative">
+        <main class="flex-1 flex flex-col p-6 md:p-10 overflow-hidden relative h-full max-h-screen">
             <!-- Header Section -->
-            <header class="flex justify-end items-center mb-8 border-b border-gray-700 pb-4 relative">
+            <header class="flex justify-end items-center mb-4 border-b border-gray-700 pb-4 relative flex-shrink-0">
                 <!-- Close Ticket Button -->
                 <button class="bg-[#b91c1c] hover:bg-[#991b1b] text-white font-medium py-1 px-4 rounded border border-red-800 transition-colors text-sm">
                     Close ticket
                 </button>
             </header>
 
-            <!-- Scrollable Content Area -->
-            <div class="flex-1 overflow-y-auto pr-2 pb-6 space-y-6">
+            <!-- Scrollable Content Area (Ticket description + replies) -->
+            <div class="flex-1 overflow-y-auto pr-2 pb-4 space-y-6">
                 
                 <!-- Ticket Meta Data -->
                 <div>
@@ -34,7 +34,7 @@
                     </div>
                 </div>
 
-                <!-- Initial Description -->
+                <!-- Ticket Description -->
                 <div class="mt-6">
                     <p class="text-lg font-medium text-white leading-relaxed whitespace-pre-wrap" th:text="${ticket.text()}">
                         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -44,9 +44,8 @@
                     </button>
                 </div>
 
-                <!-- Comments Section -->
-                <div class="space-y-8 mt-8">
-                    
+                <!-- Replies List -->
+                <div id="reply-section" class="space-y-8"> 
                     <!-- Comment 1 (Other User) -->
                     <div class="flex gap-4" th:each="reply : ${ticket.replies()}">
                         <!-- Avatar Placeholder -->
@@ -58,37 +57,42 @@
                         <!-- Comment Content -->
                         <div class="flex-1">
                             <div class="italic underline" th:text="${reply.auhtorFullName()} + ' | ' + ${#temporals.format(reply.updated(), 'dd/MMM/yyyy HH:mm')}"></div>
-                            <p class="text-base text-gray-200" th:text="${reply.text()}">
+                            <p class="text-base text-gray-200 whitespace-pre-wrap" th:text="${reply.text()}">
                                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                             </p>
                         </div>
                     </div>
-
                 </div>
 
-                <!-- Reply Input Area -->
-                <div class="mt-10 pt-4">
-                    <textarea 
-                        class="w-full bg-transparent border border-gray-600 rounded p-4 text-gray-300 focus:outline-none focus:border-[#3b82f6] transition-colors h-32"
+                <!-- Spacer to ensure form doesn't overlap content -->
+                <div class="h-4"></div>
+            </div>
+
+            <!-- Reply Input Area - Fixed at bottom -->
+            <!-- Since this is not a standard form, we are using HTMX actions, so CSRF hidden fields must be added explicitly -->
+            <div th:fragment="reply-form-block" id="reply-form-section" th:object="${replyform}">
+                <!-- `th:` prefix is required for `hx-post` for Thymeleaf to process it and properly construct the URL -->
+                <form th:hx-post="@{/tickets/{id}/reply(id=${ticket.id()})}" hx-target="#reply-section" hx-on::after-request="if(event.detail.successful) this.reset()"  hx-on::before-request="this.querySelector('#validation-error-msg')?.remove()"  class="flex-shrink-0 border-t border-gray-700 pt-4">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <textarea th:field="*{text}"
+                        class="w-full bg-transparent border border-gray-600 rounded p-4 text-gray-300 focus:outline-none focus:border-[#3b82f6] transition-colors h-24"
                         placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                     >Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</textarea>
-                </div>
+                    <div id="validation-error-msg" class="text-red-400 text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
 
+                    <!-- Footer Actions -->
+                    <div class="flex justify-end gap-3 mt-2">
+                        <button type="submit" class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
+                            Add message
+                        </button>
+                        <button type="button" onclick="window.history.back()" class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <!-- Footer Actions (Fixed at bottom) -->
-            <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-transparent">
-                <button class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
-                    Add message
-                </button>
-                <button class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
-                    Cancel
-                </button>
-            </div>
-
         </main>
     </th:block>
-    
 
 </body>
 </html>

@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.mygordienko.brennon.ticket.TicketCreateRequest;
+import com.mygordienko.brennon.ticket.TicketCreateCommand;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class TicketController {
@@ -70,6 +72,7 @@ public class TicketController {
                 .toList());
 
         model.addAttribute("ticket", ticketDto);
+        model.addAttribute("replyform", new TicketReplyCommandDto());
 
         return "ticket/ticket-details";
     }
@@ -77,21 +80,76 @@ public class TicketController {
 
     @GetMapping("/tickets/create")
     public String createTicketForm(Model model) {
-        model.addAttribute("request", new TicketCreateRequest("", ""));
+        model.addAttribute("request", new TicketCreateCommand("", ""));
         return "ticket/create-ticket";
     }
 
     @PostMapping("/tickets/create")
-    public String createTicket(@Validated @ModelAttribute("request") TicketCreateRequestDto request,
+    public String createTicket(@Validated @ModelAttribute("request") TicketCreateCommandDto request,
                                BindingResult bindingResult, Model model) {
-        // TODO: validation
         if (bindingResult.hasErrors()) {
             model.addAttribute("request", request);
             return "ticket/create-ticket";
         }
 
-        ticketService.createTicket(request.toRequest());
+        ticketService.createTicket(request.toCommand());
 
         return "redirect:/tickets/my";
+    }
+
+    @PostMapping("/tickets/{id}/reply")
+    public String replyTicket(@PathVariable int id, HttpServletResponse response, @Validated @ModelAttribute("replyform") TicketReplyCommandDto replyform,
+                               BindingResult bindingResult, Model model) {
+
+        var ticketId = TicketId.of(id);
+    
+        if (bindingResult.hasErrors()) {
+            // Return just the fragment containing the form and errors
+            // we still need ticket id to compose the submit URL 
+            var ticketDto = new TicketDto(id);
+            model.addAttribute("ticket", ticketDto);
+            model.addAttribute("replyform", replyform);
+            
+            // Tell htmx to pinpoint change the form block by matching its ID directly
+            // The Problem: 
+            //  The default submission element targeted the general replies container 
+            //  (hx-target="#reply-section"). When a validation failure occurred, the server returned an updated input form, 
+            //  which got incorrectly injected inside the target area, creating duplicate, nested inputs.
+            // The Solution:
+            //  HX-Retarget header instructs HTMX to ignore original target specified in `hx-target` and use specified target instead
+            //  We have to also instruct Thymeleaf to return corresponsing fragment (we have to wrap out form into fragment)
+            response.setHeader("HX-Retarget", "#reply-form-section"); 
+            return "ticket/ticket-details :: reply-form-block"; 
+
+        }
+
+        ticketService.replyTicket(replyform.toCommand(ticketId));
+
+        var ticket = ticketService.getTicket(ticketId);
+
+        var ticketDto = new TicketDto(
+            ticket.getId().toString(), 
+            ticket.getAuthor().getId().toString(), 
+            ticket.getStatus().getDisplayName(),
+            ticket.getSubject(),
+            ticket.getText(), 
+            ticket.getAuthor().getFullName(), 
+            ticket.getCreated(), 
+            ticket.getUpdated(), 
+            ticket.getReplies().stream()
+            .map(reply -> new TicketReplyDto(
+                    reply.getId().toString(), 
+                    reply.getAuthor().getId().toString(), 
+                    reply.getText(), 
+                    reply.getAuthor().getFullName(), 
+                    reply.getCreated(), 
+                    reply.getUpdated()))
+                .toList());
+
+        // Re-populate ticket data needed for the fragment layout
+        model.addAttribute("ticket", ticketDto); 
+        model.addAttribute("replyform", new TicketReplyCommandDto()); // Reset form
+        
+        return "ticket/ticket-details :: #reply-section";
     }
 }

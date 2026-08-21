@@ -30,3 +30,9 @@ Helpdesk platform
 * Custom converters for Spring Data JDBC, ex `BrennonUserConverters`.
 * Spring Data JDBC does not support mapping to Integer for enums, [see here](https://github.com/spring-projects/spring-data-relational/issues/629).
 * Spring Data JDBC does not have an option to load referenced aggregate (`AggregateReference<T,ID>`) and that is by design.
+
+* Adding a reply implemented using HTMX, the page is then partially updated using area and fragments selectors. update different parts of the page based on backend response (success or error): use `HX-Retarget` header to override original `hx-target`, see `ticket-details.html`.
+
+* Thymeleaf does not add CSRF fields into HTMX forms, we have to do it explicitly: `<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />`, see `ticket-details.html`.
+
+* `hx-on::before-request` to clear input field (remove error `<div>` added by Thymeleaf), see `ticket-details.html`

@@ -1,16 +1,16 @@
 package com.mygordienko.brennon.ticket.adapter.web;
 
-import com.mygordienko.brennon.ticket.TicketCreateRequest;
+import com.mygordienko.brennon.ticket.TicketCreateCommand;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-public class TicketCreateRequestDto {
+public class TicketCreateCommandDto {
     
-    public TicketCreateRequestDto() {
+    public TicketCreateCommandDto() {
     }
-    public TicketCreateRequestDto(String subject, String text) {
+    public TicketCreateCommandDto(String subject, String text) {
         this.subject = subject;
         this.text = text;
     }
@@ -24,7 +24,7 @@ public class TicketCreateRequestDto {
     @NotBlank
     private String text;
 
-    public TicketCreateRequest toRequest() {
-        return new TicketCreateRequest(subject, text);
+    public TicketCreateCommand toCommand() {
+        return new TicketCreateCommand(subject, text);
     }
 }

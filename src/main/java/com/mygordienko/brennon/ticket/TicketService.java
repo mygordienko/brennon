@@ -73,11 +73,11 @@ public class TicketService {
         var userProfileMap = Stream.concat(
                 userProfileService.getUsers(replyAuthorsIds).stream(), 
                 Stream.of(userProfileService.getUser(ticket.getAuthor().getId())))
-            .collect(Collectors.toMap(profile -> profile.getId(), profile -> profile));
+            .collect(Collectors.toMap(profile -> profile.getId(), profile -> profile, (t, u) -> t));
 
         var replyViews = ticket.getReplies().stream()
             .map(reply -> {
-                var authorProfile = userProfileMap.get(reply.getAuthor());
+                var authorProfile = userProfileMap.get(reply.getAuthor().getId());
                 return new TicketReplyView(
                     reply.getId(), 
                     reply.getTicketId(), 
@@ -103,13 +103,30 @@ public class TicketService {
 
     @PreAuthorize("hasAuthority('user:write')")
     @Transactional
-    public Ticket createTicket(TicketCreateRequest request) {
+    public Ticket createTicket(TicketCreateCommand command) {
         var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
         var currentUser = userProfileService.getCurrentUser();
 
         AggregateReference<BrennonUserProfile, BrennonUserId> author = AggregateReference.to(currentUser.getId());
 
-        var ticket = new Ticket(null, TicketStatus.NEW, author, request.subject(), request.text(), created, created, Set.of());
+        var ticket = new Ticket(null, TicketStatus.NEW, author, command.subject(), command.text(), created, created, Set.of());
+
+        return ticketStoragePort.saveTicket(ticket);
+    }
+
+
+    @PreAuthorize("hasAuthority('user:write')")
+    @Transactional
+    public Ticket replyTicket(TicketReplyCommand command) {
+        var currentUser = userProfileService.getCurrentUser();
+        var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
+
+        var ticket = ticketStoragePort.getTicketById(command.ticketId())
+            // TODO: use AOP
+            .filter(t -> ticketSecurityManager.userHasAccess(currentUser, t))
+            .orElseThrow(() -> MissingTicketException.forTicket(command.ticketId()));
+
+        ticket.addReply(currentUser.getId(), command.text(), created);
 
         return ticketStoragePort.saveTicket(ticket);
     }

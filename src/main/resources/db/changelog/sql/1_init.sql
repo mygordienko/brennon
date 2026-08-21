@@ -37,8 +37,13 @@ create table tickets (
 
 alter sequence tickets_id_seq owned by tickets.id;
 
+
+create sequence if not exists tickets_reply_id_seq
+    start with 100
+    increment by 1;
+
 create table ticket_replies (
-	id bigint not null primary key,
+	id bigint not null primary key default nextval('tickets_reply_id_seq'),
 	ticket_id bigint not null,
 	text varchar not null,
 	author_id varchar not null,
@@ -47,6 +52,8 @@ create table ticket_replies (
 	constraint fk_ticket_reply_ticket foreign key(ticket_id) references tickets(id),
 	constraint fk_ticket_reply_author foreign key(author_id) references user_profiles(id)
 );
+
+alter sequence tickets_reply_id_seq owned by ticket_replies.id;
 
 -- Default users (for test purpose only)
 

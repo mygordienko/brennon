@@ -2,6 +2,7 @@ package com.mygordienko.brennon.ticket;
 
 import java.time.OffsetDateTime;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,8 +36,12 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         this.created = created;
         this.updated = updated;
         this.replies = Set.copyOf(replies).stream()
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(() -> new HashSet<>()));
     }
+
+    /**
+     * TODO: Optimistic lock. Version
+     */
 
     @Id
     @Getter
@@ -73,5 +78,20 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     @Override
     public boolean isNew() {
         return this.id == null;
+    }
+
+    public void addReply(BrennonUserId authorId, String text, OffsetDateTime created) {
+        if (this.status == TicketStatus.CLOSED) {
+            throw new IllegalStateException("Replying on closed ticket");
+        }
+
+        if (!this.author.getId().equals(authorId)) {
+            // TODO: support reply
+            throw new IllegalStateException("Not an author's reply");
+        }
+
+        var reply = new TicketReply(null, this.id, AggregateReference.to(authorId), text, created, created);
+
+        this.replies.add(reply);
     }
 }

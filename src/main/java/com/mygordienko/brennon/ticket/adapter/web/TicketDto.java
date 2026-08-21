@@ -14,4 +14,8 @@ public record TicketDto(
     OffsetDateTime updated,
     List<TicketReplyDto> replies
 ) {
+    public TicketDto(int id) {
+        // Must delegate to the canonical constructor
+        this(String.valueOf(id), null, null, null, null, null, null, null, null); 
+    }
 }
