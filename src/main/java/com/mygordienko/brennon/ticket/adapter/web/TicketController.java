@@ -2,6 +2,7 @@ package com.mygordienko.brennon.ticket.adapter.web;
 
 import java.time.ZoneId;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.mygordienko.brennon.ticket.TicketConcurrentModificationException;
 import com.mygordienko.brennon.ticket.TicketCreateCommand;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketService;
@@ -37,6 +39,7 @@ public class TicketController {
         var ticketsDtos = page.getContent().stream()
         .map(ticket -> new TicketRecordDto(
             ticket.getId().toString(),
+            ticket.getVersion(),
             ticket.getStatus().getDisplayName(),
             ticket.getSubject(),
             ticket.getAuthor().getFullName(),
@@ -59,6 +62,7 @@ public class TicketController {
 
         var ticketDto = new TicketDto(
             ticket.getId().toString(), 
+            ticket.getVersion(),
             ticket.getAuthor().getId().toString(), 
             ticket.getStatus().getDisplayName(),
             ticket.getSubject(),
@@ -77,7 +81,7 @@ public class TicketController {
                 .toList());
 
         model.addAttribute("ticket", ticketDto);
-        model.addAttribute("replyform", new TicketReplyCommandDto());
+        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
 
         return "ticket/ticket-details";
     }
@@ -114,6 +118,8 @@ public class TicketController {
             var ticketDto = new TicketDto(id);
             model.addAttribute("ticket", ticketDto);
             model.addAttribute("replyform", replyform);
+            // Normal render, no OOB
+            model.addAttribute("isOobSwap", false);
             
             // Tell htmx to pinpoint change the form block by matching its ID directly
             // The Problem: 
@@ -128,12 +134,18 @@ public class TicketController {
 
         }
 
-        ticketService.replyTicket(replyform.toCommand(ticketId));
+        var concurrentModificationDetected = false;
+        try {
+            ticketService.replyTicket(replyform.toCommand(ticketId));
+        } catch (OptimisticLockingFailureException | TicketConcurrentModificationException ex) {
+           concurrentModificationDetected = true; 
+        }
 
         var ticket = ticketService.getTicket(ticketId);
 
         var ticketDto = new TicketDto(
             ticket.getId().toString(), 
+            ticket.getVersion(),
             ticket.getAuthor().getId().toString(), 
             ticket.getStatus().getDisplayName(),
             ticket.getSubject(),
@@ -152,9 +164,23 @@ public class TicketController {
                 .toList());
 
         // Re-populate ticket data needed for the fragment layout
-        model.addAttribute("ticket", ticketDto); 
-        model.addAttribute("replyform", new TicketReplyCommandDto()); // Reset form
+        model.addAttribute("ticket", ticketDto);
+        // Force HTMX to swap the form out-of-band
+        model.addAttribute("isOobSwap", true); 
         
-        return "ticket/ticket-details :: #reply-section";
+        if (concurrentModificationDetected) {
+            model.addAttribute("concurrentUpdateDetected", true);
+            model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion(), replyform.getText())); // keep the form data with new version
+        } else {
+            model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
+        }
+        
+        /**
+         * Thymeleaf evaluates the bundle, strings the HTML from both fragments together into a single response body, and passes it to HTMX.
+         * HTMX takes the entire string chunk. It drops the reply-section HTML into the main hx-target (#reply-section).
+         * It spots hx-swap-oob="true" on the reply-form-section element, plucks it out of the stream, and teleports it to replace 
+         * the reply form wherever it sits on the screen.
+         */
+        return "ticket/ticket-details :: reply-composite-bundle";
     }
 }

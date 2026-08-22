@@ -10,9 +10,10 @@ import lombok.Getter;
  * Short version, supposed to be used in tables/lists. Replies are not loaded.
  */
 public class TicketView {
-    public TicketView(TicketId id, TicketStatus status, BrennonUserProfile author, String subject, String text,
+    public TicketView(TicketId id, Integer version, TicketStatus status, BrennonUserProfile author, String subject, String text,
             OffsetDateTime created, OffsetDateTime updated) {
         this.id = id;
+        this.version = version;
         this.status = status;
         this.author = author;
         this.subject = subject;
@@ -23,6 +24,8 @@ public class TicketView {
 
     @Getter
     private final TicketId id;
+    @Getter
+    private final Integer version;
     @Getter
     private final TicketStatus status;
     @Getter

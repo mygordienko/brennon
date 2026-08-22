@@ -30,6 +30,7 @@ create table tickets (
 	text varchar not null,
 	status varchar not null,
 	author_id varchar not null,
+	version int not null default 0,
 	created timestamptz not null,
 	updated timestamptz not null,
 	constraint fk_ticket_author foreign key(author_id) references user_profiles(id)

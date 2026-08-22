@@ -12,9 +12,10 @@ import lombok.Getter;
  *  as well as rich representation for each reply.
  */
 public class TicketDetailsView {
-    public TicketDetailsView(TicketId id, TicketStatus status, BrennonUserProfile author, String subject, String text,
+    public TicketDetailsView(TicketId id, Integer version, TicketStatus status, BrennonUserProfile author, String subject, String text,
             OffsetDateTime created, OffsetDateTime updated, List<TicketReplyView> replies) {
         this.id = id;
+        this.version = version;
         this.status = status;
         this.author = author;
         this.subject = subject;
@@ -26,6 +27,8 @@ public class TicketDetailsView {
 
     @Getter
     private final TicketId id;
+    @Getter
+    private final Integer version;
     @Getter
     private final TicketStatus status;
     @Getter

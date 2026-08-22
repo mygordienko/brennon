@@ -36,3 +36,5 @@ Helpdesk platform
 * Thymeleaf does not add CSRF fields into HTMX forms, we have to do it explicitly: `<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />`, see `ticket-details.html`.
 
 * `hx-on::before-request` to clear input field (remove error `<div>` added by Thymeleaf), see `ticket-details.html`
+
+* Using HTMX OOB Swap to update multiple fragments by the same HTMX trigger (update "reply list" and "reply input form" in  cuncurrent update scenario).

@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 
 public record TicketRecordDto(
     String id,
+    int version,
     String status,
     String subject,
     String auhtorFullName,

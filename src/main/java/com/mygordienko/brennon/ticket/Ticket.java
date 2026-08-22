@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
@@ -26,9 +27,10 @@ import lombok.Getter;
  */
 @Table(name = "tickets")
 public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable<TicketId> {
-    public Ticket(TicketId id, TicketStatus status, AggregateReference<BrennonUserProfile, BrennonUserId> author, String subject, String text,
+    public Ticket(TicketId id, Integer version, TicketStatus status, AggregateReference<BrennonUserProfile, BrennonUserId> author, String subject, String text,
             OffsetDateTime created, OffsetDateTime updated, Set<TicketReply> replies) {
         this.id = id;
+        this.version = version;
         this.status = status;
         this.author = author;
         this.subject = subject;
@@ -37,6 +39,17 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         this.updated = updated;
         this.replies = Set.copyOf(replies).stream()
             .collect(Collectors.toCollection(() -> new HashSet<>()));
+    }
+
+    public static Ticket createNew(
+        TicketStatus status, 
+        BrennonUserId author, 
+        String subject, 
+        String text,
+        OffsetDateTime created, 
+        OffsetDateTime updated) {
+            return new Ticket(null, null, status, AggregateReference.to(author), subject, text,
+            created, updated, new HashSet<>());
     }
 
     /**
@@ -65,6 +78,10 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     @Getter
     @Column("updated")
     private final OffsetDateTime updated;
+    @Getter
+    @Version
+    @Column("version")
+    private final Integer version;
 
     @MappedCollection(idColumn = "ticket_id")
     private final Set<TicketReply> replies;

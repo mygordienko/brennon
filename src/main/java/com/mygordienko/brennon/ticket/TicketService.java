@@ -2,18 +2,14 @@ package com.mygordienko.brennon.ticket;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
 import com.mygordienko.brennon.core.common.ClockManager;
 
@@ -44,6 +40,7 @@ public class TicketService {
         var ticketViews = tickets.map(ticket -> {
                 return new TicketView(
                     ticket.getId(),
+                    ticket.getVersion(),
                     ticket.getStatus(),
                     currentUser,
                     ticket.getSubject(),
@@ -91,6 +88,7 @@ public class TicketService {
 
         return new TicketDetailsView(
                 ticket.getId(),
+                ticket.getVersion(),
                 ticket.getStatus(),
                 userProfileMap.get(ticket.getAuthor().getId()),
                 ticket.getSubject(),
@@ -106,10 +104,8 @@ public class TicketService {
     public Ticket createTicket(TicketCreateCommand command) {
         var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
         var currentUser = userProfileService.getCurrentUser();
-
-        AggregateReference<BrennonUserProfile, BrennonUserId> author = AggregateReference.to(currentUser.getId());
-
-        var ticket = new Ticket(null, TicketStatus.NEW, author, command.subject(), command.text(), created, created, Set.of());
+        
+        var ticket = Ticket.createNew(TicketStatus.NEW, currentUser.getId(), command.subject(), command.text(), created, created);
 
         return ticketStoragePort.saveTicket(ticket);
     }
@@ -125,6 +121,10 @@ public class TicketService {
             // TODO: use AOP
             .filter(t -> ticketSecurityManager.userHasAccess(currentUser, t))
             .orElseThrow(() -> MissingTicketException.forTicket(command.ticketId()));
+
+        if (ticket.getVersion() != command.version()) {
+            throw TicketConcurrentModificationException.forTicket(command.ticketId());
+        }
 
         ticket.addReply(currentUser.getId(), command.text(), created);
 

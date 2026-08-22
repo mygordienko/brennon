@@ -45,7 +45,7 @@
                 </div>
 
                 <!-- Replies List -->
-                <div id="reply-section" class="space-y-8"> 
+                <div id="reply-section" class="space-y-8" th:fragment="reply-section-block"> 
                     <!-- Comment 1 (Other User) -->
                     <div class="flex gap-4" th:each="reply : ${ticket.replies()}">
                         <!-- Avatar Placeholder -->
@@ -70,15 +70,18 @@
 
             <!-- Reply Input Area - Fixed at bottom -->
             <!-- Since this is not a standard form, we are using HTMX actions, so CSRF hidden fields must be added explicitly -->
-            <div th:fragment="reply-form-block" id="reply-form-section" th:object="${replyform}">
+            <!-- th:hx-swap-oob is needed to update this section when reply section updates (when reply is successfully added) -->
+            <div th:fragment="reply-form-block" id="reply-form-section" th:object="${replyform}" th:hx-swap-oob="${isOobSwap} ? 'true' : null">
                 <!-- `th:` prefix is required for `hx-post` for Thymeleaf to process it and properly construct the URL -->
                 <form th:hx-post="@{/tickets/{id}/reply(id=${ticket.id()})}" hx-target="#reply-section" hx-on::after-request="if(event.detail.successful) this.reset()"  hx-on::before-request="this.querySelector('#validation-error-msg')?.remove()"  class="flex-shrink-0 border-t border-gray-700 pt-4">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:field="*{version}" />
                     <textarea th:field="*{text}"
                         class="w-full bg-transparent border border-gray-600 rounded p-4 text-gray-300 focus:outline-none focus:border-[#3b82f6] transition-colors h-24"
                         placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                     >Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</textarea>
                     <div id="validation-error-msg" class="text-red-400 text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
+                    <div id="concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium" th:if="${concurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
 
                     <!-- Footer Actions -->
                     <div class="flex justify-end gap-3 mt-2">
@@ -93,6 +96,11 @@
             </div>
         </main>
     </th:block>
-
+    <!-- VIRTUAL BUNDLE -->
+    <!-- It has no physical HTML tags, so it doesn't impact your page layout -->
+    <th:block th:fragment="reply-composite-bundle">
+        <th:block th:insert="~{:: reply-section-block}"></th:block>
+        <th:block th:insert="~{:: reply-form-block}"></th:block>
+    </th:block>
 </body>
 </html>

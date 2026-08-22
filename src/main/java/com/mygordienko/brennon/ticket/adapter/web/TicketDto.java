@@ -5,6 +5,7 @@ import java.util.List;
 
 public record TicketDto(
     String id,
+    Integer version,
     String authorId,
     String status,
     String subject,
@@ -16,6 +17,6 @@ public record TicketDto(
 ) {
     public TicketDto(int id) {
         // Must delegate to the canonical constructor
-        this(String.valueOf(id), null, null, null, null, null, null, null, null); 
+        this(String.valueOf(id), null, null, null, null, null, null, null, null, null); 
     }
 }
