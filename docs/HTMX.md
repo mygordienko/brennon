@@ -20,8 +20,8 @@ And if we want to update multiple sections on a page using the same HTMX trigger
         * There is no duplication even when serving a full page, Thymeleaf ignores the `th:fragment` declarations and simply evaluates the virtual `<th:block>` content, effectively doing nothing because they are just references to blocks that **already rendered natively above**.
     * HTMX is clever enough to scan through the HTML it gets from backend for potential `hx-swap-oob` markers. It understands that sections marked with `hx-swap-oob` are not for primary target, they are separate sections that present somewhere on the page.
         * When HTMX finds a block with hx-swap-oob="true", it plucks it out of the incoming HTML stream completely.
-        * It uses that block to update the matching ID element elsewhere on your page.
-        * The remaining HTML code—the pieces without the OOB attribute—is what gets injected into your primary hx-target.
+        * It uses that block to update the matching ID element elsewhere on the page.
+        * The remaining HTML code—the pieces without the OOB attribute—is what gets injected into the primary hx-target.
 
 **IMPORTANT:** Top-Level Elements Only. The `hx-swap-oob` attribute must be on the top-level element of the returned HTML chunk.
 

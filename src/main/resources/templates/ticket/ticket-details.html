@@ -68,7 +68,7 @@
                 <div class="h-4"></div>
             </div>
 
-            <!-- Reply Input Area - Fixed at bottom -->
+            <!-- Reply Input Area -->
             <!-- Since this is not a standard form, we are using HTMX actions, so CSRF hidden fields must be added explicitly -->
             <!-- th:hx-swap-oob is needed to update this section when reply section updates (when reply is successfully added) -->
             <div th:fragment="reply-form-block" id="reply-form-section" th:object="${replyform}" th:hx-swap-oob="${isOobSwap} ? 'true' : null">
@@ -97,7 +97,7 @@
         </main>
     </th:block>
     <!-- VIRTUAL BUNDLE -->
-    <!-- It has no physical HTML tags, so it doesn't impact your page layout -->
+    <!-- It has no physical HTML tags and doesn't impact page layout -->
     <th:block th:fragment="reply-composite-bundle">
         <th:block th:insert="~{:: reply-section-block}"></th:block>
         <th:block th:insert="~{:: reply-form-block}"></th:block>
