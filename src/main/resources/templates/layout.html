@@ -17,6 +17,10 @@
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         body { font-family: system-ui, -apple-system, sans-serif; }
     </style>
+    <script>
+        const clientTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
+        document.cookie = "BRENNON_CLIENT_TIMEZONE=" + clientTimeZone + "; path=/; max-age=31536000";
+    </script>
 </head>
 <body class="bg-[#111111] text-white h-screen overflow-hidden flex">
 

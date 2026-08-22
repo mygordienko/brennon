@@ -1,5 +1,7 @@
 package com.mygordienko.brennon.ticket.adapter.web;
 
+import java.time.ZoneId;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,8 +30,9 @@ public class TicketController {
     private final TicketService ticketService;
 
     @GetMapping("/tickets/my")
-    public String getMyTickets(Model model, @PageableDefault(size = 3, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public String getMyTickets(@CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr, Model model, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         var page = ticketService.getMyTickets(pageable);
+        var zoneId = ZoneId.of(zoneIdStr);
 
         var ticketsDtos = page.getContent().stream()
         .map(ticket -> new TicketRecordDto(
@@ -36,8 +40,8 @@ public class TicketController {
             ticket.getStatus().getDisplayName(),
             ticket.getSubject(),
             ticket.getAuthor().getFullName(),
-            ticket.getCreated(),
-            ticket.getUpdated()
+            ticket.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(),
+            ticket.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime()
         ))
         .toList();
 
@@ -49,7 +53,8 @@ public class TicketController {
     }
 
     @GetMapping("/tickets/{id}")
-    public String getTicket(Model model, @PathVariable long id) {
+    public String getTicket(@CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr, Model model, @PathVariable long id) {
+        var zoneId = ZoneId.of(zoneIdStr);
         var ticket = ticketService.getTicket(TicketId.of(id));
 
         var ticketDto = new TicketDto(
@@ -59,16 +64,16 @@ public class TicketController {
             ticket.getSubject(),
             ticket.getText(), 
             ticket.getAuthor().getFullName(), 
-            ticket.getCreated(), 
-            ticket.getUpdated(), 
+            ticket.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
+            ticket.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
             ticket.getReplies().stream()
             .map(reply -> new TicketReplyDto(
                     reply.getId().toString(), 
                     reply.getAuthor().getId().toString(), 
                     reply.getText(), 
                     reply.getAuthor().getFullName(), 
-                    reply.getCreated(), 
-                    reply.getUpdated()))
+                    reply.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
+                    reply.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime()))
                 .toList());
 
         model.addAttribute("ticket", ticketDto);
@@ -98,9 +103,9 @@ public class TicketController {
     }
 
     @PostMapping("/tickets/{id}/reply")
-    public String replyTicket(@PathVariable int id, HttpServletResponse response, @Validated @ModelAttribute("replyform") TicketReplyCommandDto replyform,
+    public String replyTicket(@CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr, @PathVariable int id, HttpServletResponse response, @Validated @ModelAttribute("replyform") TicketReplyCommandDto replyform,
                                BindingResult bindingResult, Model model) {
-
+        var zoneId = ZoneId.of(zoneIdStr);
         var ticketId = TicketId.of(id);
     
         if (bindingResult.hasErrors()) {
@@ -134,16 +139,16 @@ public class TicketController {
             ticket.getSubject(),
             ticket.getText(), 
             ticket.getAuthor().getFullName(), 
-            ticket.getCreated(), 
-            ticket.getUpdated(), 
+            ticket.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
+            ticket.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
             ticket.getReplies().stream()
             .map(reply -> new TicketReplyDto(
                     reply.getId().toString(), 
                     reply.getAuthor().getId().toString(), 
                     reply.getText(), 
                     reply.getAuthor().getFullName(), 
-                    reply.getCreated(), 
-                    reply.getUpdated()))
+                    reply.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
+                    reply.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime()))
                 .toList());
 
         // Re-populate ticket data needed for the fragment layout
