@@ -6,6 +6,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.mygordienko.brennon.ticket.TicketConcurrentModificationException;
 import com.mygordienko.brennon.ticket.TicketCreateCommand;
@@ -32,7 +34,10 @@ public class TicketController {
     private final TicketService ticketService;
 
     @GetMapping("/tickets/my")
-    public String getMyTickets(@CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr, Model model, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public String getMyTickets(
+        @CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr,
+        @RequestHeader(value = "HX-Request", required = false) String hxRequest,
+        Model model, @SortDefault(sort = "id", direction = Sort.Direction.DESC) @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         var page = ticketService.getMyTickets(pageable);
         var zoneId = ZoneId.of(zoneIdStr);
 
@@ -48,11 +53,22 @@ public class TicketController {
         ))
         .toList();
 
+        var order = page.getSort().stream()
+            .findAny()
+            .orElseThrow();
+
+        var orderDto = new PageInfoDto.OrderDto(order.getProperty(), order.getDirection().name());
 
         model.addAttribute("tickets", ticketsDtos);
-        model.addAttribute("page", new PageInfoDto(page.getNumber(), page.getNumberOfElements(), page.getTotalPages(), page.getSize()));
+        model.addAttribute("page", new PageInfoDto(page.getNumber(), page.getNumberOfElements(), page.getTotalPages(), page.getSize(), orderDto));
 
-        return "ticket/ticket-list";
+        if (hxRequest != null) {
+            // this is a HTMX request, serve only fragment
+            return "ticket/ticket-list :: page-content-block";
+        } else {
+            // regular request, serve full template
+            return "ticket/ticket-list";
+        }
     }
 
     @GetMapping("/tickets/{id}")
@@ -131,7 +147,6 @@ public class TicketController {
             //  We have to also instruct Thymeleaf to return corresponsing fragment (we have to wrap out form into fragment)
             response.setHeader("HX-Retarget", "#reply-form-section"); 
             return "ticket/ticket-details :: reply-form-block"; 
-
         }
 
         var concurrentModificationDetected = false;

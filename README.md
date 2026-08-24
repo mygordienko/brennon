@@ -37,4 +37,8 @@ Helpdesk platform
 
 * `hx-on::before-request` to clear input field (remove error `<div>` added by Thymeleaf), see `ticket-details.html`
 
-* Using HTMX OOB Swap to update multiple fragments by the same HTMX trigger (update "reply list" and "reply input form" in  cuncurrent update scenario). see [docs](./docs/HTMX.md)
+* Usage of HTMX OOB Swap to update multiple fragments by the same HTMX trigger (update "reply list" and "reply input form" in  cuncurrent update scenario). see [docs](./docs/HTMX.md)
+
+* Usage of `HX-Request` header to have one endpoint serving full page template or a fragment depending on whether it is a HTMX request or not. 
+
+* see [HTMX.md](./docs/HTMX.md) for more HTMX-related info.

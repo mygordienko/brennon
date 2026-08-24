@@ -38,3 +38,32 @@ This Will Fail:
     </div>
 </th:block>
 ```
+
+
+## HTMX `hx-swap`
+
+`hx-swap` can be used along with `hx-target` to specify HOW to insert the received HTML into target container.
+    Ex: in [ticket-list.html](../src/main/resources/templates/ticket/ticket-list.html) we use `hx-swap="outerHTML"`
+    to fully replace target <div> with the HTML received from backend, and for that we ensure that the root element returned by the server is the one we are targeting with `hx-target`: `id="page-content" th:fragment="page-content-block"`
+
+
+## HTMX `HX-Request` header
+
+The problem:
+
+* The "Ticket list" decorates a common layout (sidebar, navigation).
+* We want the table to have a basic sorting that is triggered by clicking on a column header.
+* We want the page URL to update accordingly (reflecting sorting property and direction).
+* We DO NOT want the whole page to reload (bad UX).
+
+Wrong solutions:
+
+* HTMX. `hx-get` to a separate endpoint `/tickets/my-partial` that serves Thymeleaf fragment; `hx-push-url` to update URL.
+    * What is wrong: The URL remembers `/tickets/my-partial`, F5 breaks the page (only the fragment is loaded).
+
+* Option 2: Still HTMX but with single endpoint `/tickets/my` that serves either a full template or a fragment depending on special parameter `mode`. `hx-get` with `hx-push-url` that calls `/tickets/my` with `mode=partial`.
+    * the same problem as with previous solution.
+
+Correct solution:
+
+* HTMX uses a special header `HX-Request`, we can check it in our `@Controller` and return either a full template or just a fragment.

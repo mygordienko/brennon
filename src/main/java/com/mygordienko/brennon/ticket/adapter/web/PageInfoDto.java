@@ -13,6 +13,17 @@ public record PageInfoDto(
     /**
      * Configured/Requested page size
      */
-    int pageSize
+    int pageSize,
+
+    /**
+     * Sorting information.
+     */
+    OrderDto order
 ) {
+
+    public static record OrderDto(
+        String property,
+        String direction
+    ) {
+    }
 }
