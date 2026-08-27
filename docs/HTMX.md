@@ -67,3 +67,31 @@ Wrong solutions:
 Correct solution:
 
 * HTMX uses a special header `HX-Request`, we can check it in our `@Controller` and return either a full template or just a fragment.
+
+
+## HTMX `HX-Trigger` headers
+
+The problem:
+
+* Multiple forms on the same page (ex: reply and details edit)
+* After one form updates the ticket, the new version must be propagated to other forms, otherwise users won't be able to update subject right after posting a reply.
+
+OOB + virtual bundle do not always help. Ex: in [ticket-details.html](../src/main/resources/templates/ticket/ticket-details.html) "Ticket details editing form" is dynamic, it is not always present in the DOM, but loaded on demand (user hits "Edit"), therefore trying to reload it via OOB each time a new reply getss added is unsafe, we do not know if user is editing or just viewing.
+
+The right solution: 
+
+Use HX-Trigger response header to fire a JS event and use custom listener to dynamically lookup all existing version inputs across the document and update their value.
+
+## Enabling HTMX logs
+
+```
+<script>
+ ```
+        htmx.logger = function(elt, event, data) {
+            if(console) {
+                console.log("HTMX Log -> Event: " + event, data);
+            }
+        }
+ ```
+</script>
+```

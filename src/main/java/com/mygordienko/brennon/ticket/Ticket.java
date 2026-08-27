@@ -68,10 +68,10 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     private final AggregateReference<BrennonUserProfile, BrennonUserId> author;
     @Getter
     @Column("subject")
-    private final String subject;
+    private String subject;
     @Getter
     @Column("text")
-    private final String text;
+    private String text;
     @Getter
     @Column("created")
     private final OffsetDateTime created;
@@ -110,5 +110,18 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         var reply = new TicketReply(null, this.id, AggregateReference.to(authorId), text, created, created);
 
         this.replies.add(reply);
+    }
+
+    public void editDetails(BrennonUserId authorId, String subject, String text, OffsetDateTime updated) {
+        if (this.status == TicketStatus.CLOSED) {
+            throw new IllegalStateException("Editing closed ticket");
+        }
+
+        if (!this.author.getId().equals(authorId)) {
+            throw new IllegalStateException("Not an author's edit");
+        }
+
+        this.subject = subject;
+        this.text = text;
     }
 }
