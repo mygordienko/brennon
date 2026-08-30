@@ -12,6 +12,7 @@ import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Table(name = "ticket_replies")
 public class TicketReply implements Persistable<TicketReplyId> {
@@ -36,14 +37,16 @@ public class TicketReply implements Persistable<TicketReplyId> {
     @Column("author_id")
     private final AggregateReference<BrennonUserProfile, BrennonUserId> author;
     @Getter
+    @Setter
     @Column("text")
-    private final String text;
+    private String text;
     @Getter
     @Column("created")
     private final OffsetDateTime created;
     @Getter
+    @Setter
     @Column("updated")
-    private final OffsetDateTime updated;
+    private OffsetDateTime updated;
     @Override
     public boolean isNew() {
         return this.id == null;

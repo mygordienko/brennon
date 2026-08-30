@@ -22,7 +22,7 @@ public class TicketDetailsView {
         this.text = text;
         this.created = created;
         this.updated = updated;
-        this.replies = replies;
+        this.replies = List.copyOf(replies);
     }
 
     @Getter

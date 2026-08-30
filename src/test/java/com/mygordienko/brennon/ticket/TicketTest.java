@@ -1,0 +1,69 @@
+package com.mygordienko.brennon.ticket;
+
+import java.time.OffsetDateTime;
+import java.util.Set;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
+
+import com.mygordienko.brennon.core.auth.BrennonUserId;
+
+public class TicketTest {
+    @Test
+    @DisplayName("Updates timestamps when a reply is added")
+    public void givenExistingTicket_whenReplyAdded_thenUpdatesTicketUpdatedTimestamp() {
+        var ticketId = TicketId.of(1L);
+        var authorId = BrennonUserId.of("john");
+        var ticket = new Ticket(
+            ticketId, 
+            0, 
+            TicketStatus.NEW, 
+            AggregateReference.to(authorId), 
+            "subject", 
+            "text", 
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            Set.of());
+
+        var originTicketCreated = ticket.getCreated();
+        var replyTime = OffsetDateTime.parse("2026-08-30T15:32:00+02:00");
+
+        ticket.addReply(authorId, "Reply 1", replyTime);
+
+        Assertions.assertThat(ticket.getCreated()).isEqualTo(originTicketCreated);
+        Assertions.assertThat(ticket.getUpdated()).isEqualTo(replyTime);
+    }
+
+    @Test
+    @DisplayName("Updates timestamps when a reply gets updated")
+    public void givenExistingTicket_whenReplyUpdated_thenUpdatesTicketUpdatedTimestamp() {
+        var ticketId = TicketId.of(1L);
+        var ticketReplyId = TicketReplyId.of(1L);
+        var authorId = BrennonUserId.of("john");
+
+        var replyOrigTime = OffsetDateTime.parse("2026-08-30T15:32:00+02:00");
+
+        var ticket = new Ticket(
+            ticketId, 
+            0, 
+            TicketStatus.NEW, 
+            AggregateReference.to(authorId), 
+            "subject", 
+            "text", 
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            Set.of(
+                new TicketReply(ticketReplyId, ticketId, AggregateReference.to(authorId), "old text", replyOrigTime, replyOrigTime)
+            ));
+
+        var originTicketCreated = ticket.getCreated();
+        var replyUpdateTime = OffsetDateTime.parse("2026-08-30T15:35:00+02:00");
+        
+        ticket.editReply(authorId, ticketReplyId, "new text", replyUpdateTime);
+        
+        Assertions.assertThat(ticket.getCreated()).isEqualTo(originTicketCreated);
+        Assertions.assertThat(ticket.getUpdated()).isEqualTo(replyUpdateTime);
+    }
+}

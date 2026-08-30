@@ -52,10 +52,6 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             created, updated, new HashSet<>());
     }
 
-    /**
-     * TODO: Optimistic lock. Version
-     */
-
     @Id
     @Getter
     @Column("id")
@@ -77,7 +73,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     private final OffsetDateTime created;
     @Getter
     @Column("updated")
-    private final OffsetDateTime updated;
+    private OffsetDateTime updated;
     @Getter
     @Version
     @Column("version")
@@ -88,7 +84,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
 
     public List<TicketReply> getReplies() {
         return replies.stream()
-            .sorted(Comparator.comparing(TicketReply::getUpdated).reversed())
+            .sorted(Comparator.comparing(TicketReply::getCreated))
             .toList();
     }
 
@@ -110,6 +106,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         var reply = new TicketReply(null, this.id, AggregateReference.to(authorId), text, created, created);
 
         this.replies.add(reply);
+        this.updated = created;
     }
 
     public void editDetails(BrennonUserId authorId, String subject, String text, OffsetDateTime updated) {
@@ -123,5 +120,25 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
 
         this.subject = subject;
         this.text = text;
+    }
+
+    public void editReply(BrennonUserId authorId, TicketReplyId replyId, String newText, OffsetDateTime updated) {
+        if (this.status == TicketStatus.CLOSED) {
+            throw new IllegalStateException("Editing closed ticket");
+        }
+
+        if (!this.author.getId().equals(authorId)) {
+            // TODO: support reply
+            throw new IllegalStateException("Not an author's reply");
+        }
+
+        var reply = this.replies.stream()
+            .filter(r -> r.getId().equals(replyId))
+            .findFirst()
+            .orElseThrow(() -> MissingTicketReplyException.forReplyId(replyId));
+
+        reply.setText(newText);
+        reply.setUpdated(updated);
+        this.updated = updated;
     }
 }

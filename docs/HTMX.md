@@ -14,7 +14,7 @@ And if we want to update multiple sections on a page using the same HTMX trigger
     * We can use it together with `th:` to enable or disable update based on some variable value that will be evaluated on backend: `th:hx-swap-oob="${isOobSwap} ? 'true' : null"`.
         * By resolving to null, Thymeleaf completely omits the hx-swap-oob attribute from the generated HTML string.
 
-* We then ensure that our `@Controller` returns all relevant fragments when OOB replacement is needed. And the beautiful part is that those relevant fragments can be returned as a virtual bundle, just as we did with `reply-composite-bundle`. 
+* We then ensure that our `@Controller` returns all relevant fragments when OOB replacement is needed. And the beautiful part is that those relevant fragments can be returned as a virtual bundle, just as we did with `details-composite-bundle`. 
     * So we can analyze possible scenarios and decide something like: "For outcome A sections S1,S2 must be updated" and "For outcome B sections S4,S5,S6 must be updated". We then compose bundle `th:fragments="bundle-a"` and `th:fragments="bundle-b"` containing `th:insert` with relevant fragments.
     * We put those bundles as `th:block`s at the end of the target template (just before the closing `</body>`), and while it looks like HTML duplicating it is not, because in `@Controller` we return not a full template but specific fragment reference. Thymeleaf will compose HTML containing only fragments that are part of the bundle.
         * There is no duplication even when serving a full page, Thymeleaf ignores the `th:fragment` declarations and simply evaluates the virtual `<th:block>` content, effectively doing nothing because they are just references to blocks that **already rendered natively above**.
@@ -38,6 +38,9 @@ This Will Fail:
     </div>
 </th:block>
 ```
+
+**IMPORTANT:** When returning multiple HTML fragments, the one which is for primary target MUST NOT have `hx-swap-oob`. As was described above, HTMX plucks such fragments out of the incoming HTML stream, so if the "primary" fragment has OOB attribute it will never reach `hx-target`. That might be a problem when a page has multiple dependent forms (ex. updating different parts of the same aggregate). One technique that helps to reduce complexity is having a top-level fragment, which can be replaced by HTMX is some cases (ex. handling "Cancel" buttons), see `page-content` in [ticket-details.html](../src/main/resources/templates/ticket/ticket-details.html).
+
 
 
 ## HTMX `hx-swap`

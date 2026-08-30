@@ -151,4 +151,24 @@ public class TicketService {
 
         return ticketStoragePort.saveTicket(ticket);
     }
+
+    @PreAuthorize("hasAuthority('user:write')")
+    @Transactional
+    public Ticket  editReply(TicketEditReplyCommand command) {
+        var currentUser = userProfileService.getCurrentUser();
+        var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
+
+        var ticket = ticketStoragePort.getTicketById(command.ticketId())
+            // TODO: use AOP
+            .filter(t -> ticketSecurityManager.userHasAccess(currentUser, t))
+            .orElseThrow(() -> MissingTicketException.forTicket(command.ticketId()));
+
+        if (ticket.getVersion() != command.version()) {
+            throw TicketConcurrentModificationException.forTicket(command.ticketId());
+        }
+
+        ticket.editReply(currentUser.getId(), command.replyId(), command.text(), created);
+        
+        return ticketStoragePort.saveTicket(ticket);
+    }
 }

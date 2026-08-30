@@ -19,4 +19,9 @@ public record TicketDto(
         // Must delegate to the canonical constructor
         this(String.valueOf(id), null, null, null, null, null, null, null, null, null); 
     }
+
+    public TicketDto(long id) {
+        // Must delegate to the canonical constructor
+        this(String.valueOf(id), null, null, null, null, null, null, null, null, null); 
+    }
 }
