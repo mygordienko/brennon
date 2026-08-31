@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.ticket.Ticket;
 import com.mygordienko.brennon.ticket.TicketId;
+import com.mygordienko.brennon.ticket.TicketRequestFilter;
 import com.mygordienko.brennon.ticket.TicketStoragePort;
 
 public class JdbcTicketStorage implements TicketStoragePort {
@@ -31,17 +32,22 @@ public class JdbcTicketStorage implements TicketStoragePort {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Ticket> getTicketsByAuthor(BrennonUserId userId, Pageable pageable) {
+    public Page<Ticket> getTicketsByAuthor(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable) {
         var safePageable = processPageable(pageable);
+        var criteria = Criteria.where("author_id").is(userId);
 
-        var query = Query.query(Criteria.where("author_id").is(userId))
+        if (filter.status() != null) {
+            criteria = criteria.and("status").is(filter.status().getCode());
+        }
+
+        var query = Query.query(criteria)
             .limit(safePageable.getPageSize())
             .offset(safePageable.getPageNumber() * safePageable.getPageSize())
             .sort(safePageable.getSort());
 
         var pageResults = jdbcAggregateTemplate.findAll(query, Ticket.class);
 
-        var queryCount = Query.query(Criteria.where("author_id").is(userId));
+        var queryCount = Query.query(criteria);
         long totalCount = jdbcAggregateTemplate.count(queryCount,Ticket.class);
 
         return new PageImpl<>(

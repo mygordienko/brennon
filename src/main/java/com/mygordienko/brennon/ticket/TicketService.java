@@ -32,10 +32,10 @@ public class TicketService {
 
     @PreAuthorize("hasAuthority('user:read')")
     @Transactional(readOnly = true)
-    public Page<TicketView> getMyTickets(Pageable pageable) {
+    public Page<TicketView> getMyTickets(TicketRequestFilter filter, Pageable pageable) {
         var currentUser = userProfileService.getCurrentUser();
 
-        var tickets = ticketStoragePort.getTicketsByAuthor(currentUser.getId(), pageable);
+        var tickets = ticketStoragePort.getTicketsByAuthor(currentUser.getId(), filter, pageable);
 
         var ticketViews = tickets.map(ticket -> {
                 return new TicketView(

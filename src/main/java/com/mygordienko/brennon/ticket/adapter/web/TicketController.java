@@ -1,6 +1,8 @@
 package com.mygordienko.brennon.ticket.adapter.web;
 
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Optional;
 
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +28,9 @@ import com.mygordienko.brennon.ticket.TicketCreateCommand;
 import com.mygordienko.brennon.ticket.TicketDetailsView;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
+import com.mygordienko.brennon.ticket.TicketRequestFilter;
 import com.mygordienko.brennon.ticket.TicketService;
+import com.mygordienko.brennon.ticket.TicketStatus;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -42,8 +46,17 @@ public class TicketController {
     public String getMyTickets(
         @CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr,
         @RequestHeader(value = "HX-Request", required = false) String hxRequest,
-        Model model, @SortDefault(sort = "id", direction = Sort.Direction.DESC) @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        var page = ticketService.getMyTickets(pageable);
+        @RequestParam(required = false) String statusToFilter,
+        Model model, @SortDefault(sort = "id", direction = Sort.Direction.DESC) @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        var filterStatus = Optional.ofNullable(statusToFilter)
+            .filter(s -> !s.isBlank())
+            .map(s -> TicketStatus.of(s))
+            .orElse(null);
+
+        var filter = new TicketRequestFilter(filterStatus);
+
+        var page = ticketService.getMyTickets(filter, pageable);
         var zoneId = ZoneId.of(zoneIdStr);
 
         var ticketsDtos = page.getContent().stream()
@@ -64,7 +77,16 @@ public class TicketController {
 
         var orderDto = new PageInfoDto.OrderDto(order.getProperty(), order.getDirection().name());
 
+        var statuses = Arrays.stream(TicketStatus.values())
+            .map(s -> new TicketStatusDto(s.getCode(), s.getDisplayName()))
+            .toList();
+
         model.addAttribute("tickets", ticketsDtos);
+        model.addAttribute("statuses", statuses);
+
+        if (filterStatus != null) {
+            model.addAttribute("selectedStatusToFilter", filterStatus.getCode());
+        }
         model.addAttribute("page", new PageInfoDto(page.getNumber(), page.getNumberOfElements(), page.getTotalPages(), page.getSize(), orderDto));
 
         if (hxRequest != null) {

@@ -28,6 +28,7 @@ import com.mygordienko.brennon.core.auth.di.BrennonUserDataJdbcConfiguration;
 import com.mygordienko.brennon.core.auth.di.LiquibaseConfiguration;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
+import com.mygordienko.brennon.ticket.TicketRequestFilter;
 import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
 import com.mygordienko.brennon.ticket.di.TicketDataJdbcConfiguration;
 
@@ -73,7 +74,8 @@ public class JdbcTicketStorageTest {
         var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         var pageable = PageRequest.of(0, 3);
         
-        var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), pageable);
+        var filter = new TicketRequestFilter(null);
+        var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, pageable);
 
         Assertions.assertThat(results).hasSize(3);
         Assertions.assertThat(results.getContent().get(0).getId()).isEqualTo(TicketId.of(3));
@@ -102,7 +104,8 @@ public class JdbcTicketStorageTest {
         var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         var pageable = PageRequest.of(0,3, Direction.ASC, "created");
         
-        var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), pageable);
+        var filter = new TicketRequestFilter(null);
+        var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, pageable);
 
         Assertions.assertThat(results).hasSize(3);
         Assertions.assertThat(results.getContent().get(0).getId()).isEqualTo(TicketId.of(2));
@@ -128,10 +131,12 @@ public class JdbcTicketStorageTest {
                 """, parameterSource);
 
         var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+
+        var filter = new TicketRequestFilter(null);
         
-        var page1 = storage.getTicketsByAuthor(BrennonUserId.of("1"), PageRequest.of(0,1, Direction.ASC, "updated"));
-        var page2 = storage.getTicketsByAuthor(BrennonUserId.of("1"), PageRequest.of(1,1, Direction.ASC, "updated"));
-        var page3 = storage.getTicketsByAuthor(BrennonUserId.of("1"), PageRequest.of(2,1, Direction.ASC, "updated"));
+        var page1 = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, PageRequest.of(0,1, Direction.ASC, "updated"));
+        var page2 = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, PageRequest.of(1,1, Direction.ASC, "updated"));
+        var page3 = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, PageRequest.of(2,1, Direction.ASC, "updated"));
 
         Assertions.assertThat(page1).hasSize(1);
         Assertions.assertThat(page1.getTotalElements()).isEqualTo(3);
@@ -176,8 +181,10 @@ public class JdbcTicketStorageTest {
                 """, parameterSource);
 
         var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+
+        var filter = new TicketRequestFilter(null);
         
-        var page = storage.getTicketsByAuthor(BrennonUserId.of("1"), PageRequest.of(2,1));
+        var page = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, PageRequest.of(2,1));
 
         Assertions.assertThat(page).hasSize(1);
         Assertions.assertThat(page.getTotalElements()).isEqualTo(3);
