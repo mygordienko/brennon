@@ -98,3 +98,15 @@ Use HX-Trigger response header to fire a JS event and use custom listener to dyn
  ```
 </script>
 ```
+
+## HTMX `HX-Refresh` header and proper session expiration handling
+
+The problem:
+
+By default Spring Security does cache request that triggrs authentication in order to
+get the client back to the requested resource after authentication is done.
+
+That is not what we want with HTMX. HTMX requests made with expired session must trigger full
+page reload, otherwise users would see just a fragment after re-login.
+
+That is exactly what `HX-Refresh` header is used for.

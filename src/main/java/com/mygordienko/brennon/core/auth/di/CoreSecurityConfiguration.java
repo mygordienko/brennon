@@ -10,8 +10,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 
 import com.mygordienko.brennon.core.auth.adapter.jdbc.JdbcBrennonUserDetailsStorage;
+import com.mygordienko.brennon.core.auth.adapter.web.HxRefreshHeaderAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -20,6 +22,9 @@ public class CoreSecurityConfiguration {
 
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        var htmxEntryPoint = new HxRefreshHeaderAuthenticationEntryPoint();
+        var htmxRequestMatcher = new RequestHeaderRequestMatcher("HX-Request");
+
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/svg/**", "/favicon.ico").permitAll()
@@ -38,6 +43,10 @@ public class CoreSecurityConfiguration {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
+                )
+                .exceptionHandling(ex -> ex
+                    // NOTE: custom entry point for HTMX requests
+                    .defaultAuthenticationEntryPointFor(htmxEntryPoint, htmxRequestMatcher)
                 );
 
         return http.build();

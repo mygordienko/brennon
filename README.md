@@ -45,4 +45,6 @@ Helpdesk platform
 
 * Usage of `HX-Trigger` to fire custom client-side event and sync data across multiple forms on the same page.
 
+* Custom `HxRefreshHeaderAuthenticationEntryPoint` to handle session expiration with HTMX requests (proper redirect to login).
+
 * see [HTMX.md](./docs/HTMX.md) for more HTMX-related info.
