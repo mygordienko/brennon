@@ -15,6 +15,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -29,6 +30,7 @@ import com.mygordienko.brennon.core.auth.di.LiquibaseConfiguration;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
 import com.mygordienko.brennon.ticket.TicketRequestFilter;
+import com.mygordienko.brennon.ticket.TicketStatus;
 import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
 import com.mygordienko.brennon.ticket.di.TicketDataJdbcConfiguration;
 
@@ -74,7 +76,7 @@ public class JdbcTicketStorageTest {
         var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         var pageable = PageRequest.of(0, 3);
         
-        var filter = new TicketRequestFilter(null);
+        var filter = new TicketRequestFilter(null, null, null);
         var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, pageable);
 
         Assertions.assertThat(results).hasSize(3);
@@ -104,7 +106,7 @@ public class JdbcTicketStorageTest {
         var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
         var pageable = PageRequest.of(0,3, Direction.ASC, "created");
         
-        var filter = new TicketRequestFilter(null);
+        var filter = new TicketRequestFilter(null, null, null);
         var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, pageable);
 
         Assertions.assertThat(results).hasSize(3);
@@ -132,7 +134,7 @@ public class JdbcTicketStorageTest {
 
         var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
 
-        var filter = new TicketRequestFilter(null);
+        var filter = new TicketRequestFilter(null, null, null);
         
         var page1 = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, PageRequest.of(0,1, Direction.ASC, "updated"));
         var page2 = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, PageRequest.of(1,1, Direction.ASC, "updated"));
@@ -182,7 +184,7 @@ public class JdbcTicketStorageTest {
 
         var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
 
-        var filter = new TicketRequestFilter(null);
+        var filter = new TicketRequestFilter(null, null, null);
         
         var page = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, PageRequest.of(2,1));
 
@@ -237,6 +239,97 @@ public class JdbcTicketStorageTest {
         Assertions.assertThat(ticket.getReplies().get(0).getAuthor().getId()).isEqualTo(BrennonUserId.of("2"));
         Assertions.assertThat(ticket.getReplies().get(1).getId()).isEqualTo(TicketReplyId.of(1));
         Assertions.assertThat(ticket.getReplies().get(1).getText()).isEqualTo("reply 1 from 2 on ticket 1");
+    }
+
+
+    @Test
+    @Transactional
+    @DisplayName("Filter tickets by ID")
+    public void givenDataExistsWhenRequestedWithFilterByIdReturnsAggregate() {
+        final var parameterSource = new MapSqlParameterSource();
+
+        // init database
+        jdbcTemplate.update(
+                """
+                INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
+                VALUES 
+                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', '0010', '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    (2, '1', 'Cant login', 'HR desk does not accept my creds', '0030', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (3, '1', 'Slow internet', 'Cant attend live meetings', '0020', '2026-08-15 10:30:00+03', '2026-08-15 13:00:00+03'),
+                    (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                """, parameterSource);
+
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var pageable = PageRequest.of(0, 3);
+        
+        var filter = new TicketRequestFilter(TicketId.of(3), null, null);
+        var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, pageable);
+
+        Assertions.assertThat(results).hasSize(1);
+        Assertions.assertThat(results.getContent().get(0).getId()).isEqualTo(TicketId.of(3));
+    }
+
+
+    @Test
+    @Transactional
+    @DisplayName("Filter tickets by status")
+    public void givenDataExistsWhenRequestedWithFilterByStatusReturnsAggregates() {
+        final var parameterSource = new MapSqlParameterSource();
+
+        // init database
+        jdbcTemplate.update(
+                """
+                INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
+                VALUES 
+                    (1, '1', 'Power outage in office 1', 'No power, please fix asap', '0010', '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    (2, '1', 'Cant login', 'HR desk does not accept my creds', '0030', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (3, '1', 'Slow internet', 'Cant attend live meetings', '0020', '2026-08-15 10:30:00+03', '2026-08-15 13:00:00+03'),
+                    (4, '1', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                """, parameterSource);
+
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var pageable = PageRequest.of(0, 3, Sort.by(Direction.ASC, "id"));
+        
+        var filter = new TicketRequestFilter(null, TicketStatus.IN_PROGRESS, null);
+        var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, pageable);
+
+        Assertions.assertThat(results).hasSize(2);
+        Assertions.assertThat(results.getContent().get(0).getId()).isEqualTo(TicketId.of(3));
+        Assertions.assertThat(results.getContent().get(1).getId()).isEqualTo(TicketId.of(4));
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("Filter tickets by subject")
+    public void givenDataExistsWhenRequestedWithFilterBySubjectReturnsAggregates() {
+        final var parameterSource = new MapSqlParameterSource();
+
+        // init database
+        jdbcTemplate.update(
+                """
+                INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
+                VALUES 
+                    (1, '1', 'Broken USB hub in office 1', 'Broken USB hub', '0010', '2026-08-15 18:00:00+03', '2026-08-15 18:00:10+03'),
+                    (2, '1', 'Cant login', 'HR desk does not accept my creds', '0030', '2026-08-15 13:00:00+03', '2026-08-15 13:01:45+03'),
+                    (3, '1', 'Slow internet', 'Cant attend live meetings', '0020', '2026-08-15 10:30:00+03', '2026-08-15 13:00:00+03'),
+                    (4, '1', 'Printer got broken', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
+                """, parameterSource);
+
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var pageable = PageRequest.of(0, 3, Sort.by(Direction.ASC, "id"));
+        
+        var filter = new TicketRequestFilter(null, null, "internet");
+        var results = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, pageable);
+
+        Assertions.assertThat(results).hasSize(1);
+        Assertions.assertThat(results.getContent().get(0).getId()).isEqualTo(TicketId.of(3));
+
+        filter = new TicketRequestFilter(null, null, "brok");
+        results = storage.getTicketsByAuthor(BrennonUserId.of("1"), filter, pageable);
+
+        Assertions.assertThat(results).hasSize(2);
+        Assertions.assertThat(results.getContent().get(0).getId()).isEqualTo(TicketId.of(1));
+        Assertions.assertThat(results.getContent().get(1).getId()).isEqualTo(TicketId.of(4));
     }
 
 

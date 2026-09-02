@@ -47,4 +47,6 @@ Helpdesk platform
 
 * Custom `HxRefreshHeaderAuthenticationEntryPoint` to handle session expiration with HTMX requests (proper redirect to login).
 
+* Native HTML validation, ex`inputmode="numeric" pattern="[1-9][0-9]*"` prevents HTMX from sending request with incorrect data
+
 * see [HTMX.md](./docs/HTMX.md) for more HTMX-related info.

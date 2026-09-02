@@ -14,23 +14,34 @@
 
             <!-- Filters - fixed at top -->
             <div class="flex space-x-4 mb-6 flex-shrink-0">
-                <input type="text" placeholder="Filter by ID"
-                    class="bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6] w-40">
 
-                <form th:hx-get="@{/tickets/my}" hx-target="#page-content" hx-swap="outerHTML" hx-trigger="change"
-                    hx-push-url="true">
-                    <select id="ticket-status-filter" name="statusToFilter"
-                        class="bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6] w-40 appearance-none">
+                <form id="ticket-filter-form"
+                      th:hx-get="@{/tickets/my}" 
+                      hx-target="#page-content" 
+                      hx-swap="outerHTML"
+                      hx-trigger="keyup from:input changed delay:500ms, change from:#ticket-status-filter"
+                      hx-push-url="true"
+                      th:object="${ticketRequestFilter}">
+                    <input type="text"
+                           inputmode="numeric" pattern="[1-9][0-9]*"
+                           th:field="*{id}"  
+                           placeholder="Filter by ID"
+                           class="bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6] w-40">
+
+                    <select id="ticket-status-filter"
+                            th:field="*{status}"
+                            class="bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6] w-40 appearance-none">
                         <option value="">All</option>
                         <option th:each="status : ${statuses}" th:text="${status.name}" th:value="${status.code}"
-                            th:selected="${status.code == selectedStatusToFilter}">
+                            th:selected="${status.code == ticketRequestFilter.status}">
                         </option>
                     </select>
+
+                    <input type="text"
+                           th:field="*{subject}" 
+                           placeholder="Filter by subject"
+                           class="flex-1 bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6]">
                 </form>
-
-
-                <input type="text" placeholder="Filter by subject"
-                    class="flex-1 bg-[#111111] border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6]">
             </div>
 
             <!-- Table Header - fixed -->
@@ -38,7 +49,7 @@
                 class="grid grid-cols-12 gap-4 text-[#3b82f6] pb-3 border-b border-[#333333] text-sm font-medium mb-2 flex-shrink-0">
                 <button
                     th:with="isCurrent=${page.order.property == 'id'}, nextDir=${isCurrent && page.order.direction == 'ASC' ? 'DESC' : 'ASC'}"
-                    th:hx-get="@{/tickets/my(sort='id' + ',' + ${nextDir}, statusToFilter=${selectedStatusToFilter})}"
+                    th:hx-get="@{/tickets/my(sort='id' + ',' + ${nextDir}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                     hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true"
                     class="col-span-2 flex items-center cursor-pointer">ID <span th:if="${isCurrent}"
                         th:text="${page.order.direction == 'ASC' ? '↑' : '↓'}"></span></button>
@@ -46,13 +57,13 @@
                 <div class="col-span-4">Subject</div>
                 <button
                     th:with="isCurrent=${page.order.property == 'created'}, nextDir=${isCurrent && page.order.direction == 'ASC' ? 'DESC' : 'ASC'}"
-                    th:hx-get="@{/tickets/my(sort='created' + ',' + ${nextDir}, statusToFilter=${selectedStatusToFilter})}"
+                    th:hx-get="@{/tickets/my(sort='created' + ',' + ${nextDir}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                     hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true"
                     class="col-span-2 flex items-center cursor-pointer">Created <span th:if="${isCurrent}"
                         th:text="${page.order.direction == 'ASC' ? '↑' : '↓'}"></span></button>
                 <button
                     th:with="isCurrent=${page.order.property == 'updated'}, nextDir=${isCurrent && page.order.direction == 'ASC' ? 'DESC' : 'ASC'}"
-                    th:hx-get="@{/tickets/my(sort='updated' + ',' + ${nextDir}, statusToFilter=${selectedStatusToFilter})}"
+                    th:hx-get="@{/tickets/my(sort='updated' + ',' + ${nextDir}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                     hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true"
                     class="col-span-2 flex items-center cursor-pointer">Updated <span th:if="${isCurrent}"
                         th:text="${page.order.direction == 'ASC' ? '↑' : '↓'}"></span></button>
@@ -87,7 +98,7 @@
                 <div class="flex border border-[#333333] rounded overflow-hidden">
                     <!-- First page -->
                     <button
-                        th:hx-get="@{/tickets/my(page=0, sort=${page.order.property} + ',' + ${page.order.direction}, statusToFilter=${selectedStatusToFilter})}"
+                        th:hx-get="@{/tickets/my(page=0, sort=${page.order.property} + ',' + ${page.order.direction}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                         hx-target="#page-content" hx-swap="outerHTML" hx-trigger="click" hx-push-url="true"
                         th:if="${page.currentPage gt 0}"
                         class="px-4 py-2 bg-[#111111] hover:bg-[#222222] text-white border-r border-[#333333]"
@@ -100,7 +111,7 @@
 
                     <!-- Previous page -->
                     <button
-                        th:hx-get="@{/tickets/my(page=${page.currentPage - 1}, sort=${page.order.property} + ',' + ${page.order.direction}, statusToFilter=${selectedStatusToFilter})}"
+                        th:hx-get="@{/tickets/my(page=${page.currentPage - 1}, sort=${page.order.property} + ',' + ${page.order.direction}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                         hx-target="#page-content" hx-swap="outerHTML" hx-trigger="click" hx-push-url="true"
                         th:if="${page.currentPage gt 0}"
                         class="px-4 py-2 bg-[#111111] hover:bg-[#222222] text-white border-r border-[#333333]"
@@ -118,7 +129,7 @@
 
                     <!-- Next page -->
                     <button
-                        th:hx-get="@{/tickets/my(page=${page.currentPage + 1}, sort=${page.order.property} + ',' + ${page.order.direction}, statusToFilter=${selectedStatusToFilter})}"
+                        th:hx-get="@{/tickets/my(page=${page.currentPage + 1}, sort=${page.order.property} + ',' + ${page.order.direction}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                         hx-target="#page-content" hx-swap="outerHTML" hx-trigger="click" hx-push-url="true"
                         th:if="${page.currentPage lt page.totalPages - 1}"
                         class="px-4 py-2 bg-[#111111] hover:bg-[#222222] text-white border-r border-[#333333]"
@@ -131,7 +142,7 @@
 
                     <!-- Last page -->
                     <button
-                        th:hx-get="@{/tickets/my(page=${page.totalPages - 1}, sort=${page.order.property} + ',' + ${page.order.direction}, statusToFilter=${selectedStatusToFilter})}"
+                        th:hx-get="@{/tickets/my(page=${page.totalPages - 1}, sort=${page.order.property} + ',' + ${page.order.direction}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                         hx-target="#page-content" hx-swap="outerHTML" hx-trigger="click" hx-push-url="true"
                         th:if="${page.currentPage lt page.totalPages - 1}"
                         class="px-4 py-2 bg-[#111111] hover:bg-[#222222] text-white" title="Last page">

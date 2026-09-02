@@ -10,4 +10,9 @@ public class CustomErrorPageController {
     public String handle404() {
         return "core/common/404";
     }
+
+    @RequestMapping(value = "/400", produces = MediaType.TEXT_HTML_VALUE)
+    public String handle400() {
+        return "core/common/400";
+    }
 }

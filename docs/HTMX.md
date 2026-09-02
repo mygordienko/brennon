@@ -108,3 +108,11 @@ That is not what we want with HTMX. HTMX requests made with expired session must
 page reload, otherwise users would see just a fragment after re-login.
 
 That is exactly what `HX-Refresh` header is used for.
+
+## Mixed forms (different field types)
+
+In case of mixed forms we have to specify source field (type or selector) for each trigger.
+
+```
+hx-trigger="keyup from:input changed delay:500ms, change from:#ticket-status-filter"
+```

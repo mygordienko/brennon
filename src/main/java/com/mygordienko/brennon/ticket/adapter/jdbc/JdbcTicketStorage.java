@@ -40,6 +40,14 @@ public class JdbcTicketStorage implements TicketStoragePort {
             criteria = criteria.and("status").is(filter.status().getCode());
         }
 
+        if (filter.id() != null) {
+            criteria = criteria.and("id").is(filter.id().getValue());
+        }
+
+        if (filter.subject() != null) {
+            criteria = criteria.and("subject").like("%" + filter.subject() + "%").ignoreCase(true);
+        }
+
         var query = Query.query(criteria)
             .limit(safePageable.getPageSize())
             .offset(safePageable.getPageNumber() * safePageable.getPageSize())

@@ -11,6 +11,7 @@ public class ErrorPageConfiguration implements ErrorPageRegistrar {
     @Override
     public void registerErrorPages(ErrorPageRegistry registry) {
         var notFoundPage = new ErrorPage(HttpStatus.NOT_FOUND, "/404");
-        registry.addErrorPages(notFoundPage);
+        var badRequestPage = new ErrorPage(HttpStatus.BAD_REQUEST, "/400");
+        registry.addErrorPages(notFoundPage, badRequestPage);
     }
 }
