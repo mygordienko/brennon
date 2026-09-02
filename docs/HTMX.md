@@ -89,13 +89,11 @@ Use HX-Trigger response header to fire a JS event and use custom listener to dyn
 
 ```
 <script>
- ```
         htmx.logger = function(elt, event, data) {
             if(console) {
                 console.log("HTMX Log -> Event: " + event, data);
             }
         }
- ```
 </script>
 ```
 

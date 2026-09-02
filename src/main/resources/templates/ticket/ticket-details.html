@@ -22,7 +22,7 @@
 <body>
     <!-- Main Content Wrapper -->
     <th:block layout:fragment="content">
-        <main class="flex-1 flex flex-col p-6 md:p-10 overflow-hidden relative h-full max-h-screen" id= "page-content" th:fragment="page-content-block">
+        <main class="flex-1 flex flex-col pt-6 px-6 md:px-10 overflow-hidden relative h-full max-h-screen" id= "page-content" th:fragment="page-content-block">
             <!-- Header Section -->
             <header class="flex justify-end items-center mb-4 border-b border-gray-700 pb-4 relative flex-shrink-0">
                 <!-- Close Ticket Button -->
@@ -163,6 +163,10 @@
                 <div class="h-4"></div>
             </div>
 
+            <div id="error-parent"></div>
+            <template th:replace="~{fragments/error-containers :: htmx-request-error-message}"></template>
+            <template th:replace="~{fragments/error-containers :: htmx-timeout-error-message}"></template>
+
             <!-- Reply Input Area -->
             <!-- Since this is not a standard form, we are using HTMX actions, so CSRF hidden fields must be added explicitly -->
             <!-- th:hx-swap-oob is needed to update this section when reply section updates (when reply is successfully added) -->
@@ -221,6 +225,32 @@
         <th:block th:insert="~{:: reply-section-block}"></th:block>
         <th:block th:insert="~{:: ticket-details-display}"></th:block>
         <th:block th:insert="~{:: reply-form-block}"></th:block>
+    </th:block>
+    <th:block layout:fragment="script-content">
+        <script>
+            document.addEventListener('htmx:beforeRequest', ev => {
+                removeErrorMessage();
+            });
+            document.addEventListener('htmx:sendError', ev => {
+                showErrorMessage('htmx-request-error');
+            });
+            document.addEventListener('htmx:responseError', ev => {
+                showErrorMessage('htmx-request-error');
+            });
+            document.addEventListener('htmx:timeout', ev => {
+                showErrorMessage('htmx-timeout');
+            });
+            function removeErrorMessage() {
+                const errorParent = document.getElementById('error-parent');
+                errorParent.innerHTML = '';
+            }
+            function showErrorMessage(templateId) {
+                const clonedTemplate = document.getElementById(templateId).content.cloneNode(true);
+                const errorParent = document.getElementById('error-parent');
+                errorParent.innerHTML = '';
+                errorParent.appendChild(clonedTemplate);
+            }
+        </script>
     </th:block>
 </body>
 </html>

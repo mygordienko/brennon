@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="htmx-config" content='{"timeout": 1000}'>
     <title>Brennon</title>
     <!-- Link to compiled Tailwind CSS output file -->
     <link rel="stylesheet" th:href="@{/css/main.css}">
@@ -62,6 +63,7 @@
     <main class="flex-1 h-full overflow-y-auto p-10 bg-[#111111] relative">
         <th:block layout:fragment="content"></th:block>
     </main>
-
+    <th:block layout:fragment="script-content"> <!--.-->
+    </th:block>
 </body>
 </html>
