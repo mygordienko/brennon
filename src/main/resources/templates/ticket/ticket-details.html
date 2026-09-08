@@ -26,9 +26,23 @@
             <!-- Header Section -->
             <header class="flex justify-end items-center mb-4 border-b border-gray-700 pb-4 relative flex-shrink-0">
                 <!-- Close Ticket Button -->
-                <button class="bg-[#b91c1c] hover:bg-[#991b1b] text-white font-medium py-1 px-4 rounded border border-red-800 transition-colors text-sm">
-                    Close ticket
-                </button>
+                <th:block th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}">
+                    <div id="close-concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium pe-3" th:if="${closeTicketConcurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
+                    <form 
+                        th:hx-post="@{/tickets/{id}/close(id=${ticket.id()})}"
+                        hx-target="#page-content"
+                        hx-swap="outerHTML"
+                        th:object="${closeForm}" 
+                        hx-on::after-request="if(event.detail.successful) this.reset()"  
+                        hx-on::before-request="this.querySelector('#close-concurrent-error-msg')?.remove()"
+                        th:hx-swap-oob="${isOobSwap} ? 'true' : null">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" th:field="*{version}" class="ticket-version-input"/>
+                        <button class="bg-[#b91c1c] hover:bg-[#991b1b] text-white font-medium py-1 px-4 rounded border border-red-800 transition-colors text-sm">
+                            Close ticket
+                        </button>
+                    </form>
+                </th:block>
             </header>
 
             <!-- Scrollable Content Area (Ticket description + replies) -->
@@ -58,7 +72,8 @@
                                 <button class="mt-3 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1 px-4 rounded text-sm transition-colors"
                                         th:hx-get="@{/tickets/{id}/edit(id=${ticket.id})}"
                                         hx-target="#ticket-details-ui-wrapper"
-                                        hx-swap="innerHTML">
+                                        hx-swap="innerHTML"
+                                        th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}">
                                     Edit
                                 </button>
                             </div>
@@ -108,7 +123,7 @@
                                 <!-- Empty placeholder to maintain flex spacing if no error -->
                                 <div th:unless="${#fields.hasErrors('*')}"></div>
 
-                                <div id="concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium" th:if="${concurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
+                                <div id="details-concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium" th:if="${detailsConcurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
 
                                 <!-- Buttons -->
                                 <div class="flex space-x-4">
@@ -148,6 +163,7 @@
                                     th:hx-get="@{/tickets/{id}/reply(id=${ticket.id},replyId=${reply.id})}"
                                     hx-target="#reply-form-section"
                                     hx-swap="outerHTML"
+                                    th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}"
                                     class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1 px-2 rounded text-sm transition-colors">
                                 ✎
                                 </button>
@@ -173,8 +189,9 @@
             <div th:fragment="reply-form-block"
                  th:with="actualMode=${replyFormMode ?: 'add'}"
                  id="reply-form-section" 
-                 th:object="${replyform}" 
-                 th:hx-swap-oob="${isOobSwap} ? 'true' : null">
+                 th:object="${replyform}"
+                 th:hx-swap-oob="${isOobSwap} ? 'true' : null"
+                 th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}">
                 <!-- `th:` prefix is required for `hx-post` for Thymeleaf to process it and properly construct the URL -->
                 <form 
                     th:attr="hx-post=${actualMode == 'add'} ? @{/tickets/{id}/reply(id=${ticket.id()})} : null, hx-put=${actualMode != 'add'} ? @{/tickets/{id}/reply(id=${ticket.id()})} : null"
@@ -190,7 +207,7 @@
                         placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                     >Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</textarea>
                     <div id="validation-error-msg" class="text-red-400 text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
-                    <div id="concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium" th:if="${concurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
+                    <div id="reply-concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium" th:if="${replyConcurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
 
                     <!-- Footer Actions -->
                     <div class="flex justify-end gap-3 mt-2">

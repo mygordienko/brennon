@@ -8,6 +8,7 @@ public record TicketDto(
     Integer version,
     String authorId,
     String status,
+    String statusCode,
     String subject,
     String text,
     String auhtorFullName,
@@ -17,11 +18,11 @@ public record TicketDto(
 ) {
     public TicketDto(int id) {
         // Must delegate to the canonical constructor
-        this(String.valueOf(id), null, null, null, null, null, null, null, null, null); 
+        this(String.valueOf(id), null, null, null, null, null, null, null, null, null, null); 
     }
 
     public TicketDto(long id) {
         // Must delegate to the canonical constructor
-        this(String.valueOf(id), null, null, null, null, null, null, null, null, null); 
+        this(String.valueOf(id), null, null, null, null, null, null, null, null, null, null); 
     }
 }

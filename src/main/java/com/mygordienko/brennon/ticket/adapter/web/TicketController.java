@@ -107,6 +107,7 @@ public class TicketController {
 
         model.addAttribute("ticket", ticketDto);
         model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
+        model.addAttribute("closeForm", new TicketCloseCommandDto(ticket.getVersion()));
 
         if (hxRequest != null) {
             // this is a HTMX request, serve only fragment
@@ -165,7 +166,7 @@ public class TicketController {
             model.addAttribute("ticket", ticketDto);
             model.addAttribute("ticketDetailsEditMode", true);
             model.addAttribute("editDetailsForm", editDetailsForm);
-            model.addAttribute("concurrentUpdateDetected", true);
+            model.addAttribute("detailsConcurrentUpdateDetected", true);
 
             response.setHeader("HX-Retarget", "#ticket-details-form");
             // NOTE: use 'After-Swap' because current form needs to be updated as well
@@ -176,7 +177,6 @@ public class TicketController {
 
         model.addAttribute("ticket", ticketDto);
         model.addAttribute("ticketDetailsEditMode", false);
-        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
         
         response.setHeader("HX-Trigger", composeHtmxVersionEventHeader(ticket.getVersion()));
 
@@ -267,7 +267,7 @@ public class TicketController {
         model.addAttribute("isOobSwap", true); 
         
         if (concurrentModificationDetected) {
-            model.addAttribute("concurrentUpdateDetected", true);
+            model.addAttribute("replyConcurrentUpdateDetected", true);
             model.addAttribute("replyform", new TicketEditReplyCommandDto(ticket.getVersion(), replyform.getReplyId(), replyform.getText())); // keep the form data with new version
             model.addAttribute("replyFormMode", "edit");
         } else {
@@ -325,7 +325,7 @@ public class TicketController {
         model.addAttribute("isOobSwap", true); 
         
         if (concurrentModificationDetected) {
-            model.addAttribute("concurrentUpdateDetected", true);
+            model.addAttribute("replyConcurrentUpdateDetected", true);
             model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion(), replyform.getText())); // keep the form data with new version
         } else {
             model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
@@ -342,6 +342,40 @@ public class TicketController {
         return "ticket/ticket-details :: details-composite-bundle";
     }
 
+    @PostMapping("/tickets/{id}/close")
+    public String closeTicket(@CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr, 
+                              @PathVariable int id,
+                              @RequestHeader(value = "HX-Request", required = false) String hxRequest,
+                              HttpServletResponse response, 
+                              @Validated @ModelAttribute("closeForm") TicketCloseCommandDto closeForm, BindingResult bindingResult, Model model) {
+        var zoneId = ZoneId.of(zoneIdStr);
+        var ticketId = TicketId.of(id);
+
+        var concurrentModificationDetected = false;
+        try {
+            ticketService.closeTicket(closeForm.toCommand(ticketId));
+        } catch (OptimisticLockingFailureException | TicketConcurrentModificationException ex) {
+           concurrentModificationDetected = true; 
+        }
+
+        var ticket = ticketService.getTicket(ticketId);
+        var ticketDto = composeDto(ticket, zoneId);
+
+        model.addAttribute("ticket", ticketDto);
+        model.addAttribute("closeTicketConcurrentUpdateDetected", concurrentModificationDetected);
+        model.addAttribute("closeForm", new TicketCloseCommandDto(ticket.getVersion()));
+        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
+        
+        response.setHeader("HX-Trigger", composeHtmxVersionEventHeader(ticket.getVersion()));
+
+        if (hxRequest != null) {
+            // this is a HTMX request, serve only fragment
+            return "ticket/ticket-details :: page-content-block";
+        } else {
+            // regular request, serve full template
+            return "ticket/ticket-details";
+        }
+    }
 
     private String composeHtmxVersionEventHeader(int version) {
         return String.format("{\"versionUpdated\": {\"value\": %d}}", version);
@@ -353,6 +387,7 @@ public class TicketController {
             ticket.getVersion(),
             ticket.getAuthor().getId().toString(), 
             ticket.getStatus().getDisplayName(),
+            ticket.getStatus().getCode(),
             ticket.getSubject(),
             ticket.getText(), 
             ticket.getAuthor().getFullName(), 

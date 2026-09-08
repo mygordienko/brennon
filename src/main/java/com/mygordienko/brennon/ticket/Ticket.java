@@ -58,7 +58,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     private final TicketId id;
     @Getter
     @Column("status")
-    private final TicketStatus status;
+    private TicketStatus status;
     @Getter
     @Column("author_id")
     private final AggregateReference<BrennonUserProfile, BrennonUserId> author;
@@ -139,6 +139,20 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
 
         reply.setText(newText);
         reply.setUpdated(updated);
+        this.updated = updated;
+    }
+
+    public void closeTicket(BrennonUserId authorId, OffsetDateTime updated) {
+        if (this.status == TicketStatus.CLOSED) {
+            throw new IllegalStateException("Ticket is already closed");
+        }
+
+        if (!this.author.getId().equals(authorId)) {
+            // TODO: close by support
+            throw new IllegalStateException("Only the author can close");
+        }
+
+        this.status = TicketStatus.CLOSED;
         this.updated = updated;
     }
 }
