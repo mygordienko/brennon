@@ -3,6 +3,7 @@ package com.mygordienko.brennon.ticket.adapter.web;
 import java.time.ZoneId;
 import java.util.Arrays;
 
+import org.springframework.context.MessageSource;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.mygordienko.brennon.core.common.adapter.HtmxClientEventTriggerHeaderBuilder;
 import com.mygordienko.brennon.ticket.MissingTicketReplyException;
 import com.mygordienko.brennon.ticket.TicketConcurrentModificationException;
 import com.mygordienko.brennon.ticket.TicketCreateCommand;
@@ -34,11 +36,13 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class TicketController {
-    public TicketController(TicketService ticketService) {
+    public TicketController(TicketService ticketService, MessageSource messageSource) {
         this.ticketService = ticketService;
+        this.messageSource = messageSource;
     }
 
     private final TicketService ticketService;
+    private final MessageSource messageSource;
 
     @GetMapping("/tickets/my")
     public String getMyTickets(
@@ -162,15 +166,20 @@ public class TicketController {
         var ticket = ticketService.getTicket(ticketId);
         var ticketDto = composeDto(ticket, zoneId);
 
+        var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
+
         if (concurrentModificationDetected) {
             model.addAttribute("ticket", ticketDto);
             model.addAttribute("ticketDetailsEditMode", true);
             model.addAttribute("editDetailsForm", editDetailsForm);
-            model.addAttribute("detailsConcurrentUpdateDetected", true);
 
             response.setHeader("HX-Retarget", "#ticket-details-form");
+
+            htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
+            htmxEventHeaderBuilder.addCustomErrorEvent(messageSource.getMessage("ticket.error.concurrent", null, null));
+
             // NOTE: use 'After-Swap' because current form needs to be updated as well
-            response.setHeader("HX-Trigger-After-Swap", composeHtmxVersionEventHeader(ticket.getVersion()));
+            response.setHeader("HX-Trigger-After-Swap", htmxEventHeaderBuilder.toJsonString());
 
             return "ticket/ticket-details :: ticket-details-form"; 
         }
@@ -178,7 +187,8 @@ public class TicketController {
         model.addAttribute("ticket", ticketDto);
         model.addAttribute("ticketDetailsEditMode", false);
         
-        response.setHeader("HX-Trigger", composeHtmxVersionEventHeader(ticket.getVersion()));
+        htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
+        response.setHeader("HX-Trigger", htmxEventHeaderBuilder.toJsonString());
 
         return "ticket/ticket-details :: ticket-details-display";
     }
@@ -266,17 +276,19 @@ public class TicketController {
         // Force HTMX to swap the form out-of-band
         model.addAttribute("isOobSwap", true); 
         
+        var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
+        
         if (concurrentModificationDetected) {
-            model.addAttribute("replyConcurrentUpdateDetected", true);
             model.addAttribute("replyform", new TicketEditReplyCommandDto(ticket.getVersion(), replyform.getReplyId(), replyform.getText())); // keep the form data with new version
             model.addAttribute("replyFormMode", "edit");
+            htmxEventHeaderBuilder.addCustomErrorEvent(messageSource.getMessage("ticket.error.concurrent", null, null));
         } else {
             model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
         }
 
-        response.setHeader("HX-Trigger", composeHtmxVersionEventHeader(ticket.getVersion()));
+        htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
+        response.setHeader("HX-Trigger", htmxEventHeaderBuilder.toJsonString());
         
-
         return "ticket/ticket-details :: details-composite-bundle";
     }
 
@@ -324,14 +336,17 @@ public class TicketController {
         // Force HTMX to swap the form out-of-band
         model.addAttribute("isOobSwap", true); 
         
+        var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
+
         if (concurrentModificationDetected) {
-            model.addAttribute("replyConcurrentUpdateDetected", true);
+            htmxEventHeaderBuilder.addCustomErrorEvent(messageSource.getMessage("ticket.error.concurrent", null, null));
             model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion(), replyform.getText())); // keep the form data with new version
         } else {
             model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
         }
 
-        response.setHeader("HX-Trigger", composeHtmxVersionEventHeader(ticket.getVersion()));
+        htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
+        response.setHeader("HX-Trigger", htmxEventHeaderBuilder.toJsonString());
         
         /**
          * Thymeleaf evaluates the bundle, strings the HTML from both fragments together into a single response body, and passes it to HTMX.
@@ -362,23 +377,19 @@ public class TicketController {
         var ticketDto = composeDto(ticket, zoneId);
 
         model.addAttribute("ticket", ticketDto);
-        model.addAttribute("closeTicketConcurrentUpdateDetected", concurrentModificationDetected);
+
+        var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
+
+        if (concurrentModificationDetected) {
+            htmxEventHeaderBuilder.addCustomErrorEvent(messageSource.getMessage("ticket.error.concurrent", null, null));
+        }
         model.addAttribute("closeForm", new TicketCloseCommandDto(ticket.getVersion()));
         model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
         
-        response.setHeader("HX-Trigger", composeHtmxVersionEventHeader(ticket.getVersion()));
+        htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
+        response.setHeader("HX-Trigger-After-Swap", htmxEventHeaderBuilder.toJsonString());
 
-        if (hxRequest != null) {
-            // this is a HTMX request, serve only fragment
-            return "ticket/ticket-details :: page-content-block";
-        } else {
-            // regular request, serve full template
-            return "ticket/ticket-details";
-        }
-    }
-
-    private String composeHtmxVersionEventHeader(int version) {
-        return String.format("{\"versionUpdated\": {\"value\": %d}}", version);
+        return "ticket/ticket-details :: page-content-block";
     }
 
     private TicketDto composeDto(TicketDetailsView ticket, ZoneId zoneId) {

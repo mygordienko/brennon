@@ -27,14 +27,11 @@
             <header class="flex justify-end items-center mb-4 border-b border-gray-700 pb-4 relative flex-shrink-0">
                 <!-- Close Ticket Button -->
                 <th:block th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}">
-                    <div id="close-concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium pe-3" th:if="${closeTicketConcurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
                     <form 
                         th:hx-post="@{/tickets/{id}/close(id=${ticket.id()})}"
                         hx-target="#page-content"
                         hx-swap="outerHTML"
                         th:object="${closeForm}" 
-                        hx-on::after-request="if(event.detail.successful) this.reset()"  
-                        hx-on::before-request="this.querySelector('#close-concurrent-error-msg')?.remove()"
                         th:hx-swap-oob="${isOobSwap} ? 'true' : null">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" th:field="*{version}" class="ticket-version-input"/>
@@ -123,8 +120,6 @@
                                 <!-- Empty placeholder to maintain flex spacing if no error -->
                                 <div th:unless="${#fields.hasErrors('*')}"></div>
 
-                                <div id="details-concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium" th:if="${detailsConcurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
-
                                 <!-- Buttons -->
                                 <div class="flex space-x-4">
                                     <button type="submit" 
@@ -207,7 +202,6 @@
                         placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                     >Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</textarea>
                     <div id="validation-error-msg" class="text-red-400 text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
-                    <div id="reply-concurrent-error-msg" class="text-[#3b82f6] text-sm font-medium" th:if="${replyConcurrentUpdateDetected}" th:text="#{ticket.error.concurrent}">Concurrent update</div>
 
                     <!-- Footer Actions -->
                     <div class="flex justify-end gap-3 mt-2">
@@ -261,12 +255,21 @@
                 const errorParent = document.getElementById('error-parent');
                 errorParent.innerHTML = '';
             }
-            function showErrorMessage(templateId) {
+            function showErrorMessage(templateId, message) {
                 const clonedTemplate = document.getElementById(templateId).content.cloneNode(true);
+                if (message) {
+                    clonedTemplate.querySelector('#error-message').textContent = message
+                }
                 const errorParent = document.getElementById('error-parent');
                 errorParent.innerHTML = '';
                 errorParent.appendChild(clonedTemplate);
             }
+            htmx.on("customError", function(evt) {
+                const customErrorMessage = evt.detail?.value || evt.value;
+                if (customErrorMessage) {
+                    showErrorMessage('htmx-request-error', customErrorMessage);
+                }
+            });
         </script>
     </th:block>
 </body>
