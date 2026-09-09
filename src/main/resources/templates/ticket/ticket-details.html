@@ -246,7 +246,20 @@
                 showErrorMessage('htmx-request-error');
             });
             document.addEventListener('htmx:responseError', ev => {
-                showErrorMessage('htmx-request-error');
+                const xhr = ev.detail.xhr;
+                const responseBody = xhr.responseText;
+                
+                console.log("-->Status Code:", xhr.status);
+                console.log("-->Response Body:", responseBody);
+
+                try {
+                    const problemDetail = JSON.parse(responseBody);
+                    console.log("-->problemDetail:", problemDetail.detail);
+                    showErrorMessage('htmx-request-error', problemDetail.detail);
+                } catch (e) {
+                    console.error("HTMX server error response is not a JSON")
+                    showErrorMessage('htmx-request-error');
+                }
             });
             document.addEventListener('htmx:timeout', ev => {
                 showErrorMessage('htmx-timeout');
@@ -264,12 +277,6 @@
                 errorParent.innerHTML = '';
                 errorParent.appendChild(clonedTemplate);
             }
-            htmx.on("customError", function(evt) {
-                const customErrorMessage = evt.detail?.value || evt.value;
-                if (customErrorMessage) {
-                    showErrorMessage('htmx-request-error', customErrorMessage);
-                }
-            });
         </script>
     </th:block>
 </body>

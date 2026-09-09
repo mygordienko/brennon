@@ -2,9 +2,15 @@
 
 Helpdesk platform
 
+<img src="docs/ui_login_page.png" width="400" alt="login_page">
+
+<img src="docs/ui_ticket_details.png" width="400" alt="ticket_details">
+
+<img src="docs/ui_ticket_list.png" width="400" alt="ticket_list">
+
 ## Project configuration
 
-* Spring Boot 4 + Thymeleaf + Tailwind CSS
+* Spring Boot 4 + Thymeleaf + Tailwind CWSS
 * Gradle Frontend plugin to execute CSS compilation with `tailwindcss/cli`
 * Spring Data JDBC + PostgreSQL
 
@@ -48,5 +54,7 @@ Helpdesk platform
 * Custom `HxRefreshHeaderAuthenticationEntryPoint` to handle session expiration with HTMX requests (proper redirect to login).
 
 * Native HTML validation, ex`inputmode="numeric" pattern="[1-9][0-9]*"` prevents HTMX from sending request with incorrect data
+
+* ControllerAdvice with mixed responses: view name for regular requests and JSON for HTMX, see `TicketControllerAdvice`
 
 * see [HTMX.md](./docs/HTMX.md) for more HTMX-related info.

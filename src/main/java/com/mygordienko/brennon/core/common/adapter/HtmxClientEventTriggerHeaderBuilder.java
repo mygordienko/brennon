@@ -27,10 +27,6 @@ public class HtmxClientEventTriggerHeaderBuilder {
         addEvent(CustomHtmxEvent.VERSION_UPDATED.getEventName(), newVersion);
     }
 
-    public void addCustomErrorEvent(String message) {
-        addEvent(CustomHtmxEvent.CUSTOM_ERROR.getEventName(), message);
-    }
-
     private void addEvent(String name, Object value) {
         header.put(name, new Value(value));
     }
@@ -50,8 +46,7 @@ public class HtmxClientEventTriggerHeaderBuilder {
     }
 
     enum CustomHtmxEvent {
-        VERSION_UPDATED("versionUpdated"),
-        CUSTOM_ERROR("customError");
+        VERSION_UPDATED("versionUpdated");
 
         private CustomHtmxEvent(String name) {
             this.name = name;

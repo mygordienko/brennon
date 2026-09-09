@@ -3,8 +3,6 @@ package com.mygordienko.brennon.ticket.adapter.web;
 import java.time.ZoneId;
 import java.util.Arrays;
 
-import org.springframework.context.MessageSource;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mygordienko.brennon.core.common.adapter.HtmxClientEventTriggerHeaderBuilder;
 import com.mygordienko.brennon.ticket.MissingTicketReplyException;
-import com.mygordienko.brennon.ticket.TicketConcurrentModificationException;
 import com.mygordienko.brennon.ticket.TicketCreateCommand;
 import com.mygordienko.brennon.ticket.TicketDetailsView;
 import com.mygordienko.brennon.ticket.TicketId;
@@ -36,13 +33,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class TicketController {
-    public TicketController(TicketService ticketService, MessageSource messageSource) {
+    public TicketController(TicketService ticketService) {
         this.ticketService = ticketService;
-        this.messageSource = messageSource;
     }
 
     private final TicketService ticketService;
-    private final MessageSource messageSource;
 
     @GetMapping("/tickets/my")
     public String getMyTickets(
@@ -156,33 +151,12 @@ public class TicketController {
             return "ticket/ticket-details :: ticket-details-form"; 
         }
 
-        var concurrentModificationDetected = false;
-        try {
-            ticketService.editTicketDitails(editDetailsForm.toCommand(ticketId));
-        } catch (OptimisticLockingFailureException | TicketConcurrentModificationException ex) {
-           concurrentModificationDetected = true; 
-        }
+        ticketService.editTicketDitails(editDetailsForm.toCommand(ticketId));
 
         var ticket = ticketService.getTicket(ticketId);
         var ticketDto = composeDto(ticket, zoneId);
 
         var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
-
-        if (concurrentModificationDetected) {
-            model.addAttribute("ticket", ticketDto);
-            model.addAttribute("ticketDetailsEditMode", true);
-            model.addAttribute("editDetailsForm", editDetailsForm);
-
-            response.setHeader("HX-Retarget", "#ticket-details-form");
-
-            htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
-            htmxEventHeaderBuilder.addCustomErrorEvent(messageSource.getMessage("ticket.error.concurrent", null, null));
-
-            // NOTE: use 'After-Swap' because current form needs to be updated as well
-            response.setHeader("HX-Trigger-After-Swap", htmxEventHeaderBuilder.toJsonString());
-
-            return "ticket/ticket-details :: ticket-details-form"; 
-        }
 
         model.addAttribute("ticket", ticketDto);
         model.addAttribute("ticketDetailsEditMode", false);
@@ -260,32 +234,17 @@ public class TicketController {
             return "ticket/ticket-details :: reply-form-block(replyFormMode='edit')"; 
         }
 
-        var concurrentModificationDetected = false;
-        try {
-            ticketService.editReply(replyform.toCommand(ticketId));
-        } catch (OptimisticLockingFailureException | TicketConcurrentModificationException ex) {
-           concurrentModificationDetected = true; 
-        }
+        ticketService.editReply(replyform.toCommand(ticketId));
 
         var ticket = ticketService.getTicket(ticketId);
 
         var ticketDto = composeDto(ticket, zoneId);
 
-        // Re-populate ticket data needed for the fragment layout
         model.addAttribute("ticket", ticketDto);
-        // Force HTMX to swap the form out-of-band
-        model.addAttribute("isOobSwap", true); 
+        model.addAttribute("isOobSwap", true);         
+        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
         
         var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
-        
-        if (concurrentModificationDetected) {
-            model.addAttribute("replyform", new TicketEditReplyCommandDto(ticket.getVersion(), replyform.getReplyId(), replyform.getText())); // keep the form data with new version
-            model.addAttribute("replyFormMode", "edit");
-            htmxEventHeaderBuilder.addCustomErrorEvent(messageSource.getMessage("ticket.error.concurrent", null, null));
-        } else {
-            model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
-        }
-
         htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
         response.setHeader("HX-Trigger", htmxEventHeaderBuilder.toJsonString());
         
@@ -320,31 +279,16 @@ public class TicketController {
             return "ticket/ticket-details :: reply-form-block"; 
         }
 
-        var concurrentModificationDetected = false;
-        try {
-            ticketService.replyTicket(replyform.toCommand(ticketId));
-        } catch (OptimisticLockingFailureException | TicketConcurrentModificationException ex) {
-           concurrentModificationDetected = true; 
-        }
+        ticketService.replyTicket(replyform.toCommand(ticketId));
 
         var ticket = ticketService.getTicket(ticketId);
-
         var ticketDto = composeDto(ticket, zoneId);
 
-        // Re-populate ticket data needed for the fragment layout
         model.addAttribute("ticket", ticketDto);
-        // Force HTMX to swap the form out-of-band
         model.addAttribute("isOobSwap", true); 
+        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
         
         var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
-
-        if (concurrentModificationDetected) {
-            htmxEventHeaderBuilder.addCustomErrorEvent(messageSource.getMessage("ticket.error.concurrent", null, null));
-            model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion(), replyform.getText())); // keep the form data with new version
-        } else {
-            model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
-        }
-
         htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
         response.setHeader("HX-Trigger", htmxEventHeaderBuilder.toJsonString());
         
@@ -366,26 +310,16 @@ public class TicketController {
         var zoneId = ZoneId.of(zoneIdStr);
         var ticketId = TicketId.of(id);
 
-        var concurrentModificationDetected = false;
-        try {
-            ticketService.closeTicket(closeForm.toCommand(ticketId));
-        } catch (OptimisticLockingFailureException | TicketConcurrentModificationException ex) {
-           concurrentModificationDetected = true; 
-        }
+        ticketService.closeTicket(closeForm.toCommand(ticketId));
 
         var ticket = ticketService.getTicket(ticketId);
         var ticketDto = composeDto(ticket, zoneId);
 
         model.addAttribute("ticket", ticketDto);
-
-        var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
-
-        if (concurrentModificationDetected) {
-            htmxEventHeaderBuilder.addCustomErrorEvent(messageSource.getMessage("ticket.error.concurrent", null, null));
-        }
         model.addAttribute("closeForm", new TicketCloseCommandDto(ticket.getVersion()));
         model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
         
+        var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
         htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
         response.setHeader("HX-Trigger-After-Swap", htmxEventHeaderBuilder.toJsonString());
 

@@ -7,7 +7,7 @@ import org.springframework.core.convert.converter.Converter;
 import com.mygordienko.brennon.ticket.TicketId;
 
 /**
- * Custom value types, ex {@link TicketId} require csutom conversion to be sucessfully persisted/read.
+ * Custom value types, ex {@link TicketId} require custom conversion to be sucessfully persisted/read.
  * It is not sufficient to simply define a Converter bean, moreover such explicit declaration might
  * become a problem in the future because coverters are not necessarily the same for persistence and other
  * layers (ex. web).
