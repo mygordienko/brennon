@@ -1,0 +1,15 @@
+variables:
+
+stages:
+    - build
+
+job:
+    stage: build
+    script:
+        - pwd && ls
+        - ./gradlew build
+    artifacts:
+      when: always
+      paths:
+        - build/reports/tests/test/
+      expire_in: 1 week
