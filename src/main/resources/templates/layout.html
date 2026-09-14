@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,6 +44,8 @@
             <nav class="flex flex-col space-y-4 flex-1">
                 <a th:replace="~{fragments/sidebar-buttons :: nav-button(link=@{/tickets/my}, title='My tickets', menuItem='mytickets', icon='mytickets')}"></a>
                 <a th:replace="~{fragments/sidebar-buttons :: nav-button(link=@{/tickets/create}, title='Create ticket', menuItem='createticket', icon='createticket')}"></a>
+                <a sec:authorize="hasAuthority('support:read')"
+                   th:replace="~{fragments/sidebar-buttons :: nav-button(link=@{/tickets/unassigned}, title='Unassigned tickets', menuItem='unassignedtickets', icon='unassignedtickets')}" ></a>
             </nav>
 
             <!-- Logout -->
