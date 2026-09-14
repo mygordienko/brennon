@@ -6,12 +6,12 @@ import java.util.List;
 public record TicketDto(
     String id,
     Integer version,
-    String authorId,
+    UserInfoDto author,
+    UserInfoDto assignee,
     String status,
     String statusCode,
     String subject,
     String text,
-    String auhtorFullName,
     OffsetDateTime created,
     OffsetDateTime updated,
     List<TicketReplyDto> replies
@@ -25,4 +25,9 @@ public record TicketDto(
         // Must delegate to the canonical constructor
         this(String.valueOf(id), null, null, null, null, null, null, null, null, null, null); 
     }
+
+    public static record UserInfoDto(
+        String id,
+        String fullName)
+    {}
 }

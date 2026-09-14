@@ -30,6 +30,7 @@ create table tickets (
 	text varchar not null,
 	status varchar not null,
 	author_id varchar not null,
+	assignee_id varchar,
 	version int not null default 0,
 	created timestamptz not null,
 	updated timestamptz not null,
@@ -61,20 +62,26 @@ alter sequence tickets_reply_id_seq owned by ticket_replies.id;
 insert into user_logins(username, password, enabled)
 values
 	('john@mail.com', '$2a$10$N7jzrXagIVXru/1KB02g7OkAVLJC2GqULUxN6nCYAOZntCsRIEk2e', true),
-	('anna@mail.com', '$2a$10$N7jzrXagIVXru/1KB02g7OkAVLJC2GqULUxN6nCYAOZntCsRIEk2e', true);
+	('anna@mail.com', '$2a$10$N7jzrXagIVXru/1KB02g7OkAVLJC2GqULUxN6nCYAOZntCsRIEk2e', true),
+	('paul@mail.com', '$2a$10$N7jzrXagIVXru/1KB02g7OkAVLJC2GqULUxN6nCYAOZntCsRIEk2e', true);
 
 
 insert into user_authorities(username, authority)
 values
 	('john@mail.com', 'admin:read'),
 	('john@mail.com', 'admin:write'),
+	('john@mail.com', 'support:read'),
+	('john@mail.com', 'support:write'),
 	('john@mail.com', 'user:read'),
 	('john@mail.com', 'user:write'),
 	('anna@mail.com', 'user:read'),
-	('anna@mail.com', 'user:write');
+	('anna@mail.com', 'user:write'),
+	('paul@mail.com', 'user:read'),
+	('paul@mail.com', 'user:write');
 
 
 insert into user_profiles(id, username, first_name, last_name)
 values
 	('1', 'john@mail.com', 'John', 'Smith'),
-	('2', 'anna@mail.com', 'Anna', 'Kavinsky');
+	('2', 'anna@mail.com', 'Anna', 'Kavinsky'),
+	('3', 'paul@mail.com', 'Paul', 'Allen');

@@ -57,7 +57,11 @@
                                 </div>
                                 <div class="flex items-center gap-4">
                                     <span class="text-gray-400 font-medium">Author:</span>
-                                    <span class="text-gray-200" th:text="${ticket.auhtorFullName()}">Peter Parker</span>
+                                    <span class="text-gray-200" th:text="${ticket.author().fullName()}">Peter Parker</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="text-gray-400 font-medium">Assignee:</span>
+                                    <span class="text-gray-200" th:text="${ticket.assignee().fullName() == null ? '' : ticket.assignee().fullName()}">Peter Parker</span>
                                 </div>
                             </div>
 
@@ -153,7 +157,7 @@
                         <!-- Reply Content -->
                         <div class="flex-1">
                             <div class="inline-flex items-center space-x-2">
-                                <div class="italic underline" th:text="${reply.auhtorFullName()} + ' | ' + ${#temporals.format(reply.updated(), 'dd/MMM/yyyy HH:mm')}"></div>
+                                <div class="italic underline" th:text="${reply.authorFullName()} + ' | ' + ${#temporals.format(reply.updated(), 'dd/MMM/yyyy HH:mm')}"></div>
                                 <button
                                     th:hx-get="@{/tickets/{id}/reply(id=${ticket.id},replyId=${reply.id})}"
                                     hx-target="#reply-form-section"

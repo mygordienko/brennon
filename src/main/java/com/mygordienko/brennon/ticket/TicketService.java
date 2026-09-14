@@ -2,6 +2,7 @@ package com.mygordienko.brennon.ticket;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,9 +68,16 @@ public class TicketService {
             .map(reply -> reply.getAuthor().getId())
             .toList();
 
+        var assignee = ticket.getAssignee()
+            .map(ref -> ref.getId())
+            .map(id -> userProfileService.getUser(id))
+            .orElse(null);
+
         var userProfileMap = Stream.concat(
                 userProfileService.getUsers(replyAuthorsIds).stream(), 
-                Stream.of(userProfileService.getUser(ticket.getAuthor().getId())))
+                Stream.of(userProfileService.getUser(ticket.getAuthor().getId()), assignee)
+            )
+            .filter(Objects::nonNull)
             .collect(Collectors.toMap(profile -> profile.getId(), profile -> profile, (t, u) -> t));
 
         var replyViews = ticket.getReplies().stream()
@@ -91,6 +99,7 @@ public class TicketService {
                 ticket.getVersion(),
                 ticket.getStatus(),
                 userProfileMap.get(ticket.getAuthor().getId()),
+                assignee,
                 ticket.getSubject(),
                 ticket.getText(),
                 ticket.getCreated(),
@@ -105,7 +114,7 @@ public class TicketService {
         var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
         var currentUser = userProfileService.getCurrentUser();
         
-        var ticket = Ticket.createNew(TicketStatus.NEW, currentUser.getId(), command.subject(), command.text(), created, created);
+        var ticket = Ticket.createNew(TicketStatus.NEW, currentUser.getId(), null, command.subject(), command.text(), created, created);
 
         return ticketStoragePort.saveTicket(ticket);
     }

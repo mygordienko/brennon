@@ -327,15 +327,22 @@ public class TicketController {
     }
 
     private TicketDto composeDto(TicketDetailsView ticket, ZoneId zoneId) {
+
+        var authorInfo = new TicketDto.UserInfoDto(ticket.getAuthor().getId().toString(), ticket.getAuthor().getFullName());
+
+        var assigneeInfo = ticket.getAssignee()
+            .map(u -> new TicketDto.UserInfoDto(u.getId().toString(), u.getFullName()))
+            .orElse(new TicketDto.UserInfoDto("", ""));
+
         return new TicketDto(
             ticket.getId().toString(), 
             ticket.getVersion(),
-            ticket.getAuthor().getId().toString(), 
+            authorInfo,
+            assigneeInfo,
             ticket.getStatus().getDisplayName(),
             ticket.getStatus().getCode(),
             ticket.getSubject(),
             ticket.getText(), 
-            ticket.getAuthor().getFullName(), 
             ticket.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
             ticket.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
             ticket.getReplies().stream()

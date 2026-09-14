@@ -2,6 +2,7 @@ package com.mygordienko.brennon.ticket;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 
@@ -12,12 +13,22 @@ import lombok.Getter;
  *  as well as rich representation for each reply.
  */
 public class TicketDetailsView {
-    public TicketDetailsView(TicketId id, Integer version, TicketStatus status, BrennonUserProfile author, String subject, String text,
-            OffsetDateTime created, OffsetDateTime updated, List<TicketReplyView> replies) {
+    public TicketDetailsView(
+            TicketId id, 
+            Integer version, 
+            TicketStatus status, 
+            BrennonUserProfile author,
+            BrennonUserProfile assignee, 
+            String subject, 
+            String text,
+            OffsetDateTime created, 
+            OffsetDateTime updated, 
+            List<TicketReplyView> replies) {
         this.id = id;
         this.version = version;
         this.status = status;
         this.author = author;
+        this.assignee = assignee;
         this.subject = subject;
         this.text = text;
         this.created = created;
@@ -33,6 +44,11 @@ public class TicketDetailsView {
     private final TicketStatus status;
     @Getter
     private final BrennonUserProfile author;
+    private final BrennonUserProfile assignee;
+    public Optional<BrennonUserProfile> getAssignee() {
+        return Optional.ofNullable(assignee);
+    }
+
     @Getter
     private final String subject;
     @Getter

@@ -39,18 +39,21 @@ public class TicketControllerAdvice {
     @ExceptionHandler({MissingTicketException.class, MissingTicketReplyException.class})
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     public String handleMissingTicket(Exception ex) {
+        log.error("Missing error", ex);
         return "core/common/404";
     }
 
     @ExceptionHandler
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public String handleBadRequest(IllegalArgumentException ex) {
+        log.error("Illegal argument error", ex);
         return "core/common/400";
     }
 
     @ExceptionHandler
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public String handleBadRequest(IllegalStateException ex) {
+        log.error("Illegal state error", ex);
         return "core/common/400";
     }
 
@@ -93,6 +96,7 @@ public class TicketControllerAdvice {
     @ExceptionHandler
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleOtherErrors(Exception ex) {
+        log.error("Unexpected error", ex);
         return "core/common/500";
     }
 }

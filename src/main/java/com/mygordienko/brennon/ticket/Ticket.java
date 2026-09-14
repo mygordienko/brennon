@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,12 +28,22 @@ import lombok.Getter;
  */
 @Table(name = "tickets")
 public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable<TicketId> {
-    public Ticket(TicketId id, Integer version, TicketStatus status, AggregateReference<BrennonUserProfile, BrennonUserId> author, String subject, String text,
-            OffsetDateTime created, OffsetDateTime updated, Set<TicketReply> replies) {
+    public Ticket(
+            TicketId id, 
+            Integer version, 
+            TicketStatus status, 
+            AggregateReference<BrennonUserProfile, BrennonUserId> author, 
+            AggregateReference<BrennonUserProfile, BrennonUserId> assignee,
+            String subject, 
+            String text,
+            OffsetDateTime created,
+            OffsetDateTime updated,
+            Set<TicketReply> replies) {
         this.id = id;
         this.version = version;
         this.status = status;
         this.author = author;
+        this.assignee = assignee;
         this.subject = subject;
         this.text = text;
         this.created = created;
@@ -43,12 +54,15 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
 
     public static Ticket createNew(
         TicketStatus status, 
-        BrennonUserId author, 
+        BrennonUserId author,
+        BrennonUserId assignee,
         String subject, 
         String text,
         OffsetDateTime created, 
         OffsetDateTime updated) {
-            return new Ticket(null, null, status, AggregateReference.to(author), subject, text,
+            var authorRef = AggregateReference.<BrennonUserProfile, BrennonUserId>to(author);
+            var assigneeRef = (assignee == null) ? null : AggregateReference.<BrennonUserProfile, BrennonUserId>to(assignee);
+            return new Ticket(null, null, status, authorRef, assigneeRef, subject, text,
             created, updated, new HashSet<>());
     }
 
@@ -62,6 +76,12 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     @Getter
     @Column("author_id")
     private final AggregateReference<BrennonUserProfile, BrennonUserId> author;
+    @Column("assignee_id")
+    private final AggregateReference<BrennonUserProfile, BrennonUserId> assignee;
+    public Optional<AggregateReference<BrennonUserProfile, BrennonUserId>> getAssignee() {
+        return Optional.ofNullable(assignee);
+    }
+    
     @Getter
     @Column("subject")
     private String subject;

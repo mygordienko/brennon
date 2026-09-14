@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
+import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 
 public class TicketTest {
     @Test
@@ -16,11 +17,13 @@ public class TicketTest {
     public void givenExistingTicket_whenReplyAdded_thenUpdatesTicketUpdatedTimestamp() {
         var ticketId = TicketId.of(1L);
         var authorId = BrennonUserId.of("john");
+        var assigneeId = BrennonUserId.of("jeff");
         var ticket = new Ticket(
             ticketId, 
             0, 
             TicketStatus.NEW, 
-            AggregateReference.to(authorId), 
+            AggregateReference.<BrennonUserProfile, BrennonUserId>to(authorId),
+            AggregateReference.<BrennonUserProfile, BrennonUserId>to(assigneeId),
             "subject", 
             "text", 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
@@ -42,6 +45,7 @@ public class TicketTest {
         var ticketId = TicketId.of(1L);
         var ticketReplyId = TicketReplyId.of(1L);
         var authorId = BrennonUserId.of("john");
+        var assigneeId = BrennonUserId.of("jeff");
 
         var replyOrigTime = OffsetDateTime.parse("2026-08-30T15:32:00+02:00");
 
@@ -49,7 +53,8 @@ public class TicketTest {
             ticketId, 
             0, 
             TicketStatus.NEW, 
-            AggregateReference.to(authorId), 
+            AggregateReference.<BrennonUserProfile, BrennonUserId>to(authorId),
+            AggregateReference.<BrennonUserProfile, BrennonUserId>to(assigneeId),
             "subject", 
             "text", 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
