@@ -67,6 +67,47 @@ public class JdbcTicketStorage implements TicketStoragePort {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<Ticket> getTicketsByAssignee(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable) {
+        var safePageable = processPageable(pageable);
+        Criteria criteria = null;
+
+        if (userId == null) {
+            criteria = Criteria.where("assignee_id").isNull();
+        } else {
+            criteria = Criteria.where("assignee_id").is(userId);
+        } 
+
+        if (filter.status() != null) {
+            criteria = criteria.and("status").is(filter.status().getCode());
+        }
+
+        if (filter.id() != null) {
+            criteria = criteria.and("id").is(filter.id().getValue());
+        }
+
+        if (filter.subject() != null) {
+            criteria = criteria.and("subject").like("%" + filter.subject() + "%").ignoreCase(true);
+        }
+
+        var query = Query.query(criteria)
+            .limit(safePageable.getPageSize())
+            .offset(safePageable.getPageNumber() * safePageable.getPageSize())
+            .sort(safePageable.getSort());
+
+        var pageResults = jdbcAggregateTemplate.findAll(query, Ticket.class);
+
+        var queryCount = Query.query(criteria);
+        long totalCount = jdbcAggregateTemplate.count(queryCount,Ticket.class);
+
+        return new PageImpl<>(
+            pageResults, 
+            safePageable, 
+            totalCount
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<Ticket> getTicketById(TicketId ticketId) {
         var query = Query.query(Criteria.where("id").is(ticketId));
         return jdbcAggregateTemplate.findOne(query, Ticket.class);

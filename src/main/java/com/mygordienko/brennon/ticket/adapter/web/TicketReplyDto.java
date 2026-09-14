@@ -6,8 +6,13 @@ public record TicketReplyDto(
     String id,
     String authorId,
     String text,
-    String auhtorFullName,
+    String authorFullName,
     OffsetDateTime created,
-    OffsetDateTime updated
+    OffsetDateTime updated,
+    UserRelationDto currentUserRelation
 ) {
+    public static record UserRelationDto(
+        boolean isAuthor
+    )
+    {}
 }

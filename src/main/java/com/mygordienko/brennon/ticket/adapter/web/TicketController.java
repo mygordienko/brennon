@@ -3,6 +3,7 @@ package com.mygordienko.brennon.ticket.adapter.web;
 import java.time.ZoneId;
 import java.util.Arrays;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -28,6 +29,7 @@ import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
 import com.mygordienko.brennon.ticket.TicketService;
 import com.mygordienko.brennon.ticket.TicketStatus;
+import com.mygordienko.brennon.ticket.TicketView;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -62,27 +64,13 @@ public class TicketController {
         var zoneId = ZoneId.of(zoneIdStr);
 
         var ticketsDtos = page.getContent().stream()
-        .map(ticket -> new TicketRecordDto(
-            ticket.getId().toString(),
-            ticket.getVersion(),
-            ticket.getStatus().getDisplayName(),
-            ticket.getSubject(),
-            ticket.getAuthor().getFullName(),
-            ticket.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(),
-            ticket.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime()
-        ))
+        .map(ticket -> composeDto(ticket, zoneId))
         .toList();
-
-        var order = page.getSort().stream()
-            .findAny()
-            .orElseThrow();
-
-        var orderDto = new PageInfoDto.OrderDto(order.getProperty(), order.getDirection().name());
 
         model.addAttribute("tickets", ticketsDtos);
         model.addAttribute("ticketRequestFilter", filterDto);
         model.addAttribute("statuses", statuses);
-        model.addAttribute("page", new PageInfoDto(page.getNumber(), page.getNumberOfElements(), page.getTotalPages(), page.getSize(), orderDto));
+        model.addAttribute("page", composeDto(page));
 
         if (hxRequest != null) {
             // this is a HTMX request, serve only fragment
@@ -90,6 +78,46 @@ public class TicketController {
         } else {
             // regular request, serve full template
             return "ticket/ticket-list";
+        }
+    }
+
+    @GetMapping("/tickets/unassigned")
+    public String getunassignedTickets(
+        @CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr,
+        HttpServletResponse response,
+        @RequestHeader(value = "HX-Request", required = false) String hxRequest,
+        @Validated @ModelAttribute("ticketRequestFilter") TicketRequestFilterDto filterDto,
+        BindingResult bindingResult,
+        Model model, @SortDefault(sort = "id", direction = Sort.Direction.DESC) @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        var statuses = Arrays.stream(TicketStatus.values())
+            .map(s -> new TicketStatusDto(s.getCode(), s.getDisplayName()))
+            .toList();
+        
+        if (bindingResult.hasErrors()) {
+            throw new IllegalArgumentException("Wrong filter form input");
+        }
+
+        var filter = filterDto.toDomain();
+
+        var page = ticketService.getUnassignedTickets(filter, pageable);
+        var zoneId = ZoneId.of(zoneIdStr);
+
+        var ticketsDtos = page.getContent().stream()
+        .map(ticket -> composeDto(ticket, zoneId))
+        .toList();
+
+        model.addAttribute("tickets", ticketsDtos);
+        model.addAttribute("ticketRequestFilter", filterDto);
+        model.addAttribute("statuses", statuses);
+        model.addAttribute("page", composeDto(page));
+
+        if (hxRequest != null) {
+            // this is a HTMX request, serve only fragment
+            return "ticket/support-unassigned-ticket-list :: page-content-block";
+        } else {
+            // regular request, serve full template
+            return "ticket/support-unassigned-ticket-list";
         }
     }
 
@@ -142,7 +170,8 @@ public class TicketController {
         if (bindingResult.hasErrors()) {
             // Return just the fragment containing the form and errors
             // we still need ticket id to compose the submit URL 
-            var ticketDto = new TicketDto(id);
+            var ticket = ticketService.getTicket(ticketId);
+            var ticketDto = composeDto(ticket, zoneId);
             model.addAttribute("ticket", ticketDto);
             model.addAttribute("ticketDetailsEditMode", true);
             model.addAttribute("editDetailsForm", editDetailsForm);
@@ -225,7 +254,10 @@ public class TicketController {
         if (bindingResult.hasErrors()) {
             // Return just the fragment containing the form and errors
             // we still need ticket id to compose the submit URL 
-            model.addAttribute("ticket", new TicketDto(id));
+            var ticket = ticketService.getTicket(ticketId);
+            var ticketDto = composeDto(ticket, zoneId);
+
+            model.addAttribute("ticket", ticketDto);
             model.addAttribute("replyform", replyform);
             // Normal render, no OOB
             model.addAttribute("isOobSwap", false);
@@ -261,7 +293,9 @@ public class TicketController {
         if (bindingResult.hasErrors()) {
             // Return just the fragment containing the form and errors
             // we still need ticket id to compose the submit URL 
-            var ticketDto = new TicketDto(id);
+            var ticket = ticketService.getTicket(ticketId);
+            var ticketDto = composeDto(ticket, zoneId);
+
             model.addAttribute("ticket", ticketDto);
             model.addAttribute("replyform", replyform);
             // Normal render, no OOB
@@ -345,6 +379,11 @@ public class TicketController {
             ticket.getText(), 
             ticket.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
             ticket.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
+            new TicketDto.UserRelationDto(
+                ticket.getUserRelation().canClose(),
+                ticket.getUserRelation().canEdit(),
+                ticket.getUserRelation().canReply()
+            ),
             ticket.getReplies().stream()
                 .map(reply -> new TicketReplyDto(
                         reply.getId().toString(), 
@@ -352,7 +391,33 @@ public class TicketController {
                         reply.getText(), 
                         reply.getAuthor().getFullName(), 
                         reply.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(), 
-                        reply.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime()))
+                        reply.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime(),
+                        new TicketReplyDto.UserRelationDto(
+                            reply.getUserRelation().isAuthor())
+                        )
+                    )
                     .toList());
+    }
+
+    private TicketRecordDto composeDto(TicketView ticket, ZoneId zoneId) {
+        return new TicketRecordDto(
+            ticket.getId().toString(),
+            ticket.getVersion(),
+            ticket.getStatus().getDisplayName(),
+            ticket.getSubject(),
+            ticket.getAuthor().getFullName(),
+            ticket.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(),
+            ticket.getUpdated().atZoneSameInstant(zoneId).toOffsetDateTime()
+        );
+    }
+
+    private PageInfoDto composeDto(Page page) {
+         var order = page.getSort().stream()
+            .findAny()
+            .orElseThrow();
+
+        var orderDto = new PageInfoDto.OrderDto(order.getProperty(), order.getDirection().name());
+
+        return new PageInfoDto(page.getNumber(), page.getNumberOfElements(), page.getTotalPages(), page.getSize(), orderDto);
     }
 }

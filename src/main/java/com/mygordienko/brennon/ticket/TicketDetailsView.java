@@ -22,7 +22,8 @@ public class TicketDetailsView {
             String subject, 
             String text,
             OffsetDateTime created, 
-            OffsetDateTime updated, 
+            OffsetDateTime updated,
+            UserRelation userRelation,
             List<TicketReplyView> replies) {
         this.id = id;
         this.version = version;
@@ -33,7 +34,8 @@ public class TicketDetailsView {
         this.text = text;
         this.created = created;
         this.updated = updated;
-        this.replies = List.copyOf(replies);
+        this.userRelation = userRelation;
+        this.replies = List.copyOf(replies);  
     }
 
     @Getter
@@ -57,10 +59,22 @@ public class TicketDetailsView {
     private final OffsetDateTime created;
     @Getter
     private final OffsetDateTime updated;
+    @Getter
+    private final UserRelation userRelation;
 
     private final List<TicketReplyView> replies;
 
     public List<TicketReplyView> getReplies() {
         return List.copyOf(replies);
+    }
+
+    /**
+     * What current user can do with this ticket.
+     */
+    public static record UserRelation(
+        boolean canClose,
+        boolean canEdit,
+        boolean canReply
+    ) {
     }
 }

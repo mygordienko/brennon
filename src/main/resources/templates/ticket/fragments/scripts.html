@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <th:block th:fragment="htmx-error-handlers">
+        <script>
+            document.addEventListener('htmx:beforeRequest', ev => {
+                removeErrorMessage();
+            });
+            document.addEventListener('htmx:sendError', ev => {
+                showErrorMessage('htmx-request-error');
+            });
+            document.addEventListener('htmx:responseError', ev => {
+                showErrorMessage('htmx-request-error');
+            });
+            document.addEventListener('htmx:timeout', ev => {
+                    showErrorMessage('htmx-timeout');
+            });
+            function removeErrorMessage() {
+                const errorParent = document.getElementById('error-parent');
+                errorParent.innerHTML = '';
+            }
+            function showErrorMessage(templateId) {
+                const clonedTemplate = document.getElementById(templateId).content.cloneNode(true);
+                const errorParent = document.getElementById('error-parent');
+                errorParent.innerHTML = '';
+                errorParent.appendChild(clonedTemplate);
+            }
+        </script>
+    </th:block>
+</body>

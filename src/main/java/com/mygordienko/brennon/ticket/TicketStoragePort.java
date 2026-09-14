@@ -9,6 +9,7 @@ import com.mygordienko.brennon.core.auth.BrennonUserId;
 
 public interface TicketStoragePort {
     Page<Ticket> getTicketsByAuthor(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);
+    Page<Ticket> getTicketsByAssignee(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);
     Optional<Ticket> getTicketById(TicketId ticketId);
     Ticket saveTicket(Ticket ticket);
 }

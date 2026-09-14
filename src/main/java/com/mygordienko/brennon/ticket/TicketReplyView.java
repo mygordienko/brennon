@@ -8,13 +8,14 @@ import lombok.Getter;
 
 public class TicketReplyView {
     public TicketReplyView(TicketReplyId id, TicketId ticketId, BrennonUserProfile author, String text,
-            OffsetDateTime created, OffsetDateTime updated) {
+            OffsetDateTime created, OffsetDateTime updated, UserRelation userRelation) {
         this.id = id;
         this.ticketId = ticketId;
         this.author = author;
         this.text = text;
         this.created = created;
         this.updated = updated;
+        this.userRelation = userRelation;
     }
     @Getter
     private final TicketReplyId id;
@@ -28,5 +29,12 @@ public class TicketReplyView {
     private final OffsetDateTime created;
     @Getter
     private final OffsetDateTime updated;
+    @Getter
+    private final UserRelation userRelation;
+
+    public static record UserRelation(
+        boolean isAuthor
+    ) {
+    }
 
 }

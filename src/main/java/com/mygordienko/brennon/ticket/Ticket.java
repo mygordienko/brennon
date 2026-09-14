@@ -113,17 +113,17 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         return this.id == null;
     }
 
-    public void addReply(BrennonUserId authorId, String text, OffsetDateTime created) {
+    public void addReply(BrennonUserId userId, String text, OffsetDateTime created) {
         if (this.status == TicketStatus.CLOSED) {
             throw new IllegalStateException("Replying on closed ticket");
         }
 
-        if (!this.author.getId().equals(authorId)) {
-            // TODO: support reply
-            throw new IllegalStateException("Not an author's reply");
+        if (!this.author.getId().equals(userId) 
+                && (this.assignee != null && !this.assignee.getId().equals(userId))) {
+            throw new IllegalStateException("User can not reply ticket %s".formatted(this.id));
         }
 
-        var reply = new TicketReply(null, this.id, AggregateReference.to(authorId), text, created, created);
+        var reply = new TicketReply(null, this.id, AggregateReference.to(userId), text, created, created);
 
         this.replies.add(reply);
         this.updated = created;
@@ -142,20 +142,19 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         this.text = text;
     }
 
-    public void editReply(BrennonUserId authorId, TicketReplyId replyId, String newText, OffsetDateTime updated) {
+    public void editReply(BrennonUserId userId, TicketReplyId replyId, String newText, OffsetDateTime updated) {
         if (this.status == TicketStatus.CLOSED) {
             throw new IllegalStateException("Editing closed ticket");
-        }
-
-        if (!this.author.getId().equals(authorId)) {
-            // TODO: support reply
-            throw new IllegalStateException("Not an author's reply");
         }
 
         var reply = this.replies.stream()
             .filter(r -> r.getId().equals(replyId))
             .findFirst()
             .orElseThrow(() -> MissingTicketReplyException.forReplyId(replyId));
+
+        if (!reply.getAuthor().getId().equals(userId)) {
+            throw new IllegalStateException("Not an author's reply");
+        }
 
         reply.setText(newText);
         reply.setUpdated(updated);

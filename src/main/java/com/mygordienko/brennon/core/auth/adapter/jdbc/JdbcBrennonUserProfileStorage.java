@@ -1,6 +1,7 @@
 package com.mygordienko.brennon.core.auth.adapter.jdbc;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ public class JdbcBrennonUserProfileStorage implements BrennonUserProfileStorageP
     public List<BrennonUserProfile> getByIds(Collection<BrennonUserId> userIds) {
         var query = Query.query(Criteria.where("id").in(userIds));
         return jdbcAggregateTemplate.findAll(query, BrennonUserProfile.class).stream()
-            .sorted()
+            .sorted(Comparator.comparing(BrennonUserProfile::getId))
             .toList();
     }
 }

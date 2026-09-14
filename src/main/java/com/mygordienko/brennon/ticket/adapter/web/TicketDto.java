@@ -14,20 +14,18 @@ public record TicketDto(
     String text,
     OffsetDateTime created,
     OffsetDateTime updated,
+    UserRelationDto currentUserRelation,
     List<TicketReplyDto> replies
 ) {
-    public TicketDto(int id) {
-        // Must delegate to the canonical constructor
-        this(String.valueOf(id), null, null, null, null, null, null, null, null, null, null); 
-    }
-
-    public TicketDto(long id) {
-        // Must delegate to the canonical constructor
-        this(String.valueOf(id), null, null, null, null, null, null, null, null, null, null); 
-    }
-
     public static record UserInfoDto(
         String id,
         String fullName)
+    {}
+
+    public static record UserRelationDto(
+        boolean canClose,
+        boolean canEdit,
+        boolean canReply
+    )
     {}
 }

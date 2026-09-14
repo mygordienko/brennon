@@ -26,7 +26,7 @@
             <!-- Header Section -->
             <header class="flex justify-end items-center mb-4 border-b border-gray-700 pb-4 relative flex-shrink-0">
                 <!-- Close Ticket Button -->
-                <th:block th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}">
+                <th:block th:unless="${(ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()) || (!ticket.currentUserRelation().canClose())}">
                     <form 
                         th:hx-post="@{/tickets/{id}/close(id=${ticket.id()})}"
                         hx-target="#page-content"
@@ -74,7 +74,7 @@
                                         th:hx-get="@{/tickets/{id}/edit(id=${ticket.id})}"
                                         hx-target="#ticket-details-ui-wrapper"
                                         hx-swap="innerHTML"
-                                        th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}">
+                                        th:unless="${(ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()) || !ticket.currentUserRelation().canEdit()}">
                                     Edit
                                 </button>
                             </div>
@@ -162,7 +162,7 @@
                                     th:hx-get="@{/tickets/{id}/reply(id=${ticket.id},replyId=${reply.id})}"
                                     hx-target="#reply-form-section"
                                     hx-swap="outerHTML"
-                                    th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}"
+                                    th:unless="${(ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()) || !reply.currentUserRelation().isAuthor()}"
                                     class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1 px-2 rounded text-sm transition-colors">
                                 ✎
                                 </button>
@@ -190,7 +190,7 @@
                  id="reply-form-section" 
                  th:object="${replyform}"
                  th:hx-swap-oob="${isOobSwap} ? 'true' : null"
-                 th:unless="${ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()}">
+                 th:unless="${(ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()) || (!ticket.currentUserRelation().canReply())}">
                 <!-- `th:` prefix is required for `hx-post` for Thymeleaf to process it and properly construct the URL -->
                 <form 
                     th:attr="hx-post=${actualMode == 'add'} ? @{/tickets/{id}/reply(id=${ticket.id()})} : null, hx-put=${actualMode != 'add'} ? @{/tickets/{id}/reply(id=${ticket.id()})} : null"
