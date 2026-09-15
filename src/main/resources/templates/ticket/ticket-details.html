@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
     layout:decorate="~{layout}"
     th:with="activeMenuItem='ticketedit'">
 <head>
@@ -24,15 +25,30 @@
     <th:block layout:fragment="content">
         <main class="flex-1 flex flex-col pt-6 px-6 md:px-10 overflow-hidden relative h-full max-h-screen" id= "page-content" th:fragment="page-content-block">
             <!-- Header Section -->
-            <header class="flex justify-end items-center mb-4 border-b border-gray-700 pb-4 relative flex-shrink-0">
+            <header class="flex justify-end items-center mb-4 border-b border-gray-700 pb-4 relative flex-shrink-0 gap-3">
+                <!-- Assign Me Ticket Button -->
+                <th:block th:unless="${(ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()) || (!ticket.currentUserRelation().canAssign())}"
+                          sec:authorize="hasAuthority('support:write')">
+                    <form 
+                        th:hx-post="@{/tickets/{id}/assignme(id=${ticket.id()})}"
+                        hx-target="#page-content"
+                        hx-swap="outerHTML"
+                        th:object="${assignMeForm}">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" th:field="*{version}" class="ticket-version-input"/>
+                        <button class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1 px-4 rounded shadow-sm transition-colors text-sm">
+                            Assign to Me
+                        </button>
+                    </form>
+                </th:block>
+                
                 <!-- Close Ticket Button -->
                 <th:block th:unless="${(ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()) || (!ticket.currentUserRelation().canClose())}">
                     <form 
                         th:hx-post="@{/tickets/{id}/close(id=${ticket.id()})}"
                         hx-target="#page-content"
                         hx-swap="outerHTML"
-                        th:object="${closeForm}" 
-                        th:hx-swap-oob="${isOobSwap} ? 'true' : null">
+                        th:object="${closeForm}">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" th:field="*{version}" class="ticket-version-input"/>
                         <button class="bg-[#b91c1c] hover:bg-[#991b1b] text-white font-medium py-1 px-4 rounded border border-red-800 transition-colors text-sm">

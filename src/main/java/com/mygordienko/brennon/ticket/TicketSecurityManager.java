@@ -30,4 +30,9 @@ public class TicketSecurityManager {
     public boolean userCanEdit(@NonNull BrennonUserProfile currentUser, @NonNull Ticket ticket) {
         return currentUser.getId().equals(ticket.getAuthor().getId());
     }
+
+    public boolean userCanAssign(@NonNull BrennonUserProfile currentUser, @NonNull Ticket ticket) {
+        var currentUserAccount = userPort.getUserAccount(currentUser.getLogin()).orElseThrow(() -> MissingUserException.forLogin(currentUser.getLogin()));
+        return !currentUser.getId().equals(ticket.getAssignee().map(p -> p.getId()).orElse(null)) && currentUserAccount.isSupport();
+    }
 }

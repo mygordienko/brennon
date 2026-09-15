@@ -25,7 +25,8 @@ public record TicketDto(
     public static record UserRelationDto(
         boolean canClose,
         boolean canEdit,
-        boolean canReply
+        boolean canReply,
+        boolean canAssign
     )
     {}
 }

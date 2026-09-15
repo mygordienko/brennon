@@ -71,4 +71,65 @@ public class TicketTest {
         Assertions.assertThat(ticket.getCreated()).isEqualTo(originTicketCreated);
         Assertions.assertThat(ticket.getUpdated()).isEqualTo(replyUpdateTime);
     }
+
+    @Test
+    @DisplayName("Updates timestamps when assignee changes")
+    public void givenExistingTicket_whenAssigneeUpdated_thenUpdatesTicketUpdatedTimestamp() {
+        var ticketId = TicketId.of(1L);
+        var authorId = BrennonUserId.of("john");
+        var assigneeId = BrennonUserId.of("jeff");
+
+        var ticket = new Ticket(
+            ticketId, 
+            0, 
+            TicketStatus.NEW, 
+            AggregateReference.<BrennonUserProfile, BrennonUserId>to(authorId),
+            null,
+            "subject", 
+            "text", 
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            Set.of());
+
+        var originTicketCreated = ticket.getCreated();
+        var operationTime = OffsetDateTime.parse("2026-08-30T15:35:00+02:00");
+        
+        ticket.assignTo(assigneeId, operationTime);
+        
+        Assertions.assertThat(ticket.getCreated()).isEqualTo(originTicketCreated);
+        Assertions.assertThat(ticket.getUpdated()).isEqualTo(operationTime);
+        Assertions.assertThat(ticket.getAssignee()).isPresent();
+        Assertions.assertThat(ticket.getAssignee().get().getId()).isEqualTo(assigneeId);
+    }
+
+    @Test
+    @DisplayName("Updates status when assigned")
+    public void givenNewTicket_whenAssigned_thenUpdatesTicketStatusToInProgress() {
+        var ticketId = TicketId.of(1L);
+        var authorId = BrennonUserId.of("john");
+        var assigneeId = BrennonUserId.of("jeff");
+
+        var ticket = new Ticket(
+            ticketId, 
+            0, 
+            TicketStatus.NEW, 
+            AggregateReference.<BrennonUserProfile, BrennonUserId>to(authorId),
+            null,
+            "subject", 
+            "text", 
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            Set.of());
+
+        var originTicketCreated = ticket.getCreated();
+        var operationTime = OffsetDateTime.parse("2026-08-30T15:35:00+02:00");
+        
+        ticket.assignTo(assigneeId, operationTime);
+        
+        Assertions.assertThat(ticket.getCreated()).isEqualTo(originTicketCreated);
+        Assertions.assertThat(ticket.getUpdated()).isEqualTo(operationTime);
+        Assertions.assertThat(ticket.getStatus()).isEqualTo(TicketStatus.IN_PROGRESS);
+        Assertions.assertThat(ticket.getAssignee()).isPresent();
+        Assertions.assertThat(ticket.getAssignee().get().getId()).isEqualTo(assigneeId);
+    }
 }

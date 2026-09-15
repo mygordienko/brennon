@@ -77,7 +77,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     @Column("author_id")
     private final AggregateReference<BrennonUserProfile, BrennonUserId> author;
     @Column("assignee_id")
-    private final AggregateReference<BrennonUserProfile, BrennonUserId> assignee;
+    private AggregateReference<BrennonUserProfile, BrennonUserId> assignee;
     public Optional<AggregateReference<BrennonUserProfile, BrennonUserId>> getAssignee() {
         return Optional.ofNullable(assignee);
     }
@@ -172,6 +172,17 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         }
 
         this.status = TicketStatus.CLOSED;
+        this.updated = updated;
+    }
+
+    public void assignTo(BrennonUserId userId, OffsetDateTime updated) {
+        if (this.status == TicketStatus.CLOSED) {
+            throw new IllegalStateException("Ticket is already closed");
+        }
+
+        this.assignee = AggregateReference.to(userId);
+
+        this.status = TicketStatus.IN_PROGRESS;
         this.updated = updated;
     }
 }

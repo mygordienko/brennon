@@ -118,9 +118,11 @@ public class TicketService {
             .map(id -> userProfileService.getUser(id))
             .orElse(null);
 
+        var author = userProfileService.getUser(ticket.getAuthor().getId());
+
         var userProfileMap = Stream.concat(
                 userProfileService.getUsers(replyAuthorsIds).stream(), 
-                Stream.of(userProfileService.getUser(ticket.getAuthor().getId()), assignee)
+                Stream.of(author, assignee)
             )
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(profile -> profile.getId(), profile -> profile, (t, u) -> t));
@@ -153,7 +155,8 @@ public class TicketService {
                 new TicketDetailsView.UserRelation(
                     currentUser.getId().equals(ticket.getAuthor().getId()),
                     currentUser.getId().equals(ticket.getAuthor().getId()),
-                    currentUser.getId().equals(ticket.getAuthor().getId()) || currentUser.getId().equals(ticket.getAssignee().map(ref -> ref.getId()).orElse(null))
+                    currentUser.getId().equals(ticket.getAuthor().getId()) || currentUser.getId().equals(ticket.getAssignee().map(ref -> ref.getId()).orElse(null)),
+                    !currentUser.getId().equals(ticket.getAssignee().map(ref -> ref.getId()).orElse(null))
                 ),
                 replyViews
             );
@@ -248,6 +251,26 @@ public class TicketService {
         }
 
         ticket.closeTicket(currentUser.getId(), updated);
+
+        return ticketStoragePort.saveTicket(ticket);
+    }
+
+    @PreAuthorize("hasAuthority('support:write')")
+    @Transactional
+    public Ticket assignMeTicket(TicketAssignMeCommand command) {
+        var currentUser = userProfileService.getCurrentUser();
+        var updated = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
+
+        var ticket = ticketStoragePort.getTicketById(command.ticketId())
+            // TODO: use AOP
+            .filter(t -> ticketSecurityManager.userCanAssign(currentUser, t))
+            .orElseThrow(() -> MissingTicketException.forTicket(command.ticketId()));
+
+        if (ticket.getVersion() != command.version()) {
+            throw TicketConcurrentModificationException.forTicket(command.ticketId());
+        }
+
+        ticket.assignTo(currentUser.getId(), updated);
 
         return ticketStoragePort.saveTicket(ticket);
     }

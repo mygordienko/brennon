@@ -135,6 +135,7 @@ public class TicketController {
         model.addAttribute("ticket", ticketDto);
         model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
         model.addAttribute("closeForm", new TicketCloseCommandDto(ticket.getVersion()));
+        model.addAttribute("assignMeForm", new TicketAssignMeCommandDto(ticket.getVersion()));
 
         if (hxRequest != null) {
             // this is a HTMX request, serve only fragment
@@ -352,6 +353,33 @@ public class TicketController {
         model.addAttribute("ticket", ticketDto);
         model.addAttribute("closeForm", new TicketCloseCommandDto(ticket.getVersion()));
         model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
+        model.addAttribute("assignMeForm", new TicketAssignMeCommandDto(ticket.getVersion()));
+        
+        var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
+        htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
+        response.setHeader("HX-Trigger-After-Swap", htmxEventHeaderBuilder.toJsonString());
+
+        return "ticket/ticket-details :: page-content-block";
+    }
+
+    @PostMapping("/tickets/{id}/assignme")
+    public String assignMeTicket(@CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr, 
+                              @PathVariable int id,
+                              @RequestHeader(value = "HX-Request", required = false) String hxRequest,
+                              HttpServletResponse response, 
+                              @Validated @ModelAttribute("assignMeForm") TicketAssignMeCommandDto assignMeForm, BindingResult bindingResult, Model model) {
+        var zoneId = ZoneId.of(zoneIdStr);
+        var ticketId = TicketId.of(id);
+
+        ticketService.assignMeTicket(assignMeForm.toCommand(ticketId));
+
+        var ticket = ticketService.getTicket(ticketId);
+        var ticketDto = composeDto(ticket, zoneId);
+
+        model.addAttribute("ticket", ticketDto);
+        model.addAttribute("assignMeForm", new TicketAssignMeCommandDto(ticket.getVersion()));
+        model.addAttribute("closeForm", new TicketCloseCommandDto(ticket.getVersion()));
+        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
         
         var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
         htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
@@ -382,7 +410,8 @@ public class TicketController {
             new TicketDto.UserRelationDto(
                 ticket.getUserRelation().canClose(),
                 ticket.getUserRelation().canEdit(),
-                ticket.getUserRelation().canReply()
+                ticket.getUserRelation().canReply(),
+                ticket.getUserRelation().canAssign()
             ),
             ticket.getReplies().stream()
                 .map(reply -> new TicketReplyDto(

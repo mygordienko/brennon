@@ -74,7 +74,8 @@ public class TicketDetailsView {
     public static record UserRelation(
         boolean canClose,
         boolean canEdit,
-        boolean canReply
+        boolean canReply,
+        boolean canAssign
     ) {
     }
 }
