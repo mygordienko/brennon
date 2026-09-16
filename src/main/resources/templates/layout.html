@@ -46,6 +46,8 @@
                 <a th:replace="~{fragments/sidebar-buttons :: nav-button(link=@{/tickets/create}, title='Create ticket', menuItem='createticket', icon='createticket')}"></a>
                 <a sec:authorize="hasAuthority('support:read')"
                    th:replace="~{fragments/sidebar-buttons :: nav-button(link=@{/tickets/unassigned}, title='Unassigned tickets', menuItem='unassignedtickets', icon='unassignedtickets')}" ></a>
+                <a sec:authorize="hasAuthority('support:read')"
+                   th:replace="~{fragments/sidebar-buttons :: nav-button(link=@{/tickets/assignedtome}, title='Assigned to Me', menuItem='ticketsassignedtome', icon='ticketsassignedtome')}" ></a>
             </nav>
 
             <!-- Logout -->

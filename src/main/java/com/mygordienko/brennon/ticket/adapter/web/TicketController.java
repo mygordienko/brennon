@@ -121,6 +121,46 @@ public class TicketController {
         }
     }
 
+    @GetMapping("/tickets/assignedtome")
+    public String getTicketsAssignedToMe(
+        @CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr,
+        HttpServletResponse response,
+        @RequestHeader(value = "HX-Request", required = false) String hxRequest,
+        @Validated @ModelAttribute("ticketRequestFilter") TicketRequestFilterDto filterDto,
+        BindingResult bindingResult,
+        Model model, @SortDefault(sort = "id", direction = Sort.Direction.DESC) @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        var statuses = Arrays.stream(TicketStatus.values())
+            .map(s -> new TicketStatusDto(s.getCode(), s.getDisplayName()))
+            .toList();
+        
+        if (bindingResult.hasErrors()) {
+            throw new IllegalArgumentException("Wrong filter form input");
+        }
+
+        var filter = filterDto.toDomain();
+
+        var page = ticketService.getTicketsAssignedToMe(filter, pageable);
+        var zoneId = ZoneId.of(zoneIdStr);
+
+        var ticketsDtos = page.getContent().stream()
+        .map(ticket -> composeDto(ticket, zoneId))
+        .toList();
+
+        model.addAttribute("tickets", ticketsDtos);
+        model.addAttribute("ticketRequestFilter", filterDto);
+        model.addAttribute("statuses", statuses);
+        model.addAttribute("page", composeDto(page));
+
+        if (hxRequest != null) {
+            // this is a HTMX request, serve only fragment
+            return "ticket/support-assigned-to-me-ticket-list :: page-content-block";
+        } else {
+            // regular request, serve full template
+            return "ticket/support-assigned-to-me-ticket-list";
+        }
+    }
+
     @GetMapping("/tickets/{id}")
     public String getTicket(
         @CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr,
@@ -196,7 +236,6 @@ public class TicketController {
 
         return "ticket/ticket-details :: ticket-details-display";
     }
-
 
     @GetMapping("/tickets/create")
     public String createTicketForm(Model model) {

@@ -71,7 +71,18 @@ public class TicketService {
     @PreAuthorize("hasAuthority('support:read')")
     @Transactional(readOnly = true)
     public Page<TicketView> getUnassignedTickets(TicketRequestFilter filter, Pageable pageable) {
-        var tickets = ticketStoragePort.getTicketsByAssignee(null, filter, pageable);
+        return getTicketsByAssignee(null, filter, pageable);
+    }
+
+    @PreAuthorize("hasAuthority('support:read')")
+    @Transactional(readOnly = true)
+    public Page<TicketView> getTicketsAssignedToMe(TicketRequestFilter filter, Pageable pageable) {
+        var currentUser = userProfileService.getCurrentUser();
+        return getTicketsByAssignee(currentUser.getId(), filter, pageable);
+    }
+
+    private Page<TicketView> getTicketsByAssignee(BrennonUserId assigneeId, TicketRequestFilter filter, Pageable pageable) {
+        var tickets = ticketStoragePort.getTicketsByAssignee(assigneeId, filter, pageable);
         var userIdSet = this.extractRelevantUserIds(tickets.getContent());
         var userProfileMap = userProfileService.getUsers(userIdSet).stream()
             .collect(Collectors.toMap(profile -> profile.getId(), profile -> profile, (t, u) -> t));
