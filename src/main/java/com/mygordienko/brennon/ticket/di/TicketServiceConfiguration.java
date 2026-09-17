@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 
-import com.mygordienko.brennon.core.auth.BrennonUserPort;
 import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
 import com.mygordienko.brennon.core.common.ClockManager;
 import com.mygordienko.brennon.ticket.TicketSecurityManager;
@@ -20,8 +19,8 @@ public class TicketServiceConfiguration {
     }
 
     @Bean
-    public TicketSecurityManager ticketSecurityManager(BrennonUserPort userPort) {
-        return new TicketSecurityManager(userPort);
+    public TicketSecurityManager ticketSecurityManager(BrennonUserProfileService userProfileService) {
+        return new TicketSecurityManager(userProfileService);
     }
 
     @Bean

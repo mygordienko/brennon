@@ -7,7 +7,7 @@ import java.util.Optional;
 /**
  * Abstraction to load {@link BrennonUserProfile} from storage.
  */
-public interface BrennonUserProfileStoragePort {
+public interface BrennonUserProfilePort {
     Optional<BrennonUserProfile> getById(BrennonUserId userId);
     /**
      * Selects aggregates by provided IDs

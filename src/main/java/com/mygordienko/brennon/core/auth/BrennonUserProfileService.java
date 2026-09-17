@@ -2,17 +2,18 @@ package com.mygordienko.brennon.core.auth;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class BrennonUserProfileService {
-    public BrennonUserProfileService(BrennonUserProfileStoragePort userStoragePort,
-        BrennonUserPort currentUserPort
+    public BrennonUserProfileService(BrennonUserProfilePort userStoragePort,
+        BrennonUserAccountPort userPort
     ) {
         this.userStoragePort = userStoragePort;
-        this.currentUserPort = currentUserPort;
+        this.userPort = userPort;
     }
 
-    private final BrennonUserProfileStoragePort userStoragePort;
-    private final BrennonUserPort currentUserPort;
+    private final BrennonUserProfilePort userStoragePort;
+    private final BrennonUserAccountPort userPort;
 
     public BrennonUserProfile getUser(BrennonUserId userId) {
         return userStoragePort.getById(userId).orElseThrow(() -> MissingUserException.forId(userId));
@@ -23,9 +24,13 @@ public class BrennonUserProfileService {
     }
 
     public BrennonUserProfile getCurrentUser() {
-        var username = currentUserPort.getCurrentUsername()
+        var username = userPort.getCurrentUsername()
         .orElseThrow(() -> new RuntimeException("Missing auth context"));
         return userStoragePort.getByLogin(username)
         .orElseThrow(() -> MissingUserException.forLogin(username));
-    }    
+    }
+    
+    public Optional<BrennonUserAccount> getUserAccount(BrennonUserLogin login) {
+        return userPort.getUserAccount(login);
+    }
 }

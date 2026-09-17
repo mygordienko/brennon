@@ -19,10 +19,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.mygordienko.brennon.core.auth.BrennonUserAccount;
+import com.mygordienko.brennon.core.auth.BrennonUserAccountPort;
 import com.mygordienko.brennon.core.auth.BrennonUserLogin;
-import com.mygordienko.brennon.core.auth.BrennonUserPort;
 
-public class JdbcBrennonUserDetailsStorage implements UserDetailsService, BrennonUserPort {
+public class JdbcBrennonUserDetailsStorage implements UserDetailsService, BrennonUserAccountPort {
     
     public JdbcBrennonUserDetailsStorage(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

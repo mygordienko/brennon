@@ -12,9 +12,9 @@ import org.springframework.data.relational.core.query.Query;
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserLogin;
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
-import com.mygordienko.brennon.core.auth.BrennonUserProfileStoragePort;
+import com.mygordienko.brennon.core.auth.BrennonUserProfilePort;
 
-public class JdbcBrennonUserProfileStorage implements BrennonUserProfileStoragePort {
+public class JdbcBrennonUserProfileStorage implements BrennonUserProfilePort {
     public JdbcBrennonUserProfileStorage(JdbcAggregateTemplate jdbcAggregateTemplate) {
         this.jdbcAggregateTemplate = jdbcAggregateTemplate;
     }
