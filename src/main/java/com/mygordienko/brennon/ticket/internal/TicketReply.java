@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.ticket;
+package com.mygordienko.brennon.ticket.internal;
 
 import java.time.OffsetDateTime;
 
@@ -10,6 +10,8 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
+import com.mygordienko.brennon.ticket.TicketId;
+import com.mygordienko.brennon.ticket.TicketReplyId;
 
 import lombok.Getter;
 import lombok.Setter;

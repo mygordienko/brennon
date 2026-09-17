@@ -4,10 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 
-import com.mygordienko.brennon.core.auth.BrennonUserAccountPort;
-import com.mygordienko.brennon.core.auth.BrennonUserProfilePort;
-import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
 import com.mygordienko.brennon.core.auth.adapter.jdbc.JdbcBrennonUserProfileStorage;
+import com.mygordienko.brennon.core.auth.internal.BrennonUserAccountPort;
+import com.mygordienko.brennon.core.auth.internal.BrennonUserProfilePort;
+import com.mygordienko.brennon.core.auth.internal.BrennonUserProfileService;
 
 @Configuration
 public class CoreServicesConfiguration {

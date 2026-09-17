@@ -5,7 +5,7 @@ This file provides guidance on how to work with code in the Brennon repository.
 ## Project overview
 
 This is a Spring Boot MVC project. Gradle is used as a build system.
-Frontend is implemented with Thymeleaf.
+Frontend is implemented with Thymeleaf and HTMX.
 
 ## Git conventions
 
@@ -13,7 +13,7 @@ Frontend is implemented with Thymeleaf.
 * Branches MUST be named as follows:
     - For new features: `feature/feature-name-with-hyphens`
     - For fixes: `fix/feature-name-with-hyphens`
-    - For other tasks: `chore/feature-name-with-hyphens`
+    - For other tasks: `task/feature-name-with-hyphens`
 
 NO changes allowed in `main` branch.
 DO NOT push.
@@ -23,7 +23,7 @@ DO NOT push.
 When asked to implement a new feature or change existing code stick with the following
 workflow:
 
-Understand → Research → Plan → Branch → Implement → Test → Commit → Review
+Understand → Research → Plan → Branch → Implement → Test → Review → Commit
 
 Ask for confirmation and permission to proceed AFTER EACH step. DO NOT proceed without permission.
 
@@ -47,16 +47,9 @@ Read the relevant docs in `.dev/agent_docs` folder (if available) to get project
 
 Present the plan to the user before implementing. Consider side effects on other parts of the system.
 
-
 ### 4. Branch
 
 NO changes allowed in `main` branch. Create a new branch before introducing any changes.
-
-Branches MUST be named as follows:
-    - For new features: `feature/feature-name-with-hyphens`
-    - For fixes: `fix/feature-name-with-hyphens`
-    - For other tasks: `chore/feature-name-with-hyphens`
-
 
 ### 5. Implement
 

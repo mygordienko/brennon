@@ -10,6 +10,8 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
+import com.mygordienko.brennon.ticket.internal.Ticket;
+import com.mygordienko.brennon.ticket.internal.TicketReply;
 
 public class TicketTest {
     @Test

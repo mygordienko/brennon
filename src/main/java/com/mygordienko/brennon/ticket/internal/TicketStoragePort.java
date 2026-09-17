@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.ticket;
+package com.mygordienko.brennon.ticket.internal;
 
 import java.util.Optional;
 
@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
+import com.mygordienko.brennon.ticket.TicketId;
+import com.mygordienko.brennon.ticket.TicketRequestFilter;
 
 public interface TicketStoragePort {
     Page<Ticket> getTicketsByAuthor(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);

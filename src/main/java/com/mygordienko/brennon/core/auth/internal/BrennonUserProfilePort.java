@@ -1,8 +1,12 @@
-package com.mygordienko.brennon.core.auth;
+package com.mygordienko.brennon.core.auth.internal;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
+import com.mygordienko.brennon.core.auth.BrennonUserId;
+import com.mygordienko.brennon.core.auth.BrennonUserLogin;
+import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 
 /**
  * Abstraction to load {@link BrennonUserProfile} from storage.

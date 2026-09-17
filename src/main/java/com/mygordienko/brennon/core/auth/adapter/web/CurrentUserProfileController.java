@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
+import com.mygordienko.brennon.core.auth.internal.BrennonUserProfileService;
 
 @Controller
 public class CurrentUserProfileController {

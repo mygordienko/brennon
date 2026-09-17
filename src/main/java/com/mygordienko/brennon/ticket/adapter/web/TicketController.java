@@ -27,9 +27,9 @@ import com.mygordienko.brennon.ticket.TicketCreateCommand;
 import com.mygordienko.brennon.ticket.TicketDetailsView;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
-import com.mygordienko.brennon.ticket.TicketService;
 import com.mygordienko.brennon.ticket.TicketStatus;
 import com.mygordienko.brennon.ticket.TicketView;
+import com.mygordienko.brennon.ticket.internal.TicketService;
 
 import jakarta.servlet.http.HttpServletResponse;
 

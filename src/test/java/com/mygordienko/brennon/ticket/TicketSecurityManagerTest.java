@@ -10,9 +10,11 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 
 import com.mygordienko.brennon.core.auth.BrennonUserAccount;
 import com.mygordienko.brennon.core.auth.BrennonUserId;
+import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
 import com.mygordienko.brennon.core.auth.BrennonUserLogin;
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
-import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
+import com.mygordienko.brennon.ticket.internal.Ticket;
+import com.mygordienko.brennon.ticket.internal.TicketSecurityManager;
 
 public class TicketSecurityManagerTest {
     @Test
@@ -32,7 +34,7 @@ public class TicketSecurityManagerTest {
         var userAccount = Mockito.mock(BrennonUserAccount.class);
         Mockito.when(userAccount.isSupport()).thenReturn(false);
 
-        var userPort = Mockito.mock(BrennonUserProfileService.class);
+        var userPort = Mockito.mock(BrennonUserInfoApi.class);
         Mockito.when(userPort.getUserAccount(userLogin)).thenReturn(Optional.of(userAccount));
 
         var ticketSecurity =  new TicketSecurityManager(userPort);
@@ -58,7 +60,7 @@ public class TicketSecurityManagerTest {
         var userAccount = Mockito.mock(BrennonUserAccount.class);
         Mockito.when(userAccount.isSupport()).thenReturn(true);
 
-        var userPort = Mockito.mock(BrennonUserProfileService.class);
+        var userPort = Mockito.mock(BrennonUserInfoApi.class);
         Mockito.when(userPort.getUserAccount(userLogin)).thenReturn(Optional.of(userAccount));
 
         var ticketSecurity =  new TicketSecurityManager(userPort);

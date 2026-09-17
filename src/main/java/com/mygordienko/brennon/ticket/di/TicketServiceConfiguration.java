@@ -4,12 +4,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 
-import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
+import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
+import com.mygordienko.brennon.core.auth.internal.BrennonUserProfileService;
 import com.mygordienko.brennon.core.common.ClockManager;
-import com.mygordienko.brennon.ticket.TicketSecurityManager;
-import com.mygordienko.brennon.ticket.TicketService;
-import com.mygordienko.brennon.ticket.TicketStoragePort;
 import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
+import com.mygordienko.brennon.ticket.internal.TicketSecurityManager;
+import com.mygordienko.brennon.ticket.internal.TicketService;
+import com.mygordienko.brennon.ticket.internal.TicketStoragePort;
 
 @Configuration
 public class TicketServiceConfiguration {
@@ -19,7 +20,7 @@ public class TicketServiceConfiguration {
     }
 
     @Bean
-    public TicketSecurityManager ticketSecurityManager(BrennonUserProfileService userProfileService) {
+    public TicketSecurityManager ticketSecurityManager(BrennonUserInfoApi userProfileService) {
         return new TicketSecurityManager(userProfileService);
     }
 

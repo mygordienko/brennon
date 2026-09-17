@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.ticket;
+package com.mygordienko.brennon.ticket.internal;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -16,12 +16,26 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.core.auth.BrennonUserProfileService;
+import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
 import com.mygordienko.brennon.core.common.ClockManager;
+import com.mygordienko.brennon.ticket.MissingTicketException;
+import com.mygordienko.brennon.ticket.TicketAssignMeCommand;
+import com.mygordienko.brennon.ticket.TicketCloseCommand;
+import com.mygordienko.brennon.ticket.TicketConcurrentModificationException;
+import com.mygordienko.brennon.ticket.TicketCreateCommand;
+import com.mygordienko.brennon.ticket.TicketDetailsView;
+import com.mygordienko.brennon.ticket.TicketEditCommand;
+import com.mygordienko.brennon.ticket.TicketEditReplyCommand;
+import com.mygordienko.brennon.ticket.TicketId;
+import com.mygordienko.brennon.ticket.TicketReplyCommand;
+import com.mygordienko.brennon.ticket.TicketReplyView;
+import com.mygordienko.brennon.ticket.TicketRequestFilter;
+import com.mygordienko.brennon.ticket.TicketStatus;
+import com.mygordienko.brennon.ticket.TicketView;
 
 public class TicketService {
     public TicketService(
-        BrennonUserProfileService userProfileService, 
+        BrennonUserInfoApi userProfileService, 
         TicketStoragePort ticketStoragePort,
         TicketSecurityManager ticketSecurityManager,
         ClockManager clockManager) {
@@ -31,7 +45,7 @@ public class TicketService {
         this.clockManager = clockManager;
     }
 
-    private final BrennonUserProfileService userProfileService;
+    private final BrennonUserInfoApi userProfileService;
     private final TicketStoragePort ticketStoragePort;
     private final TicketSecurityManager ticketSecurityManager;
     private final ClockManager clockManager;

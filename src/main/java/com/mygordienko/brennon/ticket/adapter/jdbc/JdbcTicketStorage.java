@@ -15,10 +15,10 @@ import org.springframework.data.relational.core.query.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.ticket.Ticket;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketRequestFilter;
-import com.mygordienko.brennon.ticket.TicketStoragePort;
+import com.mygordienko.brennon.ticket.internal.Ticket;
+import com.mygordienko.brennon.ticket.internal.TicketStoragePort;
 
 public class JdbcTicketStorage implements TicketStoragePort {
 
