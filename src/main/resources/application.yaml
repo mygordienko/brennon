@@ -30,11 +30,18 @@ management:
       probes:
         enabled: true
   metrics:
+    tags:
+      application: ${spring.application.name}
     export:
       logging:
+        enabled: false
+        step: "10s"
+  otlp:
+    metrics:
+      export:
         enabled: true
-        step: "5s"
-
+        url: "http://localhost:4318/v1/metrics"
+        step: "15s"
 
 logging:
   level:

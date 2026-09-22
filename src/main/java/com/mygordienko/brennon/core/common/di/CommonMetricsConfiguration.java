@@ -12,10 +12,11 @@ import io.micrometer.core.instrument.logging.LoggingRegistryConfig;
 public class CommonMetricsConfiguration {
     /**
      * Default MeterRegistry. Logs all metrics.
+     * NOTE: prefix "logging" is handled by LoggingMeterRegistry internally
      */
     @Bean
     public LoggingMeterRegistry loggingMeterRegistry(Environment env) {
-        LoggingRegistryConfig config = key -> env.getProperty("management.metrics.export.logging." + key);
+        LoggingRegistryConfig config = key -> env.getProperty("management.metrics.export." + key);
         return new LoggingMeterRegistry(config, Clock.SYSTEM);
     }
 }
