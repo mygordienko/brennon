@@ -10,6 +10,10 @@ import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketRequestFilter;
 
 public interface TicketStoragePort {
+    /**
+     * NOTE: ID prefetch is needed to have `TicketCreatedEvent(ticketId)` domain event.
+     */
+    TicketId getNextTicketId();
     Page<Ticket> getTicketsByAuthor(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);
     Page<Ticket> getTicketsByAssignee(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);
     Optional<Ticket> getTicketById(TicketId ticketId);

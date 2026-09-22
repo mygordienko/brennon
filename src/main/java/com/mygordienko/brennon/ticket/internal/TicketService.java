@@ -193,9 +193,14 @@ public class TicketService {
         var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
         var currentUser = userProfileService.getCurrentUser();
         
-        var ticket = Ticket.createNew(TicketStatus.NEW, currentUser.getId(), null, command.subject(), command.text(), created, created);
+        var ticketId = ticketStoragePort.getNextTicketId();
 
-        return ticketStoragePort.saveTicket(ticket);
+        var ticket = Ticket.createNew(ticketId, TicketStatus.NEW, currentUser.getId(), null, command.subject(), command.text(), created, created);
+
+        // NOTE: do not use instance returned by save method, fetch a new one to have 'new' property reset.
+        ticketStoragePort.saveTicket(ticket);
+
+        return ticketStoragePort.getTicketById(ticket.getId()).orElseThrow(() -> MissingTicketException.forTicket(ticketId));
     }
 
 

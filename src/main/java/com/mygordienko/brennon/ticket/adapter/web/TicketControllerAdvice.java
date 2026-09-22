@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  *      - JSON for HTMX
  */
 @Slf4j
-@ControllerAdvice
+@ControllerAdvice(basePackages = {"com.mygordienko.brennon.ticket.adapter.web"})
 public class TicketControllerAdvice {
     public TicketControllerAdvice(MessageSource messageSource) {
         this.messageSource = messageSource;
@@ -91,12 +91,5 @@ public class TicketControllerAdvice {
         }
 
         return new ModelAndView("core/common/400", HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleOtherErrors(Exception ex) {
-        log.error("Unexpected error", ex);
-        return "core/common/500";
     }
 }

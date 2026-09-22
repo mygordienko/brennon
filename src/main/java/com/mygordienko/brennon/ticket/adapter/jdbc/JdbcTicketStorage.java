@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
@@ -20,15 +21,44 @@ import com.mygordienko.brennon.ticket.TicketRequestFilter;
 import com.mygordienko.brennon.ticket.internal.Ticket;
 import com.mygordienko.brennon.ticket.internal.TicketStoragePort;
 
+
+/**
+ * NOTE: JdbcAggregateTemplate does not process @DomainEvents.
+ *   Moreover, @DomainEvents-related methods are protected and are not accessible for this class.
+ *   In Kotlin we could define an extension method for the Ticket class here and use it to publish
+ *   domjain events.
+ *   Use Spring's CrudRepository to publish events after save automatically.
+ */
 public class JdbcTicketStorage implements TicketStoragePort {
 
-    public JdbcTicketStorage(JdbcAggregateTemplate jdbcAggregateTemplate) {
+    public JdbcTicketStorage(
+        JdbcAggregateTemplate jdbcAggregateTemplate, 
+        JdbcClient jdbcClient,
+        TicketCrudRepository springRepository) {
         this.jdbcAggregateTemplate = jdbcAggregateTemplate;
+        this.jdbcClient = jdbcClient;
+        this.springRepository = springRepository;
     }
 
     private static final Set<String> ALLOWED_SORT_COLUMNS = Set.of("id", "created", "updated");
 
     private final JdbcAggregateTemplate jdbcAggregateTemplate;
+    private final JdbcClient jdbcClient;
+    private final TicketCrudRepository springRepository;
+
+    @Override
+    public TicketId getNextTicketId() {
+        final String sql = """
+                SELECT nextval('tickets_id_seq');
+                """;
+
+        final long nextVal = jdbcClient
+            .sql(sql)
+            .query(Long.class)
+            .single();
+
+        return TicketId.of(nextVal);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -116,9 +146,9 @@ public class JdbcTicketStorage implements TicketStoragePort {
     @Override
     @Transactional
     public Ticket saveTicket(Ticket ticket) {
-        return jdbcAggregateTemplate.save(ticket);
+        // NOTE: use Spring's repository to fire domain events on save
+        return springRepository.save(ticket);
     }
-    
 
     private Pageable processPageable(Pageable pageable) {
         var direction = resolveDiraction(pageable);

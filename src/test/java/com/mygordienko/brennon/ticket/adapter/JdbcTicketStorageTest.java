@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -32,6 +33,7 @@ import com.mygordienko.brennon.ticket.TicketReplyId;
 import com.mygordienko.brennon.ticket.TicketRequestFilter;
 import com.mygordienko.brennon.ticket.TicketStatus;
 import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
+import com.mygordienko.brennon.ticket.adapter.jdbc.TicketCrudRepository;
 import com.mygordienko.brennon.ticket.di.TicketDataJdbcConfiguration;
 
 @DataJdbcTest
@@ -44,6 +46,12 @@ public class JdbcTicketStorageTest {
 
     @Autowired
     private JdbcAggregateTemplate jdbcAggregateTemplate;
+
+    @Autowired
+    private TicketCrudRepository ticketCrudRepository;
+
+    @Autowired
+    private JdbcClient jdbcClient;
 
     @AfterEach
     public void clean() {
@@ -73,7 +81,7 @@ public class JdbcTicketStorageTest {
                     (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate, jdbcClient, ticketCrudRepository);
         var pageable = PageRequest.of(0, 3);
         
         var filter = new TicketRequestFilter(null, null, null);
@@ -103,7 +111,7 @@ public class JdbcTicketStorageTest {
                     (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate, jdbcClient, ticketCrudRepository);
         var pageable = PageRequest.of(0,3, Direction.ASC, "created");
         
         var filter = new TicketRequestFilter(null, null, null);
@@ -132,7 +140,7 @@ public class JdbcTicketStorageTest {
                     (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate, jdbcClient, ticketCrudRepository);
 
         var filter = new TicketRequestFilter(null, null, null);
         
@@ -182,7 +190,7 @@ public class JdbcTicketStorageTest {
                     (4, '2', '2', 'reply 1 from 2 on ticket 2', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate, jdbcClient, ticketCrudRepository);
 
         var filter = new TicketRequestFilter(null, null, null);
         
@@ -226,7 +234,7 @@ public class JdbcTicketStorageTest {
                     (4, '2', 2, 'reply 1 from 2 on ticket 2', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate, jdbcClient, ticketCrudRepository);
         
         var ticket = storage.getTicketById(TicketId.of(1)).get();
 
@@ -259,7 +267,7 @@ public class JdbcTicketStorageTest {
                     (4, '2', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate, jdbcClient, ticketCrudRepository);
         var pageable = PageRequest.of(0, 3);
         
         var filter = new TicketRequestFilter(TicketId.of(3), null, null);
@@ -287,7 +295,7 @@ public class JdbcTicketStorageTest {
                     (4, '1', 'Printer problem', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate, jdbcClient, ticketCrudRepository);
         var pageable = PageRequest.of(0, 3, Sort.by(Direction.ASC, "id"));
         
         var filter = new TicketRequestFilter(null, TicketStatus.IN_PROGRESS, null);
@@ -315,7 +323,7 @@ public class JdbcTicketStorageTest {
                     (4, '1', 'Printer got broken', 'Printer got broken', '0020', '2026-08-15 15:00:00+03', '2026-08-15 16:00:00+03');
                 """, parameterSource);
 
-        var storage = new JdbcTicketStorage(jdbcAggregateTemplate);
+        var storage = new JdbcTicketStorage(jdbcAggregateTemplate, jdbcClient, ticketCrudRepository);
         var pageable = PageRequest.of(0, 3, Sort.by(Direction.ASC, "id"));
         
         var filter = new TicketRequestFilter(null, null, "internet");

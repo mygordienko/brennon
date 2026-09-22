@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.data.domain.Persistable;
@@ -20,6 +21,8 @@ import org.springframework.data.relational.core.mapping.Table;
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 import com.mygordienko.brennon.ticket.MissingTicketReplyException;
+import com.mygordienko.brennon.ticket.TicketClosedEvent;
+import com.mygordienko.brennon.ticket.TicketCreatedEvent;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
 import com.mygordienko.brennon.ticket.TicketStatus;
@@ -57,6 +60,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     }
 
     public static Ticket createNew(
+        TicketId ticketId,
         TicketStatus status, 
         BrennonUserId author,
         BrennonUserId assignee,
@@ -66,8 +70,13 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         OffsetDateTime updated) {
             var authorRef = AggregateReference.<BrennonUserProfile, BrennonUserId>to(author);
             var assigneeRef = (assignee == null) ? null : AggregateReference.<BrennonUserProfile, BrennonUserId>to(assignee);
-            return new Ticket(null, null, status, authorRef, assigneeRef, subject, text,
+            Ticket ticket = new Ticket(ticketId, null, status, authorRef, assigneeRef, subject, text,
             created, updated, new HashSet<>());
+
+            ticket.explicitNew = true;
+            ticket.registerEvent(new TicketCreatedEvent(ticketId, created));
+
+            return ticket;
     }
 
     @Id
@@ -112,9 +121,15 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             .toList();
     }
 
+    /**
+     * Explicit additional flag to mark entityt as a new one. Used when explicit ID is provided.
+     */
+    @Transient
+    private boolean explicitNew;
+    
     @Override
     public boolean isNew() {
-        return this.id == null;
+        return this.id == null || explicitNew;
     }
 
     public void addReply(BrennonUserId userId, String text, OffsetDateTime created) {
@@ -177,6 +192,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
 
         this.status = TicketStatus.CLOSED;
         this.updated = updated;
+        this.registerEvent(new TicketClosedEvent(id, created, updated));
     }
 
     public void assignTo(BrennonUserId userId, OffsetDateTime updated) {
