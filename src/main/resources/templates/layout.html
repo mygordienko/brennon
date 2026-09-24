@@ -12,7 +12,6 @@
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <script th:src="@{/js/htmx.min.js}"></script>
     <style>
-        /* Custom scrollbar to match the screenshot's dark scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1a1a1a; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
@@ -24,11 +23,11 @@
         document.cookie = "BRENNON_CLIENT_TIMEZONE=" + clientTimeZone + "; path=/; max-age=31536000";
     </script>
 </head>
-<body class="bg-[#111111] text-white h-screen overflow-hidden flex">
+<body class="bg-(--color-brand-bg) text-white h-screen overflow-hidden flex">
 
     <!-- Sidebar Fragment -->
     <th:block>
-        <aside class="w-72 border-r border-[#333333] flex flex-col h-full p-6 bg-[#111111] shrink-0 relative">
+        <aside class="w-72 border-r border-[#333333] flex flex-col h-full p-6 bg-(--color-brand-bg) shrink-0 relative">
             <!-- Top Right Menu Icon -->
             <div class="absolute top-6 right-6 cursor-pointer">
                 <svg class="w-6 h-6 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +64,7 @@
     </th:block>
 
     <!-- Main Content Wrapper Fragment -->
-    <main class="flex-1 h-full overflow-y-auto p-10 bg-[#111111] relative">
+    <main class="flex-1 h-full overflow-y-auto p-10 bg-(--color-brand-bg) relative">
         <th:block layout:fragment="content"></th:block>
     </main>
     <th:block layout:fragment="script-content"> <!--.-->
