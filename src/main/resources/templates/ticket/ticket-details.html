@@ -236,13 +236,6 @@
                                 class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
                             Add message
                         </button>
-                        <!-- NOTE: Thymeleaf does not allow direct dynamic evaluation of 'onclick' -->
-                        <button type="button" 
-                                th:if="${actualMode == 'add'}"
-                                onclick="window.history.back()"
-                                class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
-                            Cancel
-                        </button>
                         <button type="button"
                                 th:if="${actualMode == 'edit'}"
                                 th:hx-get="@{/tickets/{id}(id=${ticket.id})}"

@@ -6,6 +6,8 @@ Helpdesk platform
 
 <img src="docs/ui_ticket_details.png" width="400" alt="ticket_details">
 
+<img src="docs/ui_ticket_details_2.png" width="400" alt="ticket_details_2">
+
 <img src="docs/ui_ticket_list.png" width="400" alt="ticket_list">
 
 ## Project configuration
