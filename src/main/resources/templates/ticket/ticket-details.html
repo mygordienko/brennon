@@ -27,6 +27,12 @@
             <!-- Header Section -->
             <header class="flex justify-end items-center mb-4 border-b border-gray-700 pb-4 relative flex-shrink-0 gap-3">
                 <!-- Assign Me Ticket Button -->
+                <button type="button" 
+                        onclick="window.history.back()"
+                        class="mr-auto bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1 px-4 rounded shadow-sm transition-colors text-sm">
+                    Back
+                </button>
+                
                 <th:block th:unless="${(ticket.statusCode() == T(com.mygordienko.brennon.ticket.TicketStatus).CLOSED.getCode()) || (!ticket.currentUserRelation().canAssign())}"
                           sec:authorize="hasAuthority('support:write')">
                     <form 
