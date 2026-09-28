@@ -2,8 +2,8 @@
     
     <a th:fragment="nav-button(link, title, menuItem, icon)"
     th:href="${link}"
-    class="flex items-center px-4 py-3 rounded-lg border border-[#333333] hover:bg-[#222222] transition-colors"
-    th:classappend="${activeMenuItem == menuItem}? 'bg-[#3b82f6] text-white font-medium shadow-lg shadow-blue-900/50' : 'border border-[#333333] hover:bg-[#222222] transition-colors'">
+    class="flex items-center px-4 py-3 rounded-lg border border-(--color-control-border) hover:bg-[#222222] transition-colors"
+    th:classappend="${activeMenuItem == menuItem}? 'bg-(--color-button-regular) text-(--color-content-text-main) font-medium shadow-lg shadow-blue-900/50' : 'border border-(--color-control-border) hover:bg-[#222222] transition-colors'">
         <svg th:replace="~{${icon}}"></svg>
         [[${title}]]
     </a>

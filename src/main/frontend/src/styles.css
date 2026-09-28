@@ -7,6 +7,19 @@
     /* Define custom colors as CSS variables */
     --color-brand-bg: #1a1a1a;
     --color-brand-pink: #ff9199;
-    --color-brand-blue: #1d9bf0;
-    --color-brand-border: #e5e7eb;
+    --color-brand-blue: #3B82F6;
+
+    --color-control-border: #4b5563;
+    --color-control-border-focus: var(--color-brand-blue);
+
+    --color-content-text-main: #FFFFFF;
+    --color-content-text-secondary: #E5E7EB;
+    --color-label-text-main: #9CA3AF;
+    --color-validation-text: #F87171;
+
+    --color-button-regular: var(--color-brand-blue);
+    --color-button-regular-hover: #2563eb;
+
+    --color-button-important: #b91c1c;
+    --color-button-important-hover: #991b1b;
 }

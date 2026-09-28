@@ -18,11 +18,11 @@
                            inputmode="numeric" pattern="[1-9][0-9]*"
                            th:field="*{id}"  
                            placeholder="Filter by ID"
-                           class="border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6] w-40">
+                           class="border border-(--color-control-border) rounded px-3 py-2 text-sm text-(--color-label-text-main) focus:outline-none focus:border-(--color-control-border-focus) w-40">
 
                     <select id="ticket-status-filter"
                             th:field="*{status}"
-                            class="border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6] w-40 appearance-none">
+                            class="border border-(--color-control-border) rounded px-3 py-2 text-sm text-(--color-label-text-main) focus:outline-none focus:border-(--color-control-border-focus) w-40 appearance-none">
                         <option value="">All</option>
                         <option th:each="status : ${statuses}" th:text="${status.name}" th:value="${status.code}"
                             th:selected="${status.code == ticketRequestFilter.status}">
@@ -32,13 +32,13 @@
                     <input type="text"
                            th:field="*{subject}" 
                            placeholder="Filter by subject"
-                           class="flex-1 border border-[#333333] rounded px-3 py-2 text-sm text-gray-400 focus:outline-none focus:border-[#3b82f6]">
+                           class="flex-1 border border-(--color-control-border) rounded px-3 py-2 text-sm text-(--color-label-text-main) focus:outline-none focus:border-(--color-control-border-focus)">
                 </form>
             </div>
 
             <!-- Table Header - fixed -->
             <div
-                class="grid grid-cols-12 gap-4 text-[#3b82f6] pb-3 border-b border-[#333333] text-sm font-medium mb-2 flex-shrink-0">
+                class="grid grid-cols-12 gap-4 text-(--color-brand-blue) pb-3 border-b border-(--color-control-border) text-sm font-medium mb-2 flex-shrink-0">
                 <button
                     th:with="isCurrent=${page.order.property == 'id'}, nextDir=${isCurrent && page.order.direction == 'ASC' ? 'DESC' : 'ASC'}"
                     th:hx-get="@{{p}(p=${path}, sort='id' + ',' + ${nextDir}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
@@ -69,32 +69,32 @@
                         class="grid grid-cols-12 gap-4 items-center hover:bg-[#1a1a1a] p-2 rounded transition-colors cursor-pointer">
                         <div th:text="|#${ticket.id()}|"
                             th:onclick="|location.href='@{/tickets/{id}(id=${ticket.id()})}'|"
-                            class="col-span-2 text-[#3b82f6] font-bold">#10302</div>
+                            class="col-span-2 text-(--color-brand-blue) font-bold">#10302</div>
                         <div th:text="${ticket.status()}" class="col-span-2">open</div>
                         <div th:text="${ticket.subject()}" class="col-span-4">Service unavailable, request for refund
                         </div>
                         <div th:text="${#temporals.format(ticket.created(), 'dd/MMM/yyyy HH:mm')}"
-                            class="col-span-2 text-gray-400 text-sm">2026-04-01 22:01</div>
+                            class="col-span-2 text-(--color-label-text-main) text-sm">2026-04-01 22:01</div>
                         <div th:text="${#temporals.format(ticket.updated(), 'dd/MMM/yyyy HH:mm')}"
-                            class="col-span-2 text-gray-400 text-sm">2026-04-01 22:01</div>
+                            class="col-span-2 text-(--color-label-text-main) text-sm">2026-04-01 22:01</div>
                     </div>
                 </div>
             </div>
 
             <!-- Pagination - pushed to bottom with mt-auto -->
             <div class="mt-auto flex justify-center pt-6 border-t border-[#222222] flex-shrink-0">
-                <div class="flex border border-[#333333] rounded overflow-hidden">
+                <div class="flex border border-(--color-control-border) rounded overflow-hidden">
                     <!-- First page -->
                     <button
                         th:hx-get="@{{p}(p=${path}, page=0, sort=${page.order.property} + ',' + ${page.order.direction}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                         hx-target="#page-content" hx-swap="outerHTML" hx-trigger="click" hx-push-url="true"
                         th:if="${page.currentPage gt 0}"
-                        class="px-4 py-2 hover:bg-[#222222] text-white border-r border-[#333333]"
+                        class="px-4 py-2 hover:bg-[#222222] text-(--color-content-text-main) border-r border-(--color-control-border)"
                         title="First page">
                         &lt;&lt;
                     </button>
                     <th:block th:unless="${page.currentPage gt 0}">
-                        <span class="px-4 py-2 text-gray-600 border-r border-[#333333]">&lt;&lt;</span>
+                        <span class="px-4 py-2 text-gray-600 border-r border-(--color-control-border)">&lt;&lt;</span>
                     </th:block>
 
                     <!-- Previous page -->
@@ -102,16 +102,16 @@
                         th:hx-get="@{{p}(p=${path}, page=${page.currentPage - 1}, sort=${page.order.property} + ',' + ${page.order.direction}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                         hx-target="#page-content" hx-swap="outerHTML" hx-trigger="click" hx-push-url="true"
                         th:if="${page.currentPage gt 0}"
-                        class="px-4 py-2 hover:bg-[#222222] text-white border-r border-[#333333]"
+                        class="px-4 py-2 hover:bg-[#222222] text-(--color-content-text-main) border-r border-(--color-control-border)"
                         title="Previous page">
                         &lt;
                     </button>
                     <th:block th:unless="${page.currentPage gt 0}">
-                        <span class="px-4 py-2 text-gray-600 border-r border-[#333333]">&lt;</span>
+                        <span class="px-4 py-2 text-gray-600 border-r border-(--color-control-border)">&lt;</span>
                     </th:block>
 
                     <!-- Current page info -->
-                    <span class="px-4 py-2 text-gray-400 border-r border-[#333333]">
+                    <span class="px-4 py-2 text-(--color-label-text-main) border-r border-(--color-control-border)">
                         [[${page.currentPage}+1]]/[[${page.totalPages}]]
                     </span>
 
@@ -120,12 +120,12 @@
                         th:hx-get="@{{p}(p=${path}, page=${page.currentPage + 1}, sort=${page.order.property} + ',' + ${page.order.direction}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                         hx-target="#page-content" hx-swap="outerHTML" hx-trigger="click" hx-push-url="true"
                         th:if="${page.currentPage lt page.totalPages - 1}"
-                        class="px-4 py-2 hover:bg-[#222222] text-white border-r border-[#333333]"
+                        class="px-4 py-2 hover:bg-[#222222] text-(--color-content-text-main) border-r border-(--color-control-border)"
                         title="Next page">
                         &gt;
                     </button>
                     <th:block th:unless="${page.currentPage lt page.totalPages - 1}">
-                        <span class="px-4 py-2 text-gray-600 border-r border-[#333333]">></span>
+                        <span class="px-4 py-2 text-gray-600 border-r border-(--color-control-border)">></span>
                     </th:block>
 
                     <!-- Last page -->
@@ -133,12 +133,12 @@
                         th:hx-get="@{{p}(p=${path}, page=${page.totalPages - 1}, sort=${page.order.property} + ',' + ${page.order.direction}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                         hx-target="#page-content" hx-swap="outerHTML" hx-trigger="click" hx-push-url="true"
                         th:if="${page.currentPage lt page.totalPages - 1}"
-                        class="px-4 py-2 hover:bg-[#222222] text-white border-r border-[#333333]" 
+                        class="px-4 py-2 hover:bg-[#222222] text-(--color-content-text-main) border-r border-(--color-control-border)" 
                         title="Last page">
                         &gt;&gt;
                     </button>
                     <th:block th:unless="${page.currentPage lt page.totalPages - 1}">
-                        <span class="px-4 py-2 text-gray-600 border-r border-[#333333]">&gt;&gt;</span>
+                        <span class="px-4 py-2 text-gray-600 border-r border-(--color-control-border)">&gt;&gt;</span>
                     </th:block>
                 </div>
             </div>

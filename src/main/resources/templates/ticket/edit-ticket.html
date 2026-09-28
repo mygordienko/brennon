@@ -11,7 +11,7 @@
     <main class="flex-1 flex flex-col p-6 md:p-10 overflow-hidden relative" id= "page-content" th:fragment="page-content-block">
         <th:block th:fragment="edit-details-form">
             <!-- Page Title -->
-            <h1 class="text-2xl font-bold text-white mb-6">Edit ticket</h1>
+            <h1 class="text-2xl font-bold text-(--color-content-text-main) mb-6">Edit ticket</h1>
 
             <div id="error-parent"></div>
             <template th:replace="~{fragments/error-containers :: htmx-request-error-message}"></template>
@@ -29,32 +29,32 @@
 
                 <!-- Subject Input -->
                 <div class="flex flex-col space-y-2">
-                    <label for="subject" class="text-sm font-medium text-gray-400">Subject</label>
+                    <label for="subject" class="text-sm font-medium text-(--color-label-text-main)">Subject</label>
                     <input 
                         type="text" 
                         id="subject" 
                         th:field="*{subject}" 
-                        class="w-full rounded-md bg-transparent border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                        class="w-full rounded-md bg-transparent border border-(--color-control-border) text-(--color-content-text-main) px-4 py-2.5 text-sm focus:outline-none focus:border-(--color-control-border-focus) focus:ring-1 focus:ring-blue-500 transition-colors"
                     />
-                    <div class="text-red-400 text-sm font-medium" th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}">Validation error</div>
+                    <div class="text-(--color-validation-text) text-sm font-medium" th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}">Validation error</div>
                 </div>
 
                 <!-- Message Textarea -->
                 <div class="flex flex-col flex-grow">
-                    <label for="message" class="text-sm font-medium text-gray-400">Message</label>
+                    <label for="message" class="text-sm font-medium text-(--color-label-text-main)">Message</label>
                     <textarea 
                         id="message" 
                         th:field="*{text}" 
-                        class="w-full rounded-md bg-transparent border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none h-64 md:h-96"
+                        class="w-full rounded-md bg-transparent border border-(--color-control-border) text-(--color-content-text-main) px-4 py-2.5 text-sm focus:outline-none focus:border-(--color-control-border-focus) focus:ring-1 focus:ring-blue-500 transition-colors resize-none h-64 md:h-96"
                     ></textarea>
-                    <div class="text-red-400 text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
+                    <div class="text-(--color-validation-text) text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
                 </div>
 
                 <!-- Footer Actions -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
 
                     <!-- Validation Error Message -->
-                    <div th:if="${#fields.hasErrors('*')}" class="text-red-400 text-sm font-medium">
+                    <div th:if="${#fields.hasErrors('*')}" class="text-(--color-validation-text) text-sm font-medium">
                         <div th:if="${#fields.hasErrors('global')}">Validation error</div>
                     </div>
                     <!-- Empty placeholder to maintain flex spacing if no error -->
@@ -63,11 +63,11 @@
                     <!-- Buttons -->
                     <div class="flex space-x-4">
                         <button type="submit" 
-                                class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1 px-4 rounded text-sm transition-colors">
+                                class="bg-(--color-button-regular) hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) font-medium py-1 px-4 rounded text-sm transition-colors">
                             Save
                         </button>
                         <button type="button" 
-                                class="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium py-1 px-4 rounded text-sm transition-colors"
+                                class="bg-(--color-button-regular) hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) font-medium py-1 px-4 rounded text-sm transition-colors"
                                 th:hx-get="@{/tickets/{id}(id=${ticket.id})}"
                                 hx-target="#page-content"
                                 hx-swap="outerHTML">

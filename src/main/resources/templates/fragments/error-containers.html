@@ -11,7 +11,7 @@
         <th:block th:replace="~{ :: error-message(#{htmx.error.timeout})}"></th:block>
     </template>
 
-    <div th:fragment="error-message(message)" class="flex border bg-[#b91c1c] text-white rounded-lg h-10 p-1.5" role="alert">
+    <div th:fragment="error-message(message)" class="flex border bg-(--color-button-important) text-(--color-content-text-main) rounded-lg h-10 p-1.5" role="alert">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
             <path d="M7.938 2.016A.13.13 0 0 1
                     8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1
@@ -30,7 +30,7 @@
         <div id="error-message" class="ms-2" th:text="${message}">
             There was an error during the update.
         </div>
-        <button class="me-2 ml-auto px-2 hover:bg-[#991b1b]" onclick='document.getElementById("error-parent").replaceChildren()'>x</button>
+        <button class="me-2 ml-auto px-2 hover:bg-(--color-button-important-hover)" onclick='document.getElementById("error-parent").replaceChildren()'>x</button>
     </div>
 
 </body>

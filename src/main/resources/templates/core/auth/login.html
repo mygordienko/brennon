@@ -14,7 +14,7 @@
         }
     </style>
 </head>
-<body class="bg-(--color-brand-bg) min-h-screen flex flex-col justify-center items-center relative text-white">
+<body class="bg-(--color-brand-bg) min-h-screen flex flex-col justify-center items-center relative text-(--color-content-text-main)">
 
     <!-- Main Login Container -->
     <div class="w-full max-w-sm px-6 flex flex-col items-center">
@@ -29,21 +29,21 @@
             
             <!-- Email Input -->
             <div>
-                <label for="username" class="block text-white text-base font-medium mb-1">email</label>
+                <label for="username" class="block text-(--color-content-text-main) text-base font-medium mb-1">email</label>
                 <input type="text" id="username" name="username" 
-                       class="w-full bg-transparent border border-(--color-brand-border) rounded-sm px-4 py-2.5 text-white outline-none focus:border-white focus:ring-0 transition-colors">
+                       class="w-full bg-transparent border border-(--color-control-border) rounded-sm px-4 py-2.5 text-(--color-content-text-main) outline-none focus:border-white focus:ring-0 transition-colors">
             </div>
 
             <!-- Password Input -->
             <div>
-                <label for="password" class="block text-white text-base font-medium mb-1">password</label>
+                <label for="password" class="block text-(--color-content-text-main) text-base font-medium mb-1">password</label>
                 <input type="password" id="password" name="password" 
-                       class="w-full bg-transparent border border-(--color-brand-border) rounded-sm px-4 py-2.5 text-white outline-none focus:border-white focus:ring-0 transition-colors">
+                       class="w-full bg-transparent border border-(--color-control-border) rounded-sm px-4 py-2.5 text-(--color-content-text-main) outline-none focus:border-white focus:ring-0 transition-colors">
             </div>
 
             <!-- Login Button -->
             <button type="submit" 
-                    class="w-full bg-(--color-brand-blue) text-white font-bold text-base py-2.5 rounded-md mt-2 hover:bg-blue-600 transition-colors shadow-sm">
+                    class="w-full bg-(--color-brand-blue) text-(--color-content-text-main) font-bold text-base py-2.5 rounded-md mt-2 hover:bg-(--color-button-regular-hover) transition-colors shadow-sm">
                 login
             </button>
             

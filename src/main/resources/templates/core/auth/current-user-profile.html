@@ -5,12 +5,12 @@
         <!-- User Profile -->
         <div id="current-user-profile" th:fragment="currentUserProfile" class="flex flex-col items-center mt-8 mb-10">
             <div class="w-24 h-24 rounded-full border-2 border-[#3b82f6] flex items-center justify-center mb-4 bg-[#1a1a1a]">
-                <svg class="w-14 h-14 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-14 h-14 text-(--color-brand-blue)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
             </div>
             <h2 class="text-lg font-bold" th:text="${currentUser.fullName()}">John Doe</h2>
-            <p class="text-sm text-[#3b82f6] italic" th:text="${currentUser.email()}">User</p>
+            <p class="text-sm text-(--color-brand-blue) italic" th:text="${currentUser.email()}">User</p>
         </div>
     </div>
 </body>

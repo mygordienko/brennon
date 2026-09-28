@@ -23,14 +23,14 @@
         document.cookie = "BRENNON_CLIENT_TIMEZONE=" + clientTimeZone + "; path=/; max-age=31536000";
     </script>
 </head>
-<body class="bg-(--color-brand-bg) text-white h-screen overflow-hidden flex">
+<body class="bg-(--color-brand-bg) text-(--color-content-text-main) h-screen overflow-hidden flex">
 
     <!-- Sidebar Fragment -->
     <th:block>
-        <aside class="w-72 border-r border-[#333333] flex flex-col h-full p-6 bg-(--color-brand-bg) shrink-0 relative">
+        <aside class="w-72 border-r border-(--color-control-border) flex flex-col h-full p-6 bg-(--color-brand-bg) shrink-0 relative">
             <!-- Top Right Menu Icon -->
             <div class="absolute top-6 right-6 cursor-pointer">
-                <svg class="w-6 h-6 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-(--color-brand-blue)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
             </div>
@@ -52,8 +52,8 @@
             <!-- Logout -->
             <div class="mt-auto pt-6 border-t border-[#222222]">
                 <form th:action="@{/logout}" method="POST" class="inline-block w-full">
-                    <button type="submit" class="w-full flex items-center px-4 py-3 rounded-lg border border-[#333333] hover:bg-[#222222] transition-colors text-left bg-transparent cursor-pointer">
-                        <svg class="w-5 h-5 mr-3 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button type="submit" class="w-full flex items-center px-4 py-3 rounded-lg border border-(--color-control-border) hover:bg-[#222222] transition-colors text-left bg-transparent cursor-pointer">
+                        <svg class="w-5 h-5 mr-3 text-(--color-brand-blue)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h4m4-12l4 4-4 4m4-4H8"></path>
                         </svg>
                         Logout
