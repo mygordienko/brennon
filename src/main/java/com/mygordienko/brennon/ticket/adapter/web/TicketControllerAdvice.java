@@ -3,6 +3,7 @@ package com.mygordienko.brennon.ticket.adapter.web;
 import java.util.Optional;
 
 import org.springframework.context.MessageSource;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  *      - JSON for HTMX
  */
 @Slf4j
+@Order(100)
 @ControllerAdvice(basePackages = {"com.mygordienko.brennon.ticket.adapter.web"})
 public class TicketControllerAdvice {
     public TicketControllerAdvice(MessageSource messageSource) {
@@ -92,4 +94,6 @@ public class TicketControllerAdvice {
 
         return new ModelAndView("core/common/400", HttpStatus.CONFLICT);
     }
+
+
 }

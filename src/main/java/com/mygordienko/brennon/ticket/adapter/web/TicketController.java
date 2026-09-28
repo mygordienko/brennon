@@ -187,17 +187,26 @@ public class TicketController {
     }
 
     @GetMapping("/tickets/{id}/edit")
-    public String getTicketDetailsEditFragment(@CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr, Model model, @PathVariable long id) {
+    public String getTicketDetailsEditFragment(
+        @CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr,
+        @RequestHeader(value = "HX-Request", required = false) String hxRequest,
+        Model model, 
+        @PathVariable long id) {
         var zoneId = ZoneId.of(zoneIdStr);
         var ticket = ticketService.getTicket(TicketId.of(id));
 
         var ticketDto = composeDto(ticket, zoneId);
 
         model.addAttribute("ticket", ticketDto);
-        model.addAttribute("ticketDetailsEditMode", true);
         model.addAttribute("editDetailsForm", new TicketEditCommandDto(ticket.getVersion(), ticket.getSubject(), ticket.getText()));
 
-        return "ticket/ticket-details :: ticket-details-form";
+        if (hxRequest != null) {
+            return "ticket/edit-ticket :: page-content-block";
+        } else {
+            // regular request, serve full template
+            return "ticket/edit-ticket";
+        }
+        
     }
 
     @PutMapping("/tickets/{id}")
@@ -214,11 +223,9 @@ public class TicketController {
             var ticket = ticketService.getTicket(ticketId);
             var ticketDto = composeDto(ticket, zoneId);
             model.addAttribute("ticket", ticketDto);
-            model.addAttribute("ticketDetailsEditMode", true);
             model.addAttribute("editDetailsForm", editDetailsForm);
             
-            response.setHeader("HX-Retarget", "#ticket-details-form"); 
-            return "ticket/ticket-details :: ticket-details-form"; 
+            return "ticket/edit-ticket :: page-content-block"; 
         }
 
         ticketService.editTicketDitails(editDetailsForm.toCommand(ticketId));
@@ -226,15 +233,12 @@ public class TicketController {
         var ticket = ticketService.getTicket(ticketId);
         var ticketDto = composeDto(ticket, zoneId);
 
-        var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
-
         model.addAttribute("ticket", ticketDto);
-        model.addAttribute("ticketDetailsEditMode", false);
-        
-        htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
-        response.setHeader("HX-Trigger", htmxEventHeaderBuilder.toJsonString());
+        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
+        model.addAttribute("closeForm", new TicketCloseCommandDto(ticket.getVersion()));
+        model.addAttribute("assignMeForm", new TicketAssignMeCommandDto(ticket.getVersion()));
 
-        return "ticket/ticket-details :: ticket-details-display";
+        return "ticket/ticket-details :: page-content-block";
     }
 
     @GetMapping("/tickets/create")
@@ -255,7 +259,6 @@ public class TicketController {
 
         return "redirect:/tickets/my";
     }
-
 
     @GetMapping("/tickets/{id}/reply")
     public String getReplyEdit(

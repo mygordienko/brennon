@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,8 +23,12 @@ import jakarta.servlet.http.HttpServletResponse;
  *   assumes you want an empty successful response that just happens to have a 404 status header.
  * 
  *   When call response.sendError(404), we are bypassing Spring and talking directly to the underlying servlet container.
+ * 
+ * NOTE: {@link Order} is required to make this handler analyzed after all other feature-specific handlers. Setting `basePackages` 
+ *   on advice controller does not give it any priority by itself, {@link Order} is still needed.
  */
-@ControllerAdvice 
+@ControllerAdvice
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class CommonControllerAdvice {
 
     private static final Logger log = LoggerFactory.getLogger(CommonControllerAdvice.class);
