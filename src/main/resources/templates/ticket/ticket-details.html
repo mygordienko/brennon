@@ -29,6 +29,7 @@
                 <!-- Assign Me Ticket Button -->
                 <button type="button" 
                         onclick="window.history.back()"
+                        th:text="#{common.action.back}"
                         class="mr-auto bg-(--color-button-regular) hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) font-medium py-1 px-4 rounded shadow-sm transition-colors text-sm">
                     Back
                 </button>
@@ -38,6 +39,7 @@
                     <button class="bg-(--color-button-regular) hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) font-medium py-1 px-4 rounded shadow-sm transition-colors text-sm"
                             th:hx-get="@{/tickets/{id}/edit(id=${ticket.id})}"
                             hx-target="#page-content"
+                            th:text="#{common.action.edit}"
                             hx-swap="outerHTML">
                             Edit
                      </button>
@@ -52,7 +54,8 @@
                         th:object="${assignMeForm}">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" th:field="*{version}" class="ticket-version-input"/>
-                        <button class="bg-(--color-button-regular) hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) font-medium py-1 px-4 rounded shadow-sm transition-colors text-sm">
+                        <button th:text="#{ticket.assigntome}"
+                                class="bg-(--color-button-regular) hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) font-medium py-1 px-4 rounded shadow-sm transition-colors text-sm">
                             Assign to Me
                         </button>
                     </form>
@@ -67,7 +70,8 @@
                         th:object="${closeForm}">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" th:field="*{version}" class="ticket-version-input"/>
-                        <button class="bg-(--color-button-important) hover:bg-(--color-button-important-hover) text-(--color-content-text-main) font-medium py-1 px-4 rounded border border-red-800 transition-colors text-sm">
+                        <button th:text="#{ticket.close}"
+                                class="bg-(--color-button-important) hover:bg-(--color-button-important-hover) text-(--color-content-text-main) font-medium py-1 px-4 rounded border border-red-800 transition-colors text-sm">
                             Close ticket
                         </button>
                     </form>
@@ -83,15 +87,18 @@
                         <div>
                             <h1 class="text-2xl font-bold text-(--color-content-text-main) mb-4" th:text="|#${ticket.id()}: ${ticket.subject()}|">#10392: Please help</h1>
                             <div class="flex items-center gap-4 mb-1">
-                                <span class="text-(--color-label-text-main) font-medium">Status:</span>
+                                <span th:text="#{ticket.status}"
+                                      class="text-(--color-label-text-main) font-medium">Status:</span>
                                 <span class="text-(--color-content-text-secondary)" th:text="${ticket.status()}">open</span>
                             </div>
                             <div class="flex items-center gap-4">
-                                <span class="text-(--color-label-text-main) font-medium">Author:</span>
+                                <span th:text="#{ticket.author}"
+                                      class="text-(--color-label-text-main) font-medium">Author:</span>
                                 <span class="text-(--color-content-text-secondary)" th:text="${ticket.author().fullName()}">Peter Parker</span>
                             </div>
                             <div class="flex items-center gap-4">
-                                <span class="text-(--color-label-text-main) font-medium">Assignee:</span>
+                                <span th:text="#{ticket.assignee}"
+                                      class="text-(--color-label-text-main) font-medium">Assignee:</span>
                                 <span class="text-(--color-content-text-secondary)" th:text="${ticket.assignee().fullName() == null ? '' : ticket.assignee().fullName()}">Peter Parker</span>
                             </div>
                         </div>
@@ -171,7 +178,7 @@
                     <!-- Footer Actions -->
                     <div class="flex justify-end gap-3 mt-2">
                         <button type="submit"
-                                th:text="${actualMode == 'add'}?#{thicket.reply.add.save}:#{thicket.reply.edit.save}"
+                                th:text="#{ticket.reply.add}"
                                 class="bg-(--color-button-regular) hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
                             Add message
                         </button>
@@ -179,7 +186,8 @@
                                 th:if="${actualMode == 'edit'}"
                                 th:hx-get="@{/tickets/{id}(id=${ticket.id})}"
                                 hx-target="#page-content" 
-                                hx-swap="outerHTML" 
+                                hx-swap="outerHTML"
+                                th:text="#{common.action.cancel}"
                                 class="bg-(--color-button-regular) hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) font-medium py-1.5 px-6 rounded shadow-sm transition-colors text-sm">
                             Cancel
                         </button>

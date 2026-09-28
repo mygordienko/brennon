@@ -4,21 +4,24 @@
     layout:decorate="~{layout}"
     th:with="activeMenuItem='createticket'">
 <head>
-    <title>Create Ticket</title>
+    <title th:text="#{ticket.createtitle}">Create Ticket</title>
 </head>
 <body>
  <th:block layout:fragment="content">
     <main class="flex-1 flex flex-col p-6 md:p-10 overflow-hidden relative">
         
         <!-- Page Title -->
-        <h1 class="text-2xl font-bold text-(--color-content-text-main) mb-6">Create ticket</h1>
+        <h1 class="text-2xl font-bold text-(--color-content-text-main) mb-6" th:text="#{ticket.createtitle}">Create ticket</h1>
 
         <!-- Form -->
         <form th:action="@{/tickets/create}" th:object="${request}" method="post" class="flex flex-col flex-grow space-y-6">
             
             <!-- Subject Input -->
             <div class="flex flex-col space-y-2">
-                <label for="subject" class="text-sm font-medium text-(--color-label-text-main)">Subject</label>
+                <label 
+                       for="subject"
+                       th:text="#{ticket.subject}"
+                       class="text-sm font-medium text-(--color-label-text-main)">Subject</label>
                 <input 
                     type="text" 
                     id="subject" 
@@ -30,7 +33,10 @@
 
             <!-- Message Textarea -->
             <div class="flex flex-col space-y-2 flex-grow">
-                <label for="message" class="text-sm font-medium text-(--color-label-text-main)">Message</label>
+                <label 
+                       for="message" 
+                       th:text="#{ticket.message}"
+                       class="text-sm font-medium text-(--color-label-text-main)">Message</label>
                 <textarea 
                     id="message" 
                     th:field="*{text}" 
@@ -51,10 +57,16 @@
 
                 <!-- Buttons -->
                 <div class="flex space-x-4">
-                    <button type="submit" class="bg-blue-500 hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) rounded-md px-8 py-2 text-sm font-medium shadow-sm transition-colors">
+                    <button 
+                            type="submit" 
+                            th:text="#{common.action.save}"
+                            class="bg-blue-500 hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) rounded-md px-8 py-2 text-sm font-medium shadow-sm transition-colors">
                         Save
                     </button>
-                    <button type="button" onclick="window.history.back()" class="bg-blue-500 hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) rounded-md px-8 py-2 text-sm font-medium shadow-sm transition-colors">
+                    <button type="button" 
+                            th:text="#{common.action.cancel}"
+                            onclick="window.history.back()" 
+                            class="bg-blue-500 hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) rounded-md px-8 py-2 text-sm font-medium shadow-sm transition-colors">
                         Cancel
                     </button>
                 </div>

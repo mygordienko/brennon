@@ -45,19 +45,21 @@
                     hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true"
                     class="col-span-2 flex items-center cursor-pointer">ID <span th:if="${isCurrent}"
                         th:text="${page.order.direction == 'ASC' ? '↑' : '↓'}"></span></button>
-                <div class="col-span-2">Status</div>
-                <div class="col-span-4">Subject</div>
+                <div th:text="#{ticket.status}"
+                     class="col-span-2">Status</div>
+                <div th:text="#{ticket.subject}"
+                     class="col-span-4">Subject</div>
                 <button
                     th:with="isCurrent=${page.order.property == 'created'}, nextDir=${isCurrent && page.order.direction == 'ASC' ? 'DESC' : 'ASC'}"
                     th:hx-get="@{{p}(p=${path}, sort='created' + ',' + ${nextDir}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                     hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true"
-                    class="col-span-2 flex items-center cursor-pointer">Created <span th:if="${isCurrent}"
+                    class="col-span-2 flex items-center cursor-pointer"><span th:text="#{ticket.created}"></span><span th:if="${isCurrent}"
                         th:text="${page.order.direction == 'ASC' ? '↑' : '↓'}"></span></button>
                 <button
                     th:with="isCurrent=${page.order.property == 'updated'}, nextDir=${isCurrent && page.order.direction == 'ASC' ? 'DESC' : 'ASC'}"
                     th:hx-get="@{{p}(p=${path}, sort='updated' + ',' + ${nextDir}, id=${ticketRequestFilter.id}, status=${ticketRequestFilter.status}, subject=${ticketRequestFilter.subject})}"
                     hx-target="#page-content" hx-swap="outerHTML" hx-push-url="true"
-                    class="col-span-2 flex items-center cursor-pointer">Updated <span th:if="${isCurrent}"
+                    class="col-span-2 flex items-center cursor-pointer"><span th:text="#{ticket.modified}"></span><span th:if="${isCurrent}"
                         th:text="${page.order.direction == 'ASC' ? '↑' : '↓'}"></span></button>
             </div>
 
