@@ -4,12 +4,23 @@
   "private": true,
   "packageManager": "npm@11.16.0",
   "scripts": {
-    "build": "npm run build:css",
-    "watch": "npm run watch:css",
-    "build:css": "npx @tailwindcss/cli -i ./src/styles.css -o ../resources/static/css/main.css",
-    "watch:css": "npx @tailwindcss/cli --watch -i ./src/styles.css -o ../resources/static/css/main.css"
+    "build": "webpack --mode production",
+    "watch": "webpack --watch --mode development"
   },
   "devDependencies": {
-    "tailwindcss": "^4.0.0"
+    "@tailwindcss/postcss": "^4.0.0",
+    "css-loader": "^7.1.0",
+    "mini-css-extract-plugin": "^2.9.0",
+    "postcss": "^8.4.0",
+    "postcss-loader": "^8.1.1",
+    "tailwindcss": "^4.0.0",
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@uppy/core": "^4.0.0",
+    "@uppy/file-input": "^4.0.0",
+    "@uppy/dashboard": "^4.0.0",
+    "@uppy/xhr-upload": "^4.0.0"
   }
 }
