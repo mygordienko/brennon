@@ -108,6 +108,17 @@
                                 Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                             </p>
                         </div>
+
+                        <div id="ticket-attachments-container" class="flex py-2 gap-4">
+                            <div 
+                                th:each="attachment : ${ticket.attachments()}"
+                                class="px-3 py-2 rounded-lg border border-(--color-control-border) hover:bg-[#222222] transition-colors">
+                                <!-- NOTE: backend sets Content-Disposition with fileName-->
+                                <a  th:text="${attachment.name()}"
+                                    th:href="@{/api/v1/tickets/{ticketId}/attachments/{attachmentId}(ticketId=${ticket.id()}, attachmentId=${attachment.id()})}" download></a>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
@@ -173,7 +184,7 @@
                         class="w-full bg-transparent border border-(--color-control-border) rounded p-4 text-gray-300 focus:outline-none focus:border-(--color-control-border-focus) transition-colors h-24"
                         placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                     >Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</textarea>
-                    <div id="validation-error-msg" class="text-(--color-validation-text) text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
+                    <div id="validation-error-msg" class="text-(--color-error-text) text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
 
                     <!-- Footer Actions -->
                     <div class="flex justify-end gap-3 mt-2">

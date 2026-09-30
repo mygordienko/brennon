@@ -15,6 +15,10 @@ spring:
   thymeleaf:
     template-resolver-order: 0
     cache: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 management:
   defaults:
@@ -45,4 +49,11 @@ management:
 
 logging:
   level:
-    com.mygordienko.brennon: "INFO"
+    com.mygordienko.brennon: "DEBUG"
+
+brennon:
+  ticket:
+    attachments:
+      storage:
+        local:
+          basefolder: "E:/tmp/brennon"

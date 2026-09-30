@@ -70,7 +70,6 @@ public class JdbcTicketStorageTest {
     public void givenDataExistsWhenSinglePageAndNoSortingUseDefaultSorting() {
         final var parameterSource = new MapSqlParameterSource();
 
-        // init database
         jdbcTemplate.update(
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
@@ -100,7 +99,6 @@ public class JdbcTicketStorageTest {
     public void givenDataExistsWhenSinglePageAndCustomSortingUseCustomSorting() {
         final var parameterSource = new MapSqlParameterSource();
 
-        // init database
         jdbcTemplate.update(
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
@@ -129,7 +127,6 @@ public class JdbcTicketStorageTest {
     public void givenDataExistsWhenMultiPageAndCustomSortingUseCustomSorting() {
         final var parameterSource = new MapSqlParameterSource();
 
-        // init database
         jdbcTemplate.update(
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
@@ -169,7 +166,6 @@ public class JdbcTicketStorageTest {
     public void givenDataExistsWhenMultiPageThenTicketsCorrectlyAssembledWithReplies() {
         final var parameterSource = new MapSqlParameterSource();
 
-        // init database
         jdbcTemplate.update(
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
@@ -213,7 +209,6 @@ public class JdbcTicketStorageTest {
     public void givenDataExistsWhenRequestedByIdReturnsAggregate() {
         final var parameterSource = new MapSqlParameterSource();
 
-        // init database
         jdbcTemplate.update(
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
@@ -256,7 +251,6 @@ public class JdbcTicketStorageTest {
     public void givenDataExistsWhenRequestedWithFilterByIdReturnsAggregate() {
         final var parameterSource = new MapSqlParameterSource();
 
-        // init database
         jdbcTemplate.update(
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
@@ -284,7 +278,6 @@ public class JdbcTicketStorageTest {
     public void givenDataExistsWhenRequestedWithFilterByStatusReturnsAggregates() {
         final var parameterSource = new MapSqlParameterSource();
 
-        // init database
         jdbcTemplate.update(
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)
@@ -312,7 +305,6 @@ public class JdbcTicketStorageTest {
     public void givenDataExistsWhenRequestedWithFilterBySubjectReturnsAggregates() {
         final var parameterSource = new MapSqlParameterSource();
 
-        // init database
         jdbcTemplate.update(
                 """
                 INSERT INTO tickets(id, author_id, subject, text, status, created, updated)

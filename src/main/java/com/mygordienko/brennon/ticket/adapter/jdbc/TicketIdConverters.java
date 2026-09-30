@@ -4,6 +4,8 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 
+import com.mygordienko.brennon.ticket.FileId;
+import com.mygordienko.brennon.ticket.TicketAttachmentId;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
 import com.mygordienko.brennon.ticket.TicketStatus;
@@ -73,6 +75,44 @@ public class TicketIdConverters {
         @Override
         public TicketStatus convert(String source) {
             return TicketStatus.of(source);
+        }
+    }
+
+    @WritingConverter
+    public enum TicketAttachmentIdToLongConverter implements Converter<TicketAttachmentId, Long> {
+        INSTANCE;
+        @Override
+        public Long convert(TicketAttachmentId source) {
+            return source.getValue();
+        }
+    }
+
+    @ReadingConverter
+    public enum LongToTicketAttachmentIdConverter implements Converter<Long, TicketAttachmentId> {
+        INSTANCE;
+        @Override
+        public TicketAttachmentId convert(Long source) {
+            return TicketAttachmentId.of(source);
+        }
+    }
+
+
+
+    @WritingConverter
+    public enum FileIdToStringConverter implements Converter<FileId, String> {
+        INSTANCE;
+        @Override
+        public String convert(FileId source) {
+            return source.getValue();
+        }
+    }
+
+    @ReadingConverter
+    public enum StringToFileIdConverter implements Converter<String, FileId> {
+        INSTANCE;
+        @Override
+        public FileId convert(String source) {
+            return FileId.of(source);
         }
     }
 }

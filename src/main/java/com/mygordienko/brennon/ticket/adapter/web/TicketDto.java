@@ -15,7 +15,8 @@ public record TicketDto(
     OffsetDateTime created,
     OffsetDateTime updated,
     UserRelationDto currentUserRelation,
-    List<TicketReplyDto> replies
+    List<TicketReplyDto> replies,
+    List<TicketAttachmentDto> attachments
 ) {
     public static record UserInfoDto(
         String id,

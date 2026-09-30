@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  *      - JSON for HTMX
  */
 @Slf4j
-@Order(100)
+@Order(200)
 @ControllerAdvice(basePackages = {"com.mygordienko.brennon.ticket.adapter.web"})
 public class TicketControllerAdvice {
     public TicketControllerAdvice(MessageSource messageSource) {

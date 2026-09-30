@@ -20,7 +20,11 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
+import com.mygordienko.brennon.ticket.FileId;
 import com.mygordienko.brennon.ticket.MissingTicketReplyException;
+import com.mygordienko.brennon.ticket.TicketAttachmentAddedEvent;
+import com.mygordienko.brennon.ticket.TicketAttachmentId;
+import com.mygordienko.brennon.ticket.TicketAttachmentRemovedEvent;
 import com.mygordienko.brennon.ticket.TicketClosedEvent;
 import com.mygordienko.brennon.ticket.TicketCreatedEvent;
 import com.mygordienko.brennon.ticket.TicketId;
@@ -45,7 +49,8 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             String text,
             OffsetDateTime created,
             OffsetDateTime updated,
-            Set<TicketReply> replies) {
+            Set<TicketReply> replies,
+            Set<TicketAttachment> attachments) {
         this.id = id;
         this.version = version;
         this.status = status;
@@ -56,6 +61,8 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
         this.created = created;
         this.updated = updated;
         this.replies = Set.copyOf(replies).stream()
+            .collect(Collectors.toCollection(() -> new HashSet<>()));
+        this.attachments = Set.copyOf(attachments).stream()
             .collect(Collectors.toCollection(() -> new HashSet<>()));
     }
 
@@ -71,7 +78,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             var authorRef = AggregateReference.<BrennonUserProfile, BrennonUserId>to(author);
             var assigneeRef = (assignee == null) ? null : AggregateReference.<BrennonUserProfile, BrennonUserId>to(assignee);
             Ticket ticket = new Ticket(ticketId, null, status, authorRef, assigneeRef, subject, text,
-            created, updated, new HashSet<>());
+            created, updated, new HashSet<>(), new HashSet<>());
 
             ticket.explicitNew = true;
             ticket.registerEvent(new TicketCreatedEvent(ticketId, created));
@@ -120,6 +127,18 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             .sorted(Comparator.comparing(TicketReply::getCreated))
             .toList();
     }
+
+    @MappedCollection(idColumn = "ticket_id")
+    private final Set<TicketAttachment> attachments;
+
+    public List<TicketAttachment> getAttachments() {
+        return attachments.stream()
+            .sorted(Comparator.comparing(TicketAttachment::getCreated))
+            .toList();
+    }
+
+    @Column("last_attachment_id")
+    private long lastAttachmentId;
 
     /**
      * Explicit additional flag to mark entityt as a new one. Used when explicit ID is provided.
@@ -204,5 +223,52 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
 
         this.status = TicketStatus.IN_PROGRESS;
         this.updated = updated;
+    }
+
+    public void addAttachment(BrennonUserId userId, FileId fileId, String name, OffsetDateTime created) {
+        if (this.status == TicketStatus.CLOSED) {
+            throw new IllegalStateException("Adding attachment to a closed ticket");
+        }
+
+        if (!this.author.getId().equals(userId) 
+                && (this.assignee != null && !this.assignee.getId().equals(userId))) {
+            throw new IllegalStateException("User %s can not add attachment to ticket %s".formatted(userId, this.id));
+        }
+
+        var attachmentId = getNextAttachmentId();
+        var attachment = TicketAttachment.createNew(attachmentId, this.id, null, fileId, name, userId, created);
+
+        this.attachments.add(attachment);
+        this.updated = created;
+        this.registerEvent(new TicketAttachmentAddedEvent(id, attachmentId));
+    }
+
+    public boolean removeAttachment(BrennonUserId userId, TicketAttachmentId attachmentId, OffsetDateTime updated) {
+        if (this.status == TicketStatus.CLOSED) {
+            throw new IllegalStateException("Removing attachment from a closed ticket");
+        }
+
+        if (!this.author.getId().equals(userId) 
+                && (this.assignee != null && !this.assignee.getId().equals(userId))) {
+            throw new IllegalStateException("User %s can not remove attachment from ticket %s".formatted(userId, this.id));
+        }
+
+        var attachmentToRemove = this.attachments.stream()
+            .filter(att -> att.getId().equals(attachmentId))
+            .findFirst();
+
+        if (attachmentToRemove.isPresent()) {
+            this.attachments.removeIf(att -> att.getId().equals(attachmentToRemove.get().getId()));
+            this.registerEvent(new TicketAttachmentRemovedEvent(id, attachmentToRemove.get().getId(), attachmentToRemove.get().getFileId()));
+            this.updated = updated;
+            return true;
+        }
+
+        return false;
+    }
+
+    private final TicketAttachmentId getNextAttachmentId() {
+        this.lastAttachmentId++;
+        return TicketAttachmentId.of(this.lastAttachmentId);
     }
 }

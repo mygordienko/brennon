@@ -10,6 +10,8 @@ Helpdesk platform
 
 <img src="docs/ui_ticket_list.png" width="400" alt="ticket_list">
 
+<img src="docs/ui_ticket_create.png" width="400" alt="ticket_create">
+
 ## Project configuration
 
 * Spring Boot 4 + Thymeleaf + Tailwind CSS + HTMX
@@ -81,6 +83,10 @@ management:
 
 * ControllerAdvice with mixed responses: view name for regular requests and JSON for HTMX, see `TicketControllerAdvice`
 
+* Usage of `{}` to isolate Thymeleaf script fragment loaded with HTMX in order to prevent "variable redeclaration" JS error. HTMX does not clear Browser environment when swap, so if loaded script creates global variable there will be conflicts. See `edit-ticket.html`
+
 * see [HTMX.md](./docs/HTMX.md) for more HTMX-related info.
 
 * `@DomainEvents` in Aggregate, published automatically by Spring Data
+
+

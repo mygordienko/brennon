@@ -26,7 +26,7 @@ public class CoreSecurityConfiguration {
 
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/svg/**", "/favicon.ico", "/actuator/health/**").permitAll()
+                        .requestMatchers("/css/**", "/dist/**", "/js/**", "/images/**", "/svg/**", "/favicon.ico", "/actuator/health/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )

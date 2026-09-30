@@ -14,9 +14,12 @@
     - request ObjectStore to validate and copy file to the final place (`ProcessUploadCommand`)
 8. When `ObjectStore` is done validating and copying the file it nootifies Ticket sybsystem (ex. via message queue).
 
+
+**NOTE:** Attachment status is necessary if file processing (validation, malware scan, etc.) takes significant ammount of time and so MUST be done after uploaded file associated with a ticket. If we restrict attachment size to ~5MB and do processing immediately after upload (block user from proceeding with ticket update) then we can go without statuses.
+
 Another important aspect is that this design allows gradual migration to the cloud, here are the steps:
 
-- Stage 1: Single instance for local deployment.
+- [x] Stage 1: Single instance for local deployment.
     - `ObjectStore` is implemented as a `LocalFileSystemObjectStore` that is backed by whatever disk is available on current machine
     - No message queue, async communication between Ticket subsystem and `ObjectStore` is done purely with Spring domain events.
 

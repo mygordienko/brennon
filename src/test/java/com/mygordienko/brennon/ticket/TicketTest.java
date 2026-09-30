@@ -30,6 +30,7 @@ public class TicketTest {
             "text", 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            Set.of(),
             Set.of());
 
         var originTicketCreated = ticket.getCreated();
@@ -63,7 +64,8 @@ public class TicketTest {
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             Set.of(
                 new TicketReply(ticketReplyId, ticketId, AggregateReference.to(authorId), "old text", replyOrigTime, replyOrigTime)
-            ));
+            ),
+            Set.of());
 
         var originTicketCreated = ticket.getCreated();
         var replyUpdateTime = OffsetDateTime.parse("2026-08-30T15:35:00+02:00");
@@ -91,6 +93,7 @@ public class TicketTest {
             "text", 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            Set.of(),
             Set.of());
 
         var originTicketCreated = ticket.getCreated();
@@ -121,6 +124,7 @@ public class TicketTest {
             "text", 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
+            Set.of(),
             Set.of());
 
         var originTicketCreated = ticket.getCreated();

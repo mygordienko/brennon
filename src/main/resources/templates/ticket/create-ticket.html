@@ -28,7 +28,7 @@
                     th:field="*{subject}" 
                     class="w-full rounded-md bg-transparent border border-(--color-control-border) text-(--color-content-text-main) px-4 py-2.5 text-sm focus:outline-none focus:border-(--color-control-border-focus) focus:ring-1 focus:ring-blue-500 transition-colors"
                 />
-                <div class="text-(--color-validation-text) text-sm font-medium" th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}">Validation error</div>
+                <div class="text-(--color-error-text) text-sm font-medium" th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}">Validation error</div>
             </div>
 
             <!-- Message Textarea -->
@@ -42,14 +42,28 @@
                     th:field="*{text}" 
                     class="w-full rounded-md bg-transparent border border-(--color-control-border) text-(--color-content-text-main) px-4 py-2.5 text-sm focus:outline-none focus:border-(--color-control-border-focus) focus:ring-1 focus:ring-blue-500 transition-colors resize-none h-64 md:h-96"
                 ></textarea>
-                <div class="text-(--color-validation-text) text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
+                <div class="text-(--color-error-text) text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
             </div>
+
+            <!-- Custom Upload UI Container -->
+            <div class="space-y-2">
+                <div id="custom-upload-picker"
+                        type="button" 
+                        class="text-(--color-brand-blue) hover:text-(--color-content-text-main) w-fit rounded-md py-2 text-sm font-medium shadow-sm transition-colors"></div>
+
+                <ul id="custom-file-list" class="divide-y divide-(--color-control-border) border border-(--color-control-border) rounded-lg hidden">
+                    <!-- JavaScript will inject <li> items here -->
+                </ul>
+            </div>
+
+            <!-- Hidden inputs for file IDs will be generated here dynamically -->
+            <input type="hidden" id="concatenated-file-ids" th:field="*{uploadedFileIds}"></input>
 
             <!-- Footer Actions -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center pt-4 mt-auto gap-4 md:gap-0">
                 
                 <!-- Validation Error Message -->
-                <div th:if="${#fields.hasErrors('*')}" class="text-(--color-validation-text) text-sm font-medium">
+                <div th:if="${#fields.hasErrors('*')}" class="text-(--color-error-text) text-sm font-medium">
                     <div th:if="${#fields.hasErrors('global')}">Validation error</div>
                 </div>
                 <!-- Empty placeholder to maintain flex spacing if no error -->
@@ -75,5 +89,8 @@
         </form>
     </main>
  </th:block>
+ <th:block layout:fragment="script-content">
+    <th:block th:replace="~{ticket/fragments/scripts :: uppyLoader(@{/api/v1/tickets/attachments/upload}, 'custom-upload-picker', 'custom-file-list', #{ticket.choosefile})}"></th:block>
+</th:block>
 </body>
 </html>

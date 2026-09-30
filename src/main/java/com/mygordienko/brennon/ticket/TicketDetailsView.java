@@ -25,7 +25,8 @@ public class TicketDetailsView {
             OffsetDateTime created, 
             OffsetDateTime updated,
             UserRelation userRelation,
-            List<TicketReplyView> replies) {
+            List<TicketReplyView> replies,
+            List<TicketAttachmentView> attachments) {
         this.id = id;
         this.version = version;
         this.status = status;
@@ -37,6 +38,7 @@ public class TicketDetailsView {
         this.updated = updated;
         this.userRelation = userRelation;
         this.replies = List.copyOf(replies);  
+        this.attachments = List.copyOf(attachments);
     }
 
     @Getter
@@ -67,6 +69,12 @@ public class TicketDetailsView {
 
     public List<TicketReplyView> getReplies() {
         return List.copyOf(replies);
+    }
+
+    private final List<TicketAttachmentView> attachments;
+
+    public List<TicketAttachmentView> getAttachments() {
+        return List.copyOf(attachments);
     }
 
     /**

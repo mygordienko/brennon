@@ -23,7 +23,11 @@ public class TicketDataJdbcConfiguration {
                     TicketIdConverters.LongToTicketReplyIdConverter.INSTANCE,
                     TicketIdConverters.TicketReplyIdToLongConverter.INSTANCE,
                     TicketIdConverters.TicketStatusToStringConverter.INSTANCE,
-                    TicketIdConverters.StringToTicketStatusConverter.INSTANCE
+                    TicketIdConverters.StringToTicketStatusConverter.INSTANCE,
+                    TicketIdConverters.FileIdToStringConverter.INSTANCE,
+                    TicketIdConverters.StringToFileIdConverter.INSTANCE,
+                    TicketIdConverters.LongToTicketAttachmentIdConverter.INSTANCE,
+                    TicketIdConverters.TicketAttachmentIdToLongConverter.INSTANCE
                 );
             }
         };

@@ -8,6 +8,7 @@
     --color-brand-bg: #1a1a1a;
     --color-brand-pink: #ff9199;
     --color-brand-blue: #3B82F6;
+    --color-brand-red: #b91c1c;
 
     --color-control-border: #4b5563;
     --color-control-border-focus: var(--color-brand-blue);
@@ -15,11 +16,11 @@
     --color-content-text-main: #FFFFFF;
     --color-content-text-secondary: #E5E7EB;
     --color-label-text-main: #9CA3AF;
-    --color-validation-text: #F87171;
+    --color-error-text: #F87171;
 
     --color-button-regular: var(--color-brand-blue);
     --color-button-regular-hover: #2563eb;
 
-    --color-button-important: #b91c1c;
+    --color-button-important: var(--color-brand-red);
     --color-button-important-hover: #991b1b;
 }

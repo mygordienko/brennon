@@ -3,6 +3,8 @@ package com.mygordienko.brennon.ticket.adapter.web;
 import java.time.ZoneId;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mygordienko.brennon.core.common.adapter.HtmxClientEventTriggerHeaderBuilder;
 import com.mygordienko.brennon.ticket.MissingTicketReplyException;
-import com.mygordienko.brennon.ticket.TicketCreateCommand;
 import com.mygordienko.brennon.ticket.TicketDetailsView;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
@@ -38,6 +39,8 @@ public class TicketController {
     public TicketController(TicketService ticketService) {
         this.ticketService = ticketService;
     }
+
+    private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.ticket.adapter.web.TicketController");
 
     private final TicketService ticketService;
 
@@ -228,6 +231,9 @@ public class TicketController {
             return "ticket/edit-ticket :: page-content-block"; 
         }
 
+        log.debug("Request delete attachments: {}", editDetailsForm.getAttachmentIdsToRemove());
+        log.debug("Request add files: {}", editDetailsForm.getUploadedFileIds());
+
         ticketService.editTicketDitails(editDetailsForm.toCommand(ticketId));
 
         var ticket = ticketService.getTicket(ticketId);
@@ -243,13 +249,14 @@ public class TicketController {
 
     @GetMapping("/tickets/create")
     public String createTicketForm(Model model) {
-        model.addAttribute("request", new TicketCreateCommand("", ""));
+        model.addAttribute("request", new TicketCreateCommandDto("", ""));
         return "ticket/create-ticket";
     }
 
     @PostMapping("/tickets/create")
     public String createTicket(@Validated @ModelAttribute("request") TicketCreateCommandDto request,
                                BindingResult bindingResult, Model model) {
+        log.info("Creating ticket {} with attachments {}", request.getSubject(), request.getUploadedFileIds());
         if (bindingResult.hasErrors()) {
             model.addAttribute("request", request);
             return "ticket/create-ticket";
@@ -317,7 +324,7 @@ public class TicketController {
 
         model.addAttribute("ticket", ticketDto);
         model.addAttribute("isOobSwap", true);         
-        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion())); // Reset form
+        model.addAttribute("replyform", new TicketReplyCommandDto(ticket.getVersion()));
         
         var htmxEventHeaderBuilder = new HtmxClientEventTriggerHeaderBuilder();
         htmxEventHeaderBuilder.addVersionUpdatedEvent(ticket.getVersion());
@@ -467,7 +474,20 @@ public class TicketController {
                             reply.getUserRelation().isAuthor())
                         )
                     )
-                    .toList());
+                    .toList(),
+            ticket.getAttachments().stream()
+                .map(attach -> new TicketAttachmentDto(
+                        attach.getId().toString(),
+                        attach.getAuthorId().toString(),
+                        attach.getReplyId().map(Object::toString).orElse(null),
+                        attach.getName(),
+                        attach.getCreated(),
+                        new TicketAttachmentDto.UserRelationDto(
+                            attach.getUserRelation().isAuthor())
+                    ))
+                    .toList()
+                
+            );
     }
 
     private TicketRecordDto composeDto(TicketView ticket, ZoneId zoneId) {

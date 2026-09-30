@@ -38,7 +38,7 @@
                         th:field="*{subject}" 
                         class="w-full rounded-md bg-transparent border border-(--color-control-border) text-(--color-content-text-main) px-4 py-2.5 text-sm focus:outline-none focus:border-(--color-control-border-focus) focus:ring-1 focus:ring-blue-500 transition-colors"
                     />
-                    <div class="text-(--color-validation-text) text-sm font-medium" th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}">Validation error</div>
+                    <div class="text-(--color-error-text) text-sm font-medium" th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}">Validation error</div>
                 </div>
 
                 <!-- Message Textarea -->
@@ -51,14 +51,50 @@
                         th:field="*{text}" 
                         class="w-full rounded-md bg-transparent border border-(--color-control-border) text-(--color-content-text-main) px-4 py-2.5 text-sm focus:outline-none focus:border-(--color-control-border-focus) focus:ring-1 focus:ring-blue-500 transition-colors resize-none h-64 md:h-96"
                     ></textarea>
-                    <div class="text-(--color-validation-text) text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
+                    <div class="text-(--color-error-text) text-sm font-medium" th:if="${#fields.hasErrors('text')}" th:errors="*{text}">Validation error</div>
                 </div>
+
+                <div id="ticket-attachments-container" class="flex py-2 gap-4">
+                    <th:block th:each="attachment : ${ticket.attachments()}">
+                        <div 
+                            th:if="${attachment.currentUserRelation().isAuthor()}"
+                            th:id="'attachment-' + ${attachment.id()}"
+                            class="flex px-3 py-2 rounded-lg border border-(--color-control-border) hover:bg-[#222222] transition-colors">
+                            <!-- NOTE: backend sets Content-Disposition with fileName-->
+                            <div th:text="${attachment.name()}"></div>
+                            <div class="attachment-id-element" th:text="${attachment.id()}" hidden></div>
+                            <button type="button"
+                                    th:data-attachment-id="${attachment.id()}"
+                                    onclick="window.removeAttachment(this.getAttribute('data-attachment-id'))"
+                                    class="text-(--color-content-text-main) hover:text-(--color-brand-red) transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </th:block>
+                </div>
+
+                <!-- Custom Upload UI Container -->
+                <div class="space-y-2">
+                    <div id="custom-upload-picker"
+                            type="button" 
+                            class="text-(--color-brand-blue) hover:text-(--color-content-text-main) w-fit rounded-md py-2 text-sm font-medium shadow-sm transition-colors"></div>
+
+                    <ul id="custom-file-list" class="divide-y divide-(--color-control-border) border border-(--color-control-border) rounded-lg hidden">
+                        <!-- JavaScript will inject <li> items here -->
+                    </ul>
+                </div>
+
+                <!-- Hidden inputs for file IDs will be generated here dynamically -->
+                <input type="hidden" id="concatenated-file-ids" th:field="*{uploadedFileIds}"></input>
+
+                <!-- Hidden inputs for removed attachments -->
+                <input type="hidden" id="concatenated-attachment-ids-to-remove" th:field="*{attachmentIdsToRemove}"></input>
 
                 <!-- Footer Actions -->
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
 
                     <!-- Validation Error Message -->
-                    <div th:if="${#fields.hasErrors('*')}" class="text-(--color-validation-text) text-sm font-medium">
+                    <div th:if="${#fields.hasErrors('*')}" class="text-(--color-error-text) text-sm font-medium">
                         <div th:if="${#fields.hasErrors('global')}">Validation error</div>
                     </div>
                     <!-- Empty placeholder to maintain flex spacing if no error -->
@@ -82,6 +118,30 @@
                     </div>
                 </div>
             </form>
+        </th:block>
+        <th:block>
+            <th:block th:replace="~{ticket/fragments/scripts :: uppyLoader(@{/api/v1/tickets/attachments/upload}, 'custom-upload-picker', 'custom-file-list', #{ticket.choosefile})}"></th:block>
+            <script>
+                window.removeAttachment = function(attachmentId) {
+                    console.log("Remove id: " + attachmentId);
+                    document.getElementById("attachment-" + attachmentId)?.remove();
+
+                    let idsToRemoveStr = document.getElementById('concatenated-attachment-ids-to-remove').value;
+
+                    const idsToRemoveArr = idsToRemoveStr
+                        .split(",")
+                        .map(item => item.trim())
+                        .filter(item => item !== "");
+                    
+                    idsToRemoveArr.push(attachmentId);
+
+                    let result = idsToRemoveArr.join(',');
+
+                    console.log("Remove attach ids: " + result);
+
+                    document.getElementById('concatenated-attachment-ids-to-remove').value = result;
+                };
+            </script>
         </th:block>
     </main>
  </th:block>

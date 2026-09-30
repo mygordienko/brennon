@@ -1,5 +1,10 @@
 package com.mygordienko.brennon.ticket.adapter.web;
 
+import java.util.Collection;
+import java.util.List;
+
+import com.mygordienko.brennon.ticket.FileId;
+import com.mygordienko.brennon.ticket.TicketAttachmentId;
 import com.mygordienko.brennon.ticket.TicketEditCommand;
 import com.mygordienko.brennon.ticket.TicketId;
 
@@ -29,8 +34,22 @@ public class TicketEditCommandDto {
     @Setter
     @NotBlank
     private String text;
+    @Getter
+    @Setter
+    private Collection<Long> attachmentIdsToRemove = List.of();
+    @Getter
+    @Setter
+    private Collection<String> uploadedFileIds = List.of();
 
     public TicketEditCommand toCommand(TicketId ticketId) {
-        return new TicketEditCommand(ticketId, version, subject, text);
+        var attachmentToRemove = attachmentIdsToRemove.stream()
+            .map(TicketAttachmentId::of)
+            .toList();
+
+        var filesToAdd = uploadedFileIds.stream()
+            .map(FileId::of)
+            .toList();
+        
+        return new TicketEditCommand(ticketId, version, subject, text, filesToAdd, attachmentToRemove);
     }
 }

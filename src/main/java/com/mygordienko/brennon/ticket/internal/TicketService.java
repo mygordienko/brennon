@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,8 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
 import com.mygordienko.brennon.core.common.ClockManager;
+import com.mygordienko.brennon.ticket.FileId;
+import com.mygordienko.brennon.ticket.MissingTicketAttachmentException;
 import com.mygordienko.brennon.ticket.MissingTicketException;
 import com.mygordienko.brennon.ticket.TicketAssignMeCommand;
+import com.mygordienko.brennon.ticket.TicketAttachmentId;
+import com.mygordienko.brennon.ticket.TicketAttachmentView;
 import com.mygordienko.brennon.ticket.TicketCloseCommand;
 import com.mygordienko.brennon.ticket.TicketConcurrentModificationException;
 import com.mygordienko.brennon.ticket.TicketCreateCommand;
@@ -38,16 +44,23 @@ public class TicketService {
         BrennonUserInfoApi userProfileService, 
         TicketStoragePort ticketStoragePort,
         TicketSecurityManager ticketSecurityManager,
+        TicketAttachmentStoragePort ticketAttachmentStoragePort,
         ClockManager clockManager) {
         this.userProfileService = userProfileService;
         this.ticketStoragePort = ticketStoragePort;
         this.ticketSecurityManager = ticketSecurityManager;
+        this.ticketAttachmentStoragePort = ticketAttachmentStoragePort;
         this.clockManager = clockManager;
     }
+
+    private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.ticket.internal.TicketService");
+    private static final String DEFAULT_ATTACHMENT_NAME = "attachment";
+
 
     private final BrennonUserInfoApi userProfileService;
     private final TicketStoragePort ticketStoragePort;
     private final TicketSecurityManager ticketSecurityManager;
+    private final TicketAttachmentStoragePort ticketAttachmentStoragePort;
     private final ClockManager clockManager;
 
     @PreAuthorize("hasAuthority('user:read')")
@@ -167,6 +180,19 @@ public class TicketService {
             })
             .toList();
 
+        var attachmentViews = ticket.getAttachments().stream()
+            .map(att -> {
+                return new TicketAttachmentView(
+                    att.getId(), 
+                    ticketId, 
+                    att.getAuthorId(), 
+                    att.getTicketReplyId(),
+                    att.getName(), 
+                    att.getCreated(), 
+                    new TicketAttachmentView.UserRelation(currentUser.getId().equals(att.getAuthorId())));
+            })
+            .toList();
+
         return new TicketDetailsView(
                 ticket.getId(),
                 ticket.getVersion(),
@@ -183,7 +209,8 @@ public class TicketService {
                     currentUser.getId().equals(ticket.getAuthor().getId()) || currentUser.getId().equals(ticket.getAssignee().map(ref -> ref.getId()).orElse(null)),
                     !currentUser.getId().equals(ticket.getAssignee().map(ref -> ref.getId()).orElse(null))
                 ),
-                replyViews
+                replyViews,
+                attachmentViews
             );
     }
 
@@ -197,9 +224,15 @@ public class TicketService {
 
         var ticket = Ticket.createNew(ticketId, TicketStatus.NEW, currentUser.getId(), null, command.subject(), command.text(), created, created);
 
-        // NOTE: do not use instance returned by save method, fetch a new one to have 'new' property reset.
+        for (FileId fileId : command.fileIds()) {
+            var meta = ticketAttachmentStoragePort.getTempMeta(currentUser.getId(), fileId);
+            log.debug("ticket {} adding file {} name {}", ticketId, fileId, meta.fileName());
+            var attachmentName = Optional.ofNullable(meta.fileName()).orElse(DEFAULT_ATTACHMENT_NAME);
+            ticket.addAttachment(currentUser.getId(), fileId, attachmentName, created);
+        }
         ticketStoragePort.saveTicket(ticket);
 
+        // NOTE: do not use instance returned by save method, fetch a new one to have 'new' property reset.
         return ticketStoragePort.getTicketById(ticket.getId()).orElseThrow(() -> MissingTicketException.forTicket(ticketId));
     }
 
@@ -241,6 +274,29 @@ public class TicketService {
         }
 
         ticket.editDetails(currentUser.getId(), command.subject(), command.text(), updated);
+
+        var editableAttachments = ticket.getAttachments().stream()
+            .filter(att -> att.getAuthorId().equals(currentUser.getId()))
+            .map(att -> att.getId())
+            .collect(Collectors.toSet());
+
+        for (TicketAttachmentId attachmentId : command.attachmentsToRemove()) {
+            if (!editableAttachments.contains(attachmentId)) {
+                throw MissingTicketAttachmentException.forTicket(ticket.getId(), attachmentId);
+            }
+
+            if (ticket.removeAttachment(currentUser.getId(), attachmentId, updated)) {
+                log.debug("Ticket {} Removing attachment {}", ticket.getId(), attachmentId);
+            };
+        }
+
+        for (FileId fileId : command.attachmentsToAdd()) {
+            var meta = ticketAttachmentStoragePort.getTempMeta(currentUser.getId(), fileId);
+            log.debug("ticket edit {} adding file {} name {}", ticket.getId(), fileId, meta.fileName());
+            var attachmentName = Optional.ofNullable(meta.fileName()).orElse(DEFAULT_ATTACHMENT_NAME);
+
+            ticket.addAttachment(currentUser.getId(), fileId, attachmentName, updated);
+        }
 
         return ticketStoragePort.saveTicket(ticket);
     }
