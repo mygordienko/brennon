@@ -53,7 +53,7 @@ public class TicketAttachmentController {
     }
 
     @GetMapping("/{ticketId}/attachments/{attachmentId}")
-    public ResponseEntity<Resource> download(@PathVariable long ticketId, @PathVariable long attachmentId) {
+    public ResponseEntity<Resource> download(@PathVariable long ticketId, @PathVariable int attachmentId) {
         ResourceBundle bundle = ticketAttachmentService.getAttachmentResource(TicketId.of(ticketId), TicketAttachmentId.of(attachmentId));
 
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,

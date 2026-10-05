@@ -3,6 +3,7 @@ package com.mygordienko.brennon.ticket.internal;
 import java.time.OffsetDateTime;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.mapping.Column;
@@ -28,6 +29,19 @@ public class TicketReply implements Persistable<TicketReplyId> {
         this.updated = updated;
     }
 
+    public static TicketReply createNew(
+        TicketReplyId id,
+        TicketId ticketId,
+        BrennonUserId author,
+        String text,
+        OffsetDateTime created,
+        OffsetDateTime updated
+    ) {
+        var reply = new TicketReply(id, ticketId, AggregateReference.to(author), text, created, updated);
+        reply.explicitNew = true;
+        return reply;
+    }
+
     @Id
     @Getter
     @Column("id")
@@ -49,10 +63,12 @@ public class TicketReply implements Persistable<TicketReplyId> {
     @Setter
     @Column("updated")
     private OffsetDateTime updated;
+
+    @Transient
+    private boolean explicitNew;
+
     @Override
     public boolean isNew() {
-        return this.id == null;
+        return this.explicitNew;
     }
-
-    
 }

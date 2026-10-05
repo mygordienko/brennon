@@ -33,19 +33,19 @@ public class TicketIdConverters {
     }
 
     @WritingConverter
-    public enum TicketReplyIdToLongConverter implements Converter<TicketReplyId, Long> {
+    public enum TicketReplyIdToIntegerConverter implements Converter<TicketReplyId, Integer> {
         INSTANCE;
         @Override
-        public Long convert(TicketReplyId source) {
+        public Integer convert(TicketReplyId source) {
             return source.getValue();
         }
     }
 
     @ReadingConverter
-    public enum LongToTicketReplyIdConverter implements Converter<Long, TicketReplyId> {
+    public enum IntegerToTicketReplyIdConverter implements Converter<Integer, TicketReplyId> {
         INSTANCE;
         @Override
-        public TicketReplyId convert(Long source) {
+        public TicketReplyId convert(Integer source) {
             return TicketReplyId.of(source);
         }
     }
@@ -79,19 +79,19 @@ public class TicketIdConverters {
     }
 
     @WritingConverter
-    public enum TicketAttachmentIdToLongConverter implements Converter<TicketAttachmentId, Long> {
+    public enum TicketAttachmentIdToIntegerConverter implements Converter<TicketAttachmentId, Integer> {
         INSTANCE;
         @Override
-        public Long convert(TicketAttachmentId source) {
+        public Integer convert(TicketAttachmentId source) {
             return source.getValue();
         }
     }
 
     @ReadingConverter
-    public enum LongToTicketAttachmentIdConverter implements Converter<Long, TicketAttachmentId> {
+    public enum IntegerToTicketAttachmentIdConverter implements Converter<Integer, TicketAttachmentId> {
         INSTANCE;
         @Override
-        public TicketAttachmentId convert(Long source) {
+        public TicketAttachmentId convert(Integer source) {
             return TicketAttachmentId.of(source);
         }
     }

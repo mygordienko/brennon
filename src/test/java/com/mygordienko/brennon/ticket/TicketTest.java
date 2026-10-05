@@ -31,7 +31,7 @@ public class TicketTest {
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             Set.of(),
-            Set.of());
+            Set.of(), 0 ,0);
 
         var originTicketCreated = ticket.getCreated();
         var replyTime = OffsetDateTime.parse("2026-08-30T15:32:00+02:00");
@@ -46,7 +46,7 @@ public class TicketTest {
     @DisplayName("Updates timestamps when a reply gets updated")
     public void givenExistingTicket_whenReplyUpdated_thenUpdatesTicketUpdatedTimestamp() {
         var ticketId = TicketId.of(1L);
-        var ticketReplyId = TicketReplyId.of(1L);
+        var ticketReplyId = TicketReplyId.of(1);
         var authorId = BrennonUserId.of("john");
         var assigneeId = BrennonUserId.of("jeff");
 
@@ -65,7 +65,7 @@ public class TicketTest {
             Set.of(
                 new TicketReply(ticketReplyId, ticketId, AggregateReference.to(authorId), "old text", replyOrigTime, replyOrigTime)
             ),
-            Set.of());
+            Set.of(), 0, 0);
 
         var originTicketCreated = ticket.getCreated();
         var replyUpdateTime = OffsetDateTime.parse("2026-08-30T15:35:00+02:00");
@@ -94,7 +94,7 @@ public class TicketTest {
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             Set.of(),
-            Set.of());
+            Set.of(), 0, 0);
 
         var originTicketCreated = ticket.getCreated();
         var operationTime = OffsetDateTime.parse("2026-08-30T15:35:00+02:00");
@@ -125,7 +125,7 @@ public class TicketTest {
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             OffsetDateTime.parse("2026-08-30T15:30:00+02:00"), 
             Set.of(),
-            Set.of());
+            Set.of(), 0, 0);
 
         var originTicketCreated = ticket.getCreated();
         var operationTime = OffsetDateTime.parse("2026-08-30T15:35:00+02:00");

@@ -272,7 +272,7 @@ public class TicketController {
         @CookieValue(value = "BRENNON_CLIENT_TIMEZONE", defaultValue = "UTC") String zoneIdStr, 
         Model model, 
         @PathVariable("id") long ticketId,
-        @RequestParam("replyId") long replyId) {
+        @RequestParam("replyId") int replyId) {
         var zoneId = ZoneId.of(zoneIdStr);
         var ticket = ticketService.getTicket(TicketId.of(ticketId));
 

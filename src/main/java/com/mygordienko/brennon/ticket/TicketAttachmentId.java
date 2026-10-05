@@ -1,22 +1,22 @@
 package com.mygordienko.brennon.ticket;
 
 public class TicketAttachmentId {
-    private TicketAttachmentId(Long value) {
+    private TicketAttachmentId(Integer value) {
         this.value = value;
     }
 
-    public static final TicketAttachmentId of(Long value) {
+    public static final TicketAttachmentId of(Integer value) {
         return new TicketAttachmentId(value);
     }
 
-    private final Long value;
+    private final Integer value;
 
     @Override
     public String toString() {
         return String.valueOf(value);
     }
 
-    public Long getValue() {
+    public Integer getValue() {
         return value;
     }
 

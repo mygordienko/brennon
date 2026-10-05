@@ -50,7 +50,9 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             OffsetDateTime created,
             OffsetDateTime updated,
             Set<TicketReply> replies,
-            Set<TicketAttachment> attachments) {
+            Set<TicketAttachment> attachments,
+            int lastReplyId,
+            int lastAttachmentId) {
         this.id = id;
         this.version = version;
         this.status = status;
@@ -64,6 +66,8 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             .collect(Collectors.toCollection(() -> new HashSet<>()));
         this.attachments = Set.copyOf(attachments).stream()
             .collect(Collectors.toCollection(() -> new HashSet<>()));
+        this.lastReplyId = lastReplyId;
+        this.lastAttachmentId = lastAttachmentId;
     }
 
     public static Ticket createNew(
@@ -78,7 +82,7 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             var authorRef = AggregateReference.<BrennonUserProfile, BrennonUserId>to(author);
             var assigneeRef = (assignee == null) ? null : AggregateReference.<BrennonUserProfile, BrennonUserId>to(assignee);
             Ticket ticket = new Ticket(ticketId, null, status, authorRef, assigneeRef, subject, text,
-            created, updated, new HashSet<>(), new HashSet<>());
+            created, updated, new HashSet<>(), new HashSet<>(), 0, 0);
 
             ticket.explicitNew = true;
             ticket.registerEvent(new TicketCreatedEvent(ticketId, created));
@@ -138,7 +142,10 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     }
 
     @Column("last_attachment_id")
-    private long lastAttachmentId;
+    private int lastAttachmentId;
+
+    @Column("last_reply_id")
+    private int lastReplyId;
 
     /**
      * Explicit additional flag to mark entityt as a new one. Used when explicit ID is provided.
@@ -161,7 +168,8 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
             throw new IllegalStateException("User can not reply ticket %s".formatted(this.id));
         }
 
-        var reply = new TicketReply(null, this.id, AggregateReference.to(userId), text, created, created);
+        var newReplyId = getNextReplyId();
+        var reply = TicketReply.createNew(newReplyId, this.id, userId, text, created, created);
 
         this.replies.add(reply);
         this.updated = created;
@@ -270,5 +278,10 @@ public class Ticket extends AbstractAggregateRoot<Ticket> implements Persistable
     private final TicketAttachmentId getNextAttachmentId() {
         this.lastAttachmentId++;
         return TicketAttachmentId.of(this.lastAttachmentId);
+    }
+
+    private final TicketReplyId getNextReplyId() {
+        this.lastReplyId++;
+        return TicketReplyId.of(this.lastReplyId);
     }
 }

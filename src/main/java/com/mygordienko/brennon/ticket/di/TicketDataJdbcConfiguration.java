@@ -20,14 +20,14 @@ public class TicketDataJdbcConfiguration {
                 return List.of(
                     TicketIdConverters.LongToTicketIdConverter.INSTANCE,
                     TicketIdConverters.TicketIdToLongConverter.INSTANCE,
-                    TicketIdConverters.LongToTicketReplyIdConverter.INSTANCE,
-                    TicketIdConverters.TicketReplyIdToLongConverter.INSTANCE,
+                    TicketIdConverters.IntegerToTicketReplyIdConverter.INSTANCE,
+                    TicketIdConverters.TicketReplyIdToIntegerConverter.INSTANCE,
                     TicketIdConverters.TicketStatusToStringConverter.INSTANCE,
                     TicketIdConverters.StringToTicketStatusConverter.INSTANCE,
                     TicketIdConverters.FileIdToStringConverter.INSTANCE,
                     TicketIdConverters.StringToFileIdConverter.INSTANCE,
-                    TicketIdConverters.LongToTicketAttachmentIdConverter.INSTANCE,
-                    TicketIdConverters.TicketAttachmentIdToLongConverter.INSTANCE
+                    TicketIdConverters.IntegerToTicketAttachmentIdConverter.INSTANCE,
+                    TicketIdConverters.TicketAttachmentIdToIntegerConverter.INSTANCE
                 );
             }
         };

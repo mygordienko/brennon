@@ -35,41 +35,36 @@ create table tickets (
 	created timestamptz not null,
 	updated timestamptz not null,
 	last_attachment_id int not null default 0,
+	last_reply_id int not null default 0,
 	constraint fk_ticket_author foreign key(author_id) references user_profiles(id)
 );
 
 alter sequence tickets_id_seq owned by tickets.id;
 
-
-create sequence if not exists tickets_reply_id_seq
-    start with 100
-    increment by 1;
-
 -- TODO: replies are owned by ticket (no independent IDs)
 create table ticket_replies (
-	id bigint not null primary key default nextval('tickets_reply_id_seq'),
+	id int not null default 0,
 	ticket_id bigint not null,
 	text varchar not null,
 	author_id varchar not null,
 	created timestamptz not null,
 	updated timestamptz not null,
 	constraint fk_ticket_reply_ticket foreign key(ticket_id) references tickets(id),
-	constraint fk_ticket_reply_author foreign key(author_id) references user_profiles(id)
+	constraint fk_ticket_reply_author foreign key(author_id) references user_profiles(id),
+	constraint uq_ticket_reply unique(id, ticket_id)
 );
-
-alter sequence tickets_reply_id_seq owned by ticket_replies.id;
 
 -- attachments are owned by ticket
 create table ticket_attachments (
-	id bigint not null,
+	id int not null,
 	ticket_id bigint not null,
-	reply_id bigint,
+	reply_id int,
 	file_id varchar not null,
 	name varchar not null,
 	author_id varchar not null,
 	created timestamptz not null,
 	constraint fk_ticket_attachment_ticket foreign key(ticket_id) references tickets(id),
-	constraint fk_ticket_attachment_reply foreign key(reply_id) references ticket_replies(id),
+	constraint fk_ticket_attachment_reply foreign key(reply_id, ticket_id) references ticket_replies(id, ticket_id),
 	constraint fk_ticket_attachment_author foreign key(author_id) references user_profiles(id),
 	constraint uq_ticket_attachment unique(id, ticket_id)
 );

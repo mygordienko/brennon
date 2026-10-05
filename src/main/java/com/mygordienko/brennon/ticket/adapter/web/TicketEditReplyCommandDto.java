@@ -13,7 +13,7 @@ public class TicketEditReplyCommandDto {
     public TicketEditReplyCommandDto() {
     }
 
-    public TicketEditReplyCommandDto(Integer version, Long replyId, String text) {
+    public TicketEditReplyCommandDto(Integer version, Integer replyId, String text) {
         this.version = version;
         this.replyId = replyId;
         this.text = text;
@@ -29,7 +29,7 @@ public class TicketEditReplyCommandDto {
     private Integer version;
     @Getter
     @Setter
-    private Long replyId;
+    private Integer replyId;
 
     public TicketEditReplyCommand toCommand(TicketId ticketId) {
         return new TicketEditReplyCommand(ticketId, version, TicketReplyId.of(replyId), text);

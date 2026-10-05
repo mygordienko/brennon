@@ -36,7 +36,7 @@ public class TicketEditCommandDto {
     private String text;
     @Getter
     @Setter
-    private Collection<Long> attachmentIdsToRemove = List.of();
+    private Collection<Integer> attachmentIdsToRemove = List.of();
     @Getter
     @Setter
     private Collection<String> uploadedFileIds = List.of();
