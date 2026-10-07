@@ -1,5 +1,4 @@
 # Use postgres/example user/password credentials
-version: '3.1'
 
 services:
 
@@ -10,8 +9,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
       POSTGRES_DB: brennon
-    ports:
-      - 5432:5432
+    expose:
+      - 5432
     volumes:
       - ./init-scripts:/docker-entrypoint-initdb.d
 
@@ -24,3 +23,45 @@ services:
       - 3000:3000
       - 4317:4317
       - 4318:4318
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: rustfs-server
+    security_opt:
+      - "no-new-privileges:true" # Preventing Privilege Escalation
+    ports:
+      - "9000:9000" # S3 API Port
+      - "9001:9001" # Web Console Port
+    environment:
+      - RUSTFS_VOLUMES=/data/rustfs # Storage path inside container
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_ACCESS_KEY=rustfsadmin
+      - RUSTFS_SECRET_KEY=rustfsadminpassword
+    volumes:
+      - rustfs_data:/data
+    restart: unless-stopped
+
+  brennon:
+    image: brennon:0.0.1-SNAPSHOT
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db:5432/brennon?currentSchema=brennon"
+      SPRING_DATASOURCE_USERNAME: "postgres"
+      SPRING_DATASOURCE_PASSWORD: "example"
+      MANAGEMENT_OTLP_METRICS_EXPORT_URL: "http://otel-lgtm:4318/v1/metrics"
+      BRENNON_TICKET_ATTACHMENTS_STORAGE_ACTIVE: "s3"
+      BRENNON_TICKET_ATTACHMENTS_STORAGE_S3_ENDPOINT: "http://rustfs:9000"
+      BRENNON_TICKET_ATTACHMENTS_STORAGE_S3_CREDENTIALS_ACCESS_KEY_ID: "rustfsadmin"
+      BRENNON_TICKET_ATTACHMENTS_STORAGE_S3_CREDENTIALS_SECRET_ACCESS_KEY: "rustfsadminpassword"
+    restart: always
+    depends_on:
+      - db
+      - rustfs
+      - otel-lgtm
+    ports:
+      - 8080:8080
+
+
+volumes:
+  rustfs_data:

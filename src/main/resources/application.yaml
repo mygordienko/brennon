@@ -5,6 +5,11 @@ server:
       timeout: 10m
 
 spring:
+  # Disable autoconfiguration, S3-related beans will be created manually
+  cloud:
+    aws:
+      s3:
+        enabled: false
   application:
     name: brennon
   datasource:
@@ -55,5 +60,11 @@ brennon:
   ticket:
     attachments:
       storage:
+        active: "s3"
         local:
-          basefolder: "E:/tmp/brennon"
+          basefolder: "/brennon"
+        s3:
+          endpoint: "http://localhost:9000"
+          credentials:
+            accessKeyId: "rustfsadmin"
+            secretAccessKey: "rustfsadminpassword"
