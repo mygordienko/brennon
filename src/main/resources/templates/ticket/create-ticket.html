@@ -90,7 +90,7 @@
     </main>
  </th:block>
  <th:block layout:fragment="script-content">
-    <th:block th:replace="~{ticket/fragments/scripts :: uppyLoader(@{/api/v1/tickets/attachments/upload}, 'custom-upload-picker', 'custom-file-list', #{ticket.choosefile})}"></th:block>
+    <th:block th:replace="~{ticket/fragments/scripts :: uppyLoader(@{/api/v1/tickets/attachments/upload}, 'custom-upload-picker', 'custom-file-list', #{ticket.choosefile} + ' (only images)')}"></th:block>
 </th:block>
 </body>
 </html>

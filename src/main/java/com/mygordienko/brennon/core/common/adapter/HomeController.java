@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.core.auth.adapter.web;
+package com.mygordienko.brennon.core.common.adapter;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -13,6 +13,8 @@ public class HomeController {
         if (authentication != null && authentication.isAuthenticated()) {
             model.addAttribute("username", authentication.getName());
         }
-        return "core/home";
+        // NOTE: intentionally redirect to "my tickets"
+        // TODO: home page
+        return "redirect:/tickets/my";
     }
 }

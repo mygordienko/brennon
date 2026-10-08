@@ -120,7 +120,7 @@
             </form>
         </th:block>
         <th:block>
-            <th:block th:replace="~{ticket/fragments/scripts :: uppyLoader(@{/api/v1/tickets/attachments/upload}, 'custom-upload-picker', 'custom-file-list', #{ticket.choosefile})}"></th:block>
+            <th:block th:replace="~{ticket/fragments/scripts :: uppyLoader(@{/api/v1/tickets/attachments/upload}, 'custom-upload-picker', 'custom-file-list', #{ticket.choosefile} + ' (only images)')}"></th:block>
             <script>
                 window.removeAttachment = function(attachmentId) {
                     console.log("Remove id: " + attachmentId);

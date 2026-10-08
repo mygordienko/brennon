@@ -90,10 +90,10 @@ management:
 
 * ControllerAdvice with mixed responses: view name for regular requests and JSON for HTMX, see `TicketControllerAdvice`
 
-* Usage of `{}` to isolate Thymeleaf script fragment loaded with HTMX in order to prevent "variable redeclaration" JS error. HTMX does not clear Browser environment when swap, so if loaded script creates global variable there will be conflicts. See `edit-ticket.html`
+* Usage of `{}` to isolate Thymeleaf script fragment loaded with HTMX in order to prevent "variable redeclaration" JS error. HTMX does not clear Browser environment on swap, so if loaded script creates global variable there will be conflicts. See `edit-ticket.html`
 
 * see [HTMX.md](./docs/HTMX.md) for more HTMX-related info.
 
 * `@DomainEvents` in Aggregate, published automatically by Spring Data
 
-
+* File content validation with Apache Tika, see `FileContentValidator`

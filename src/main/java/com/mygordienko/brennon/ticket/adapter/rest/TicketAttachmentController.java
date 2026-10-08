@@ -25,13 +25,15 @@ import com.mygordienko.brennon.ticket.internal.TicketAttachmentService;
 @RequestMapping("/api/v1/tickets")
 @RestController 
 public class TicketAttachmentController {
-    public TicketAttachmentController(TicketAttachmentService ticketAttachmentService) {
+    public TicketAttachmentController(TicketAttachmentService ticketAttachmentService, FileContentValidator fileContentValidator) {
         this.ticketAttachmentService = ticketAttachmentService;
+        this.fileContentValidator = new FileContentValidator();
     }
 
     private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.ticket.adapter.web.TicketAttachmentController");
 
     private final TicketAttachmentService ticketAttachmentService;
+    private final FileContentValidator fileContentValidator;
 
     @PostMapping("/attachments/upload")
     public UploadedFileDto upload(
@@ -41,8 +43,7 @@ public class TicketAttachmentController {
 
         checkFileName(file.getOriginalFilename());
 
-        try (var is = file.getInputStream()) {
-            // TODO: file verification
+        try (var is = fileContentValidator.checkRealFileType(file.getInputStream())) {
             log.info("Uploading file {}", file.getOriginalFilename());
             ticketAttachmentService.saveTemp(fileId, is, file.getOriginalFilename());
         } catch (IOException e) {

@@ -18,6 +18,13 @@ public class TicketAttachmentControllerAdvice {
     private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.ticket.adapter.rest.TicketAttachmentControllerAdvice");
     
     @ExceptionHandler
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ProblemDetail handleBadAttachment(IllegalArgumentException ex) {
+        log.error("Bad attachment", ex);
+        return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), "Unsupported attachment");
+    }
+
+    @ExceptionHandler
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     public ProblemDetail handleMissingTicket(MissingTicketException ex) {
         log.error("Missing ticket during REST processing", ex);

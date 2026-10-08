@@ -15,6 +15,7 @@ import com.mygordienko.brennon.core.auth.internal.BrennonUserProfileService;
 import com.mygordienko.brennon.core.common.ClockManager;
 import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
 import com.mygordienko.brennon.ticket.adapter.jdbc.TicketCrudRepository;
+import com.mygordienko.brennon.ticket.adapter.rest.FileContentValidator;
 import com.mygordienko.brennon.ticket.adapter.storage.LocalFileSystemTicketAttachmentStorage;
 import com.mygordienko.brennon.ticket.adapter.storage.S3TicketAttachmentStorage;
 import com.mygordienko.brennon.ticket.internal.TicketAttachmentService;
@@ -119,5 +120,10 @@ public class TicketServiceConfiguration {
             TicketSecurityManager ticketSecurityManager,
             BrennonUserInfoApi userProfileService) {
         return new TicketAttachmentService(ticketStoragePort, ticketAttachmentStoragePort, ticketSecurityManager, userProfileService);
+    }
+
+    @Bean 
+    public FileContentValidator fileContentValidator() {
+        return new FileContentValidator();
     }
 }

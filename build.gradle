@@ -33,6 +33,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
 
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:4.2.0'
+	implementation 'org.apache.tika:tika-core:4.1.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
