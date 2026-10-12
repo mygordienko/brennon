@@ -4,13 +4,8 @@ import java.time.OffsetDateTime;
 
 import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 
-import lombok.Getter;
-
-/**
- * Short version, supposed to be used in tables/lists. Replies are not loaded.
- */
-public class TicketView {
-    public TicketView(
+public class TicketRecordView {
+    public TicketRecordView(
             TicketId id, 
             Integer version, 
             TicketStatus status, 
@@ -31,22 +26,48 @@ public class TicketView {
         this.updated = updated;
     }
 
-    @Getter
     private final TicketId id;
-    @Getter
+    public TicketId getId() {
+        return id;
+    }
+    
     private final Integer version;
-    @Getter
+    public Integer getVersion() {
+        return version;
+    }
+    
     private final TicketStatus status;
-    @Getter
+    public TicketStatus getStatus() {
+        return status;
+    }
+    
     private final BrennonUserProfile author;
-    @Getter
+    public BrennonUserProfile getAuthor() {
+        return author;
+    }
+    
     private final BrennonUserProfile assignee;
-    @Getter
+    public BrennonUserProfile getAssignee() {
+        return assignee;
+    }
+    
     private final String subject;
-    @Getter
+    public String getSubject() {
+        return subject;
+    }
+    
     private final String text;
-    @Getter
+    public String getText() {
+        return text;
+    }
+    
     private final OffsetDateTime created;
-    @Getter
+    public OffsetDateTime getCreated() {
+        return created;
+    }
+
     private final OffsetDateTime updated;
+    public OffsetDateTime getUpdated() {
+        return updated;
+    }
 }

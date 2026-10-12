@@ -14,8 +14,8 @@ public interface TicketStoragePort {
      * NOTE: ID prefetch is needed to have `TicketCreatedEvent(ticketId)` domain event.
      */
     TicketId getNextTicketId();
-    Page<Ticket> getTicketsByAuthor(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);
-    Page<Ticket> getTicketsByAssignee(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);
+    Page<TicketRecord> getTicketsByAuthor(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);
+    Page<TicketRecord> getTicketsByAssignee(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable);
     Optional<Ticket> getTicketById(TicketId ticketId);
     Ticket saveTicket(Ticket ticket);
 }

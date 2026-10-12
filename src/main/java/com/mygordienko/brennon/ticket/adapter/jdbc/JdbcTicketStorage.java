@@ -19,6 +19,7 @@ import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketRequestFilter;
 import com.mygordienko.brennon.ticket.internal.Ticket;
+import com.mygordienko.brennon.ticket.internal.TicketRecord;
 import com.mygordienko.brennon.ticket.internal.TicketStoragePort;
 
 
@@ -62,7 +63,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Ticket> getTicketsByAuthor(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable) {
+    public Page<TicketRecord> getTicketsByAuthor(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable) {
         var safePageable = processPageable(pageable);
         var criteria = Criteria.where("author_id").is(userId);
 
@@ -83,10 +84,10 @@ public class JdbcTicketStorage implements TicketStoragePort {
             .offset(safePageable.getPageNumber() * safePageable.getPageSize())
             .sort(safePageable.getSort());
 
-        var pageResults = jdbcAggregateTemplate.findAll(query, Ticket.class);
+        var pageResults = jdbcAggregateTemplate.findAll(query, TicketRecord.class);
 
         var queryCount = Query.query(criteria);
-        long totalCount = jdbcAggregateTemplate.count(queryCount,Ticket.class);
+        long totalCount = jdbcAggregateTemplate.count(queryCount,TicketRecord.class);
 
         return new PageImpl<>(
             pageResults, 
@@ -97,7 +98,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Ticket> getTicketsByAssignee(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable) {
+    public Page<TicketRecord> getTicketsByAssignee(BrennonUserId userId, TicketRequestFilter filter, Pageable pageable) {
         var safePageable = processPageable(pageable);
         Criteria criteria = null;
 
@@ -124,10 +125,10 @@ public class JdbcTicketStorage implements TicketStoragePort {
             .offset(safePageable.getPageNumber() * safePageable.getPageSize())
             .sort(safePageable.getSort());
 
-        var pageResults = jdbcAggregateTemplate.findAll(query, Ticket.class);
+        var pageResults = jdbcAggregateTemplate.findAll(query, TicketRecord.class);
 
         var queryCount = Query.query(criteria);
-        long totalCount = jdbcAggregateTemplate.count(queryCount,Ticket.class);
+        long totalCount = jdbcAggregateTemplate.count(queryCount,TicketRecord.class);
 
         return new PageImpl<>(
             pageResults, 

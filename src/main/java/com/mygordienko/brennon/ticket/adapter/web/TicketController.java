@@ -27,9 +27,9 @@ import com.mygordienko.brennon.core.common.adapter.HtmxClientEventTriggerHeaderB
 import com.mygordienko.brennon.ticket.MissingTicketReplyException;
 import com.mygordienko.brennon.ticket.TicketDetailsView;
 import com.mygordienko.brennon.ticket.TicketId;
+import com.mygordienko.brennon.ticket.TicketRecordView;
 import com.mygordienko.brennon.ticket.TicketReplyId;
 import com.mygordienko.brennon.ticket.TicketStatus;
-import com.mygordienko.brennon.ticket.TicketView;
 import com.mygordienko.brennon.ticket.internal.TicketService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -490,7 +490,7 @@ public class TicketController {
             );
     }
 
-    private TicketRecordDto composeDto(TicketView ticket, ZoneId zoneId) {
+    private TicketRecordDto composeDto(TicketRecordView ticket, ZoneId zoneId) {
         return new TicketRecordDto(
             ticket.getId().toString(),
             ticket.getVersion(),

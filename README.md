@@ -97,3 +97,7 @@ management:
 * `@DomainEvents` in Aggregate, published automatically by Spring Data
 
 * File content validation with Apache Tika, see `FileContentValidator`
+
+* Usage of `TicketRecord` as a lightweight projection of `Ticket` aggregate. That is because Spring Data JDBC does not support Single Query Loading for custom requests (Criteria API), so if we tried to select `List<Ticket>` there would be N+1 problem.
+
+* `application-test.yaml` - profile-specific file to override specific properties. See also `build.gradle` where we explicitly set the profile.

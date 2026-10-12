@@ -71,4 +71,6 @@ frontend {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	// NOTE: enable profile to make Spring pick up application-test.yaml
+	systemProperty 'spring.profiles.active', 'test'
 }

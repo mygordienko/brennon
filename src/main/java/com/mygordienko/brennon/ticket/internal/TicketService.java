@@ -33,11 +33,11 @@ import com.mygordienko.brennon.ticket.TicketDetailsView;
 import com.mygordienko.brennon.ticket.TicketEditCommand;
 import com.mygordienko.brennon.ticket.TicketEditReplyCommand;
 import com.mygordienko.brennon.ticket.TicketId;
+import com.mygordienko.brennon.ticket.TicketRecordView;
 import com.mygordienko.brennon.ticket.TicketReplyCommand;
 import com.mygordienko.brennon.ticket.TicketReplyView;
 import com.mygordienko.brennon.ticket.TicketRequestFilter;
 import com.mygordienko.brennon.ticket.TicketStatus;
-import com.mygordienko.brennon.ticket.TicketView;
 
 public class TicketService {
     public TicketService(
@@ -65,7 +65,7 @@ public class TicketService {
 
     @PreAuthorize("hasAuthority('user:read')")
     @Transactional(readOnly = true)
-    public Page<TicketView> getMyTickets(TicketRequestFilter filter, Pageable pageable) {
+    public Page<TicketRecordView> getMyTickets(TicketRequestFilter filter, Pageable pageable) {
         var currentUser = userProfileService.getCurrentUser();
         var tickets = ticketStoragePort.getTicketsByAuthor(currentUser.getId(), filter, pageable);
         var userIdSet = this.extractRelevantUserIds(tickets.getContent());
@@ -73,13 +73,12 @@ public class TicketService {
             .collect(Collectors.toMap(profile -> profile.getId(), profile -> profile, (t, u) -> t));
 
         var ticketViews = tickets.map(ticket -> {
-                var author = userProfileMap.get(ticket.getAuthor().getId());
-                var assignee = ticket.getAssignee()
-                    .map(ref -> ref.getId())
+                var author = userProfileMap.get(ticket.getAuthorId());
+                var assignee = ticket.getAssigneeId()
                     .map(id -> userProfileMap.get(id))
                     .orElse(null);
 
-                return new TicketView(
+                return new TicketRecordView(
                     ticket.getId(),
                     ticket.getVersion(),
                     ticket.getStatus(),
@@ -97,31 +96,30 @@ public class TicketService {
 
     @PreAuthorize("hasAuthority('support:read')")
     @Transactional(readOnly = true)
-    public Page<TicketView> getUnassignedTickets(TicketRequestFilter filter, Pageable pageable) {
+    public Page<TicketRecordView> getUnassignedTickets(TicketRequestFilter filter, Pageable pageable) {
         return getTicketsByAssignee(null, filter, pageable);
     }
 
     @PreAuthorize("hasAuthority('support:read')")
     @Transactional(readOnly = true)
-    public Page<TicketView> getTicketsAssignedToMe(TicketRequestFilter filter, Pageable pageable) {
+    public Page<TicketRecordView> getTicketsAssignedToMe(TicketRequestFilter filter, Pageable pageable) {
         var currentUser = userProfileService.getCurrentUser();
         return getTicketsByAssignee(currentUser.getId(), filter, pageable);
     }
 
-    private Page<TicketView> getTicketsByAssignee(BrennonUserId assigneeId, TicketRequestFilter filter, Pageable pageable) {
+    private Page<TicketRecordView> getTicketsByAssignee(BrennonUserId assigneeId, TicketRequestFilter filter, Pageable pageable) {
         var tickets = ticketStoragePort.getTicketsByAssignee(assigneeId, filter, pageable);
         var userIdSet = this.extractRelevantUserIds(tickets.getContent());
         var userProfileMap = userProfileService.getUsers(userIdSet).stream()
             .collect(Collectors.toMap(profile -> profile.getId(), profile -> profile, (t, u) -> t));
 
         var ticketViews = tickets.map(ticket -> {
-                var author = userProfileMap.get(ticket.getAuthor().getId());
-                var assignee = ticket.getAssignee()
-                    .map(ref -> ref.getId())
+                var author = userProfileMap.get(ticket.getAuthorId());
+                var assignee = ticket.getAssigneeId()
                     .map(id -> userProfileMap.get(id))
                     .orElse(null);
 
-                return new TicketView(
+                return new TicketRecordView(
                     ticket.getId(),
                     ticket.getVersion(),
                     ticket.getStatus(),
@@ -216,7 +214,7 @@ public class TicketService {
 
     @PreAuthorize("hasAuthority('user:write')")
     @Transactional
-    public Ticket createTicket(TicketCreateCommand command) {
+    public void createTicket(TicketCreateCommand command) {
         var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
         var currentUser = userProfileService.getCurrentUser();
         
@@ -233,13 +231,13 @@ public class TicketService {
         ticketStoragePort.saveTicket(ticket);
 
         // NOTE: do not use instance returned by save method, fetch a new one to have 'new' property reset.
-        return ticketStoragePort.getTicketById(ticket.getId()).orElseThrow(() -> MissingTicketException.forTicket(ticketId));
+        // return
     }
 
 
     @PreAuthorize("hasAuthority('user:write')")
     @Transactional
-    public Ticket replyTicket(TicketReplyCommand command) {
+    public void replyTicket(TicketReplyCommand command) {
         var currentUser = userProfileService.getCurrentUser();
         var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
 
@@ -254,13 +252,13 @@ public class TicketService {
 
         ticket.addReply(currentUser.getId(), command.text(), created);
 
-        return ticketStoragePort.saveTicket(ticket);
+        ticketStoragePort.saveTicket(ticket);
     }
 
 
     @PreAuthorize("hasAuthority('user:write')")
     @Transactional
-    public Ticket editTicketDitails(TicketEditCommand command) {
+    public void editTicketDitails(TicketEditCommand command) {
         var currentUser = userProfileService.getCurrentUser();
         var updated = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
 
@@ -298,12 +296,12 @@ public class TicketService {
             ticket.addAttachment(currentUser.getId(), fileId, attachmentName, updated);
         }
 
-        return ticketStoragePort.saveTicket(ticket);
+        ticketStoragePort.saveTicket(ticket);
     }
 
     @PreAuthorize("hasAuthority('user:write')")
     @Transactional
-    public Ticket editReply(TicketEditReplyCommand command) {
+    public void editReply(TicketEditReplyCommand command) {
         var currentUser = userProfileService.getCurrentUser();
         var created = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
 
@@ -318,12 +316,12 @@ public class TicketService {
 
         ticket.editReply(currentUser.getId(), command.replyId(), command.text(), created);
         
-        return ticketStoragePort.saveTicket(ticket);
+        ticketStoragePort.saveTicket(ticket);
     }
 
     @PreAuthorize("hasAuthority('user:write')")
     @Transactional
-    public Ticket closeTicket(TicketCloseCommand command) {
+    public void closeTicket(TicketCloseCommand command) {
         var currentUser = userProfileService.getCurrentUser();
         var updated = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
 
@@ -338,12 +336,12 @@ public class TicketService {
 
         ticket.closeTicket(currentUser.getId(), updated);
 
-        return ticketStoragePort.saveTicket(ticket);
+        ticketStoragePort.saveTicket(ticket);
     }
 
     @PreAuthorize("hasAuthority('support:write')")
     @Transactional
-    public Ticket assignMeTicket(TicketAssignMeCommand command) {
+    public void assignMeTicket(TicketAssignMeCommand command) {
         var currentUser = userProfileService.getCurrentUser();
         var updated = OffsetDateTime.ofInstant(clockManager.now(), ZoneId.systemDefault());
 
@@ -358,19 +356,18 @@ public class TicketService {
 
         ticket.assignTo(currentUser.getId(), updated);
 
-        return ticketStoragePort.saveTicket(ticket);
+        ticketStoragePort.saveTicket(ticket);
     }
 
-    private Set<BrennonUserId> extractRelevantUserIds(Collection<Ticket> tickets) {
+    private Set<BrennonUserId> extractRelevantUserIds(Collection<TicketRecord> tickets) {
         var authorsIds = tickets.stream()
-            .map(t -> t.getAuthor().getId())
+            .map(t -> t.getAuthorId())
             .toList();
 
         var assigneeIds = tickets.stream()
-            .map(t -> t.getAssignee())
+            .map(t -> t.getAssigneeId())
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .map(u -> u.getId())
             .toList();
 
         var userIdSet = new HashSet<BrennonUserId>();
