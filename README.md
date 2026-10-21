@@ -29,7 +29,14 @@ Helpdesk platform
   - [just backing services](ci/docker/docker-compose-backing-services.yml)
   - [full config including brennon service](ci/docker/docker-compose.yml)
 
-### Observability
+### Github Actions
+
+see [manifest](./.github/workflows/ci-default.yml)
+
+To validate manifest use `actionLint`: `docker run --rm -v ./.github/workflows:/workflows rhysd/actionlint:latest -color /workflows/ci-default.yml`
+
+
+## Observability
 
 OTLP is enabled by default. Logging is disabled by default.
 
