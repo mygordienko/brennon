@@ -12,8 +12,8 @@ Frontend is implemented with Thymeleaf and HTMX.
 * Each commit MUST follow Conventional Commits 1.0.0 specification.
 * Branches MUST be named as follows:
     - For new features: `feature/feature-name-with-hyphens`
-    - For fixes: `fix/feature-name-with-hyphens`
-    - For other tasks: `task/feature-name-with-hyphens`
+    - For fixes: `fix/fix-name-with-hyphens`
+    - For other tasks: `task/task-name-with-hyphens`
 
 NO changes allowed in `main` branch.
 DO NOT push.
