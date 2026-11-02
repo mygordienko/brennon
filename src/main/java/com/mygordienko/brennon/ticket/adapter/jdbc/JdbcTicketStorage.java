@@ -26,8 +26,6 @@ import com.mygordienko.brennon.ticket.internal.TicketStoragePort;
 /**
  * NOTE: JdbcAggregateTemplate does not process @DomainEvents.
  *   Moreover, @DomainEvents-related methods are protected and are not accessible for this class.
- *   In Kotlin we could define an extension method for the Ticket class here and use it to publish
- *   domjain events.
  *   Use Spring's CrudRepository to publish events after save automatically.
  */
 public class JdbcTicketStorage implements TicketStoragePort {
@@ -67,17 +65,7 @@ public class JdbcTicketStorage implements TicketStoragePort {
         var safePageable = processPageable(pageable);
         var criteria = Criteria.where("author_id").is(userId);
 
-        if (filter.status() != null) {
-            criteria = criteria.and("status").is(filter.status().getCode());
-        }
-
-        if (filter.id() != null) {
-            criteria = criteria.and("id").is(filter.id().getValue());
-        }
-
-        if (filter.subject() != null) {
-            criteria = criteria.and("subject").like("%" + filter.subject() + "%").ignoreCase(true);
-        }
+        criteria = addFilterCriteria(criteria, filter); 
 
         var query = Query.query(criteria)
             .limit(safePageable.getPageSize())
@@ -106,19 +94,9 @@ public class JdbcTicketStorage implements TicketStoragePort {
             criteria = Criteria.where("assignee_id").isNull();
         } else {
             criteria = Criteria.where("assignee_id").is(userId);
-        } 
-
-        if (filter.status() != null) {
-            criteria = criteria.and("status").is(filter.status().getCode());
         }
-
-        if (filter.id() != null) {
-            criteria = criteria.and("id").is(filter.id().getValue());
-        }
-
-        if (filter.subject() != null) {
-            criteria = criteria.and("subject").like("%" + filter.subject() + "%").ignoreCase(true);
-        }
+        
+        criteria = addFilterCriteria(criteria, filter);   
 
         var query = Query.query(criteria)
             .limit(safePageable.getPageSize())
@@ -135,6 +113,23 @@ public class JdbcTicketStorage implements TicketStoragePort {
             safePageable, 
             totalCount
         );
+    }
+
+    private Criteria addFilterCriteria(Criteria criteria, TicketRequestFilter filter) {
+        if (filter.id() != null) {
+            return criteria.and("id").is(filter.id().getValue());
+        } else {
+            var result = criteria;
+            if (filter.status() != null) {
+                result = result.and("status").is(filter.status().getCode());
+            }
+
+            if (filter.subject() != null) {
+                result = result.and("subject").like("%" + filter.subject() + "%").ignoreCase(true);
+            }
+
+            return result;
+        }
     }
 
     @Override

@@ -41,6 +41,13 @@ create table tickets (
 
 alter sequence tickets_id_seq owned by tickets.id;
 
+create index idx_tickets_assignee_id      on tickets (assignee_id, id);
+create index idx_tickets_assignee_updated on tickets (assignee_id, updated);
+create index idx_tickets_assignee_status_updated on tickets (assignee_id, status, updated);
+create index idx_tickets_author_id      on tickets (author_id, id);
+create index idx_tickets_author_updated on tickets (author_id, updated);
+create index idx_tickets_author_status_updated on tickets (author_id, status, updated);
+
 -- TODO: replies are owned by ticket (no independent IDs)
 create table ticket_replies (
 	id int not null default 0,
@@ -53,6 +60,8 @@ create table ticket_replies (
 	constraint fk_ticket_reply_author foreign key(author_id) references user_profiles(id),
 	constraint uq_ticket_reply unique(id, ticket_id)
 );
+
+create index idx_ticket_replies_ticket_id on ticket_replies (ticket_id);
 
 -- attachments are owned by ticket
 create table ticket_attachments (
@@ -69,7 +78,9 @@ create table ticket_attachments (
 	constraint uq_ticket_attachment unique(id, ticket_id)
 );
 
--- Default users (for test purpose only)
+create index idx_ticket_attachments_ticket_id on ticket_attachments (ticket_id);
+
+-- TODO: Default users (for test purpose only)
 
 insert into user_logins(username, password, enabled)
 values

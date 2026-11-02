@@ -60,6 +60,8 @@ management:
 
 ## Things to note
 
+* DB indexes created for offset pagination. Deep pagination is not expected (users go down to 100th page). Sorting by `created` is supported, but considered much less common than by `updated`.
+
 * [current-user-profile.html](src/main/resources/templates/core/current-user-profile.html) 
     provides a fragment showing user info (name, login, etc) which is used by main layout and
     loaded by HTMX. There is also a dedicated `CurrentUserProfileController` to serve the 
