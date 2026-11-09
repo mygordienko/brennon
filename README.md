@@ -38,11 +38,47 @@ To validate manifest use `actionLint`: `docker run --rm -v ./.github/workflows:/
 
 ## Observability
 
-OTLP is enabled by default. Logging is disabled by default.
+OTLP as a single protocol for metrics, traces and logs. Metrics and Traces are collected by `spring-boot-starter-opentelemetry`. 
+Logging is handled separately with standalone collector due to alpha status of the official Logback/Log4j appenders.
+
+### Logging
+
+**Option 1: Open Telemetry appender**
+
+[official guide](https://spring.io/blog/2025/11/18/opentelemetry-with-spring-boot)
+
+```
+implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:2.33.1-alpha'
+implementation 'io.opentelemetry:opentelemetry-api-incubator:1.59.0-alpha'
+```
+
+Official Open Telemetry appenders are still in **alpha**. Manual dependency version alignment required.
+
+**Option 2: open telemetry collector for logs (what is used)**
+
+```yaml
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+      - ./log:/var/log/brennon:ro
+      - ./otel-data:/etc/otelcol-contrib/.data
+    depends_on:
+      - otel-lgtm
+```
+
+**Option 3: Open Telemetry Java agent**
+
+Ignored intentionally as the intention is to stick with Spring Boot's starter.
+
+### Metrics
+
+Exported via OTLP Micrometer Registry.
+OTLP is enabled by default. Logging (for metrics) is disabled by default.
 
 ```yaml
 management:
-
   metrics:
     tags:
       application: ${spring.application.name}
@@ -57,6 +93,22 @@ management:
         url: "http://localhost:4318/v1/metrics"
         step: "15s"
 ```
+
+### Traces
+
+```yaml
+management:
+  opentelemetry:
+    enabled: true
+    tracing:
+      export:
+        schedule-delay: 5s
+        timeout: 30s
+        otlp:
+          enabled: true
+          endpoint: "http://localhost:4318/v1/traces"
+```
+
 
 ## Things to note
 

@@ -45,6 +45,15 @@ management:
       logging:
         enabled: false
         step: "10s"
+  opentelemetry:
+    enabled: true
+    tracing:
+      export:
+        schedule-delay: 5s
+        timeout: 30s
+        otlp:
+          enabled: true
+          endpoint: "http://localhost:4318/v1/traces"
   otlp:
     metrics:
       export:
@@ -55,7 +64,9 @@ management:
 logging:
   level:
     com.mygordienko.brennon: "DEBUG"
-    # org.springframework.jdbc.core: TRACE
+#    io.opentelemetry.sdk: "TRACE"
+#    io.opentelemetry.instrumentation: "TRACE"
+#    org.springframework.jdbc.core: TRACE
 
 brennon:
   ticket:

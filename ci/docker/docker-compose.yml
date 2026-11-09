@@ -14,6 +14,16 @@ services:
     volumes:
       - ./init-scripts:/docker-entrypoint-initdb.d
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+      - ./log:/var/log/brennon:ro
+      - ./otel-data:/etc/otelcol-contrib/.data
+    depends_on:
+      - otel-lgtm
+
   # Default credentials: admin / admin
   otel-lgtm:
     image: grafana/otel-lgtm
@@ -50,11 +60,14 @@ services:
       SPRING_DATASOURCE_USERNAME: "postgres"
       SPRING_DATASOURCE_PASSWORD: "example"
       MANAGEMENT_OTLP_METRICS_EXPORT_URL: "http://otel-lgtm:4318/v1/metrics"
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: "http://otel-lgtm:4318/v1/traces"
       BRENNON_TICKET_ATTACHMENTS_STORAGE_ACTIVE: "s3"
       BRENNON_TICKET_ATTACHMENTS_STORAGE_S3_ENDPOINT: "http://rustfs:9000"
       BRENNON_TICKET_ATTACHMENTS_STORAGE_S3_CREDENTIALS_ACCESS_KEY_ID: "rustfsadmin"
       BRENNON_TICKET_ATTACHMENTS_STORAGE_S3_CREDENTIALS_SECRET_ACCESS_KEY: "rustfsadminpassword"
     restart: always
+    volumes:
+      - ./log:/var/log/brennon
     depends_on:
       - db
       - rustfs
@@ -65,3 +78,4 @@ services:
 
 volumes:
   rustfs_data:
+  app-logs:
