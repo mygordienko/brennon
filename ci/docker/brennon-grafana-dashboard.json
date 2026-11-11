@@ -4,18 +4,18 @@
   "metadata": {
     "name": "adrp8qr",
     "namespace": "default",
-    "uid": "a5f8a76b-454f-405e-a06d-ab89f6f10c10",
-    "resourceVersion": "1790101518727992",
-    "generation": 22,
-    "creationTimestamp": "2026-09-22T17:54:26Z",
+    "uid": "07f207c5-b8ec-485e-9bbf-a55810e5b845",
+    "resourceVersion": "1794403589099997",
+    "generation": 10,
+    "creationTimestamp": "2026-11-11T12:55:42Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "3778766070804480"
+      "grafana.app/deprecatedInternalID": "3808893248851968"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:cfz1kdlfgswlcc",
-      "grafana.app/saved-from-ui": "Grafana v13.2.1 (56cd3e9288)",
-      "grafana.app/updatedBy": "user:cfz1kdlfgswlcc",
-      "grafana.app/updatedTimestamp": "2026-09-22T18:25:18Z"
+      "grafana.app/createdBy": "user:dg3zappgtqcqob",
+      "grafana.app/saved-from-ui": "Grafana v13.2.2 (1bea008f7e)",
+      "grafana.app/updatedBy": "user:dg3zappgtqcqob",
+      "grafana.app/updatedTimestamp": "2026-11-11T13:26:29Z"
     }
   },
   "spec": {
@@ -86,7 +86,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.1",
+            "version": "13.2.2",
             "spec": {
               "options": {
                 "colorMode": "value",
@@ -154,10 +154,31 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "exemplar": false,
-                        "expr": "min_over_time(brennon_tickets_resolution_time_max_milliseconds{application=\"brennon\"}[5m]) / 1000",
+                        "expr": "sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"1\"}[7d]))\r\n/\r\nsum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"+Inf\"}[7d])) * 100",
                         "instant": false,
-                        "legendFormat": "min (sec)",
+                        "legendFormat": "1h",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(\r\n  sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"4\"}[7d]))\r\n  -\r\n  sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"1\"}[7d]))\r\n)\r\n/\r\nsum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"+Inf\"}[7d])) * 100",
+                        "instant": false,
+                        "legendFormat": "4h",
                         "range": true
                       }
                     },
@@ -177,10 +198,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "exemplar": false,
-                        "expr": "max_over_time(brennon_tickets_resolution_time_max_milliseconds{application=\"brennon\"}[5m]) / 1000",
+                        "expr": "(\r\n  sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"12\"}[7d]))\r\n  -\r\n  sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"4\"}[7d]))\r\n)\r\n/\r\nsum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"+Inf\"}[7d])) * 100",
                         "instant": false,
-                        "legendFormat": "max (sec)",
+                        "legendFormat": "12h",
                         "range": true
                       }
                     },
@@ -200,14 +220,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "exemplar": false,
-                        "expr": "avg_over_time(brennon_tickets_resolution_time_max_milliseconds{application=\"brennon\"}[5m]) / 1000",
+                        "expr": "(\r\n  sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"24\"}[7d]))\r\n  -\r\n  sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"12\"}[7d]))\r\n)\r\n/\r\nsum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"+Inf\"}[7d])) * 100",
                         "instant": false,
-                        "legendFormat": "avg (sec)",
+                        "legendFormat": "24h",
                         "range": true
                       }
                     },
                     "refId": "D",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "prometheus"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(\r\n  sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"48\"}[7d]))\r\n  -\r\n  sum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"24\"}[7d]))\r\n)\r\n/\r\nsum(increase(brennon_tickets_resolution_time_hours_bucket{le=\"+Inf\"}[7d])) * 100",
+                        "instant": false,
+                        "legendFormat": "48h",
+                        "range": true
+                      }
+                    },
+                    "refId": "E",
                     "hidden": false
                   }
                 }
@@ -218,21 +259,32 @@
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "13.2.1",
+            "group": "bargauge",
+            "version": "13.2.2",
             "spec": {
               "options": {
+                "displayMode": "lcd",
                 "legend": {
                   "calcs": [],
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": false
                 },
-                "tooltip": {
-                  "hideZeros": false,
-                  "mode": "single",
-                  "sort": "none"
-                }
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "text"
               },
               "fieldConfig": {
                 "defaults": {
@@ -250,41 +302,7 @@
                     ]
                   },
                   "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "hideFrom": {
-                      "legend": false,
-                      "tooltip": false,
-                      "viz": false
-                    },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": {
-                      "type": "linear"
-                    },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "off"
-                    }
+                    "mode": "continuous-viridis"
                   }
                 },
                 "overrides": []
@@ -333,7 +351,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.1",
+            "version": "13.2.2",
             "spec": {
               "options": {
                 "legend": {

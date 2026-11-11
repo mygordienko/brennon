@@ -10,8 +10,8 @@ import com.mygordienko.brennon.ticket.TicketClosedEvent;
 import com.mygordienko.brennon.ticket.TicketCreatedEvent;
 
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 
 public class TicketMetricsListener {
     public TicketMetricsListener(MeterRegistry meterRegistry) {
@@ -19,15 +19,18 @@ public class TicketMetricsListener {
             .description(TicketMetrics.TICKETS_CREATED.getDescription())
             .register(meterRegistry);
 
-        this.ticketResolutionTimer = Timer.builder(TicketMetrics.TICKET_RESOLUTION_TIME.getCode())
-            .description(TicketMetrics.TICKET_RESOLUTION_TIME.getDescription())
-            .register(meterRegistry);
+        // NOTE: ticket resolution can take days, we can not use Timer or LongTaskTimer
+        this.ticketResolutionDistribution = DistributionSummary.builder(TicketMetrics.TICKET_RESOLUTION_TIME.getCode())
+                .description(TicketMetrics.TICKET_RESOLUTION_TIME.getDescription())
+                .baseUnit("hours")
+                .serviceLevelObjectives(1.0, 4.0, 12.0, 24.0, 48.0, 72.0)
+                .register(meterRegistry);
     }
 
     private static final Logger log = LoggerFactory.getLogger(TicketMetricsListener.class);
 
     private final Counter ticketCreatedCounter;
-    private final Timer ticketResolutionTimer;
+    private final DistributionSummary ticketResolutionDistribution;
 
     @EventListener
     public void handleTicketCreated(TicketCreatedEvent event) {
@@ -38,7 +41,7 @@ public class TicketMetricsListener {
     @EventListener
     public void handleTicketClosed(TicketClosedEvent event) {
         log.debug("Ticket metrics handle TicketClosedEvent: %s".formatted(event));
-        Duration resolutionDuration = Duration.between(event.createdAt(), event.closedAt());
-        ticketResolutionTimer.record(resolutionDuration);
+        Long resolutionDuration = Duration.between(event.createdAt(), event.closedAt()).toHours();
+        ticketResolutionDistribution.record(resolutionDuration);
     }
 } 
