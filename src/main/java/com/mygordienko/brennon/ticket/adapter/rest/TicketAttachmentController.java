@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.fileupload2.core.FileItemInput;
+import org.apache.commons.fileupload2.core.FileItemInputIterator;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -13,14 +16,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.mygordienko.brennon.ticket.TicketAttachmentId;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.internal.ResourceBundle;
 import com.mygordienko.brennon.ticket.internal.TicketAttachmentService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RequestMapping("/api/v1/tickets")
 @RestController 
@@ -35,19 +38,34 @@ public class TicketAttachmentController {
     private final TicketAttachmentService ticketAttachmentService;
     private final FileContentValidator fileContentValidator;
 
+    /**
+     * NOTE: Custom multipart processing to achieve pure streaming without storing request into temp files.
+     */
     @PostMapping("/attachments/upload")
-    public UploadedFileDto upload(
-        @RequestParam("file") MultipartFile file
-    ) {
+    public UploadedFileDto upload(HttpServletRequest request) {
         var fileId = ticketAttachmentService.gernerateNextFileId();
+        try {
+            @SuppressWarnings("rawtypes")
+            JakartaServletFileUpload upload = new JakartaServletFileUpload();
+            FileItemInputIterator iter = upload.getItemIterator(request);
 
-        checkFileName(file.getOriginalFilename());
+            while (iter.hasNext()) {
+                FileItemInput item = iter.next();
+                if (!item.isFormField()) {
+                    
+                    String fileName = item.getName();
+                    checkFileName(fileName);
 
-        try (var is = fileContentValidator.checkRealFileType(file.getInputStream())) {
-            log.info("Uploading file {}", file.getOriginalFilename());
-            ticketAttachmentService.saveTemp(fileId, is, file.getOriginalFilename());
+                    try (var is = fileContentValidator.checkRealFileType(item.getInputStream())) {
+                        log.info("Uploading file {}", fileName);
+                        ticketAttachmentService.saveTemp(fileId, is, fileName);
+                    }
+                    // NOTE: we expect single file per request
+                    break;
+                }
+            }
         } catch (IOException e) {
-            throw new RuntimeException("Erorr uploading file", e);
+            throw new RuntimeException("Error uploading file", e);
         }
 
         return new UploadedFileDto(fileId.toString());

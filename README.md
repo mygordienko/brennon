@@ -112,6 +112,8 @@ management:
 
 ## Things to note
 
+* To achieve pure streaming file upload the default Spring's multipart data processing must be disabled (globally via properties or for specific endpoints via custom bean, see `MultipartConfig`). By default whanr using `@RequestParam` with `MultipartFile` the request body will be cached in temp files or memory (if small enough). Note that Spring Security can interfere and trigger request body to be cached, ex. when checking CSRF token passed via hidden form field, pass it via headers then. Here we use Uppy library for file upload and we do it via separate Ajax request to dedicated REST controller, CSRF token is passed in headers, see [scripts.html](src/main/resources/templates/ticket/fragments/scripts.html).
+
 * DB indexes created for offset pagination. Deep pagination is not expected (users go down to 100th page). Sorting by `created` is supported, but considered much less common than by `updated`.
 
 * [current-user-profile.html](src/main/resources/templates/core/current-user-profile.html) 
