@@ -26,7 +26,6 @@ When asked to implement a new feature or change existing code stick with the fol
 
 Understand → Plan → Implement → Test → Review → Commit
 
-Ask for confirmation and permission to proceed AFTER EACH step. DO NOT proceed without permission.
 The steps are described below:
 
 * Understand: Read the task thoroughly before writing any code. Clarify scope, acceptance criteria, and edge cases. If the issue is ambiguous, ask the user for clarification rather than guessing. Read the relevant docs in `.dev/agent_docs` folder (if available) to get project-specific guidelines — do not read them all upfront.
