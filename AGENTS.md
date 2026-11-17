@@ -1,6 +1,7 @@
 # AI Agent Instructions
 
-This file provides guidance on how to work with code in the Brennon repository.
+THis is Git repository for Brennon application. Brennon is a helpdesk platform.
+This file provides guidance on how to work with code in this repository.
 
 ## Project overview
 
