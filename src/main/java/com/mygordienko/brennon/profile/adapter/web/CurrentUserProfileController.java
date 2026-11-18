@@ -1,10 +1,11 @@
-package com.mygordienko.brennon.core.auth.adapter.web;
+package com.mygordienko.brennon.profile.adapter.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.mygordienko.brennon.core.auth.internal.BrennonUserProfileService;
+import com.mygordienko.brennon.core.auth.adapter.web.UserInfoDto;
+import com.mygordienko.brennon.profile.internal.BrennonUserProfileService;
 
 @Controller
 public class CurrentUserProfileController {

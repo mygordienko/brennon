@@ -18,8 +18,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
 import com.mygordienko.brennon.core.common.ClockManager;
+import com.mygordienko.brennon.profile.BrennonUserProfileInfoApi;
 import com.mygordienko.brennon.ticket.FileId;
 import com.mygordienko.brennon.ticket.MissingTicketAttachmentException;
 import com.mygordienko.brennon.ticket.MissingTicketException;
@@ -41,7 +41,7 @@ import com.mygordienko.brennon.ticket.TicketStatus;
 
 public class TicketService {
     public TicketService(
-        BrennonUserInfoApi userProfileService, 
+        BrennonUserProfileInfoApi userProfileService, 
         TicketStoragePort ticketStoragePort,
         TicketSecurityManager ticketSecurityManager,
         TicketAttachmentStoragePort ticketAttachmentStoragePort,
@@ -57,7 +57,7 @@ public class TicketService {
     private static final String DEFAULT_ATTACHMENT_NAME = "attachment";
 
 
-    private final BrennonUserInfoApi userProfileService;
+    private final BrennonUserProfileInfoApi userProfileService;
     private final TicketStoragePort ticketStoragePort;
     private final TicketSecurityManager ticketSecurityManager;
     private final TicketAttachmentStoragePort ticketAttachmentStoragePort;

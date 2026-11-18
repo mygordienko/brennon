@@ -10,7 +10,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.core.auth.BrennonUserProfile;
+import com.mygordienko.brennon.profile.BrennonUserProfile;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
 

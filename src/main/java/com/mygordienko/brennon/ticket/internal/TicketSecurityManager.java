@@ -2,16 +2,16 @@ package com.mygordienko.brennon.ticket.internal;
 
 import org.jspecify.annotations.NonNull;
 
-import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
-import com.mygordienko.brennon.core.auth.BrennonUserProfile;
+import com.mygordienko.brennon.core.auth.BrennonUserAccountApi;
 import com.mygordienko.brennon.core.auth.MissingUserException;
+import com.mygordienko.brennon.profile.BrennonUserProfile;
 
 public class TicketSecurityManager {
-    public TicketSecurityManager(BrennonUserInfoApi userService) {
+    public TicketSecurityManager(BrennonUserAccountApi userService) {
         this.userService = userService;
     }
 
-    private final BrennonUserInfoApi userService;
+    private final BrennonUserAccountApi userService;
 
     public boolean userCanRead(@NonNull BrennonUserProfile currentUser, @NonNull Ticket ticket) {
         var currentUserAccount = userService.getUserAccount(currentUser.getLogin()).orElseThrow(() -> MissingUserException.forLogin(currentUser.getLogin()));

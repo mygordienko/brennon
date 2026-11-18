@@ -2,7 +2,7 @@ package com.mygordienko.brennon.ticket;
 
 import java.time.OffsetDateTime;
 
-import com.mygordienko.brennon.core.auth.BrennonUserProfile;
+import com.mygordienko.brennon.profile.BrennonUserProfile;
 
 import lombok.Getter;
 

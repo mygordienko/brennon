@@ -1,9 +1,12 @@
-package com.mygordienko.brennon.core.auth;
+package com.mygordienko.brennon.profile;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
+import com.mygordienko.brennon.core.auth.BrennonUserId;
+import com.mygordienko.brennon.core.auth.BrennonUserLogin;
 
 import lombok.Getter;
 

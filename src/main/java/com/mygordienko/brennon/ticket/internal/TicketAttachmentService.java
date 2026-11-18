@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
+import com.mygordienko.brennon.profile.BrennonUserProfileInfoApi;
 import com.mygordienko.brennon.ticket.FileId;
 import com.mygordienko.brennon.ticket.MissingTicketAttachmentException;
 import com.mygordienko.brennon.ticket.MissingTicketException;
@@ -22,7 +22,7 @@ public class TicketAttachmentService {
             TicketStoragePort ticketStoragePort,
             TicketAttachmentStoragePort ticketAttachmentStoragePort, 
             TicketSecurityManager ticketSecurityManager,
-            BrennonUserInfoApi userProfileService) {
+            BrennonUserProfileInfoApi userProfileService) {
         this.ticketStoragePort = ticketStoragePort;
         this.ticketAttachmentStoragePort = ticketAttachmentStoragePort;
         this.ticketSecurityManager = ticketSecurityManager;
@@ -34,7 +34,7 @@ public class TicketAttachmentService {
     private final TicketStoragePort ticketStoragePort;
     private final TicketAttachmentStoragePort ticketAttachmentStoragePort;
     private final TicketSecurityManager ticketSecurityManager;
-    private final BrennonUserInfoApi userProfileService;
+    private final BrennonUserProfileInfoApi userProfileService;
 
     @PreAuthorize("hasAuthority('user:write')")
     public FileId gernerateNextFileId() {

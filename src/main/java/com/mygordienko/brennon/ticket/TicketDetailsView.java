@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.mygordienko.brennon.core.auth.BrennonUserProfile;
+import com.mygordienko.brennon.profile.BrennonUserProfile;
 import com.mygordienko.brennon.ticket.internal.Ticket;
 
 import lombok.Getter;

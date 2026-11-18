@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.core.auth.di;
+package com.mygordienko.brennon.core.common.di;
 
 import javax.sql.DataSource;
 

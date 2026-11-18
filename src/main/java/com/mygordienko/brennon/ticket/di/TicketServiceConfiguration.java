@@ -10,9 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
-import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
-import com.mygordienko.brennon.core.auth.internal.BrennonUserProfileService;
+import com.mygordienko.brennon.core.auth.BrennonUserAccountApi;
 import com.mygordienko.brennon.core.common.ClockManager;
+import com.mygordienko.brennon.profile.BrennonUserProfileInfoApi;
+import com.mygordienko.brennon.profile.internal.BrennonUserProfileService;
 import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
 import com.mygordienko.brennon.ticket.adapter.jdbc.TicketCrudRepository;
 import com.mygordienko.brennon.ticket.adapter.rest.FileContentValidator;
@@ -42,8 +43,8 @@ public class TicketServiceConfiguration {
     }
 
     @Bean
-    public TicketSecurityManager ticketSecurityManager(BrennonUserInfoApi userProfileService) {
-        return new TicketSecurityManager(userProfileService);
+    public TicketSecurityManager ticketSecurityManager(BrennonUserAccountApi userAccountApi) {
+        return new TicketSecurityManager(userAccountApi);
     }
 
     @Bean
@@ -118,7 +119,7 @@ public class TicketServiceConfiguration {
             TicketStoragePort ticketStoragePort,
             TicketAttachmentStoragePort ticketAttachmentStoragePort, 
             TicketSecurityManager ticketSecurityManager,
-            BrennonUserInfoApi userProfileService) {
+            BrennonUserProfileInfoApi userProfileService) {
         return new TicketAttachmentService(ticketStoragePort, ticketAttachmentStoragePort, ticketSecurityManager, userProfileService);
     }
 

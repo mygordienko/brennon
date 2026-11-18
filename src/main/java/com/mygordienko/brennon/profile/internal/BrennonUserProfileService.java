@@ -1,26 +1,24 @@
-package com.mygordienko.brennon.core.auth.internal;
+package com.mygordienko.brennon.profile.internal;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
-import com.mygordienko.brennon.core.auth.BrennonUserAccount;
+import com.mygordienko.brennon.core.auth.BrennonUserAccountApi;
 import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.core.auth.BrennonUserInfoApi;
-import com.mygordienko.brennon.core.auth.BrennonUserLogin;
-import com.mygordienko.brennon.core.auth.BrennonUserProfile;
 import com.mygordienko.brennon.core.auth.MissingUserException;
+import com.mygordienko.brennon.profile.BrennonUserProfile;
+import com.mygordienko.brennon.profile.BrennonUserProfileInfoApi;
 
-public class BrennonUserProfileService implements BrennonUserInfoApi {
+public class BrennonUserProfileService implements BrennonUserProfileInfoApi {
     public BrennonUserProfileService(BrennonUserProfilePort userStoragePort,
-        BrennonUserAccountPort userPort
+        BrennonUserAccountApi userPort
     ) {
         this.userStoragePort = userStoragePort;
         this.userPort = userPort;
     }
 
     private final BrennonUserProfilePort userStoragePort;
-    private final BrennonUserAccountPort userPort;
+    private final BrennonUserAccountApi userPort;
 
     @Override
     public BrennonUserProfile getUser(BrennonUserId userId) {
@@ -38,10 +36,5 @@ public class BrennonUserProfileService implements BrennonUserInfoApi {
         .orElseThrow(() -> new RuntimeException("Missing auth context"));
         return userStoragePort.getByLogin(username)
         .orElseThrow(() -> MissingUserException.forLogin(username));
-    }
-    
-    @Override
-    public Optional<BrennonUserAccount> getUserAccount(BrennonUserLogin login) {
-        return userPort.getUserAccount(login);
     }
 }
