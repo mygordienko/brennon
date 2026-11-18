@@ -25,7 +25,7 @@ services:
       - 4318:4318
 
   rustfs:
-    image: rustfs/rustfs:latest
+    image: rustfs/rustfs:1.0.1
     container_name: rustfs-server
     security_opt:
       - "no-new-privileges:true" # Preventing Privilege Escalation
