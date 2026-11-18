@@ -6,12 +6,15 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.fileupload2.core.FileItemInput;
 import org.apache.commons.fileupload2.core.FileItemInputIterator;
+import org.apache.commons.fileupload2.core.FileUploadSizeException;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,15 +31,23 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/api/v1/tickets")
 @RestController 
 public class TicketAttachmentController {
-    public TicketAttachmentController(TicketAttachmentService ticketAttachmentService, FileContentValidator fileContentValidator) {
+    public TicketAttachmentController(
+        TicketAttachmentService ticketAttachmentService, 
+        FileContentValidator fileContentValidator,
+        @Value("${spring.servlet.multipart.max-file-size:5MB}") DataSize maxFileSize,
+        @Value("${spring.servlet.multipart.max-request-size:5MB}") DataSize maxRequestSize) {
         this.ticketAttachmentService = ticketAttachmentService;
         this.fileContentValidator = new FileContentValidator();
+        this.maxFileSize = maxFileSize;
+        this.maxRequestSize = maxRequestSize;
     }
 
     private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.ticket.adapter.web.TicketAttachmentController");
 
     private final TicketAttachmentService ticketAttachmentService;
     private final FileContentValidator fileContentValidator;
+    private final DataSize maxFileSize;
+    private final DataSize maxRequestSize;
 
     /**
      * NOTE: Custom multipart processing to achieve pure streaming without storing request into temp files.
@@ -47,6 +58,9 @@ public class TicketAttachmentController {
         try {
             @SuppressWarnings("rawtypes")
             JakartaServletFileUpload upload = new JakartaServletFileUpload();
+            upload.setMaxFileSize(maxFileSize.toBytes());
+            upload.setMaxSize(maxRequestSize.toBytes());
+            upload.setMaxFileCount(1);
             FileItemInputIterator iter = upload.getItemIterator(request);
 
             while (iter.hasNext()) {
@@ -64,6 +78,8 @@ public class TicketAttachmentController {
                     break;
                 }
             }
+        } catch (FileUploadSizeException e) {
+            throw new IllegalArgumentException("Attachment is too large");
         } catch (IOException e) {
             throw new RuntimeException("Error uploading file", e);
         }

@@ -115,6 +115,11 @@
                 updateHiddenInput();
             };
 
+            uppy.on('restriction-failed', (file, error) => {
+                console.error(`Rejected ${file?.name}: ${error.message}`);
+                alert(`${file?.name} rejected. ${error.message}`);
+            });
+
             uppy.on('upload-error', (file, error, response) => {
                 console.error(`Failed to upload file: ${file.name}`);
                 console.error('Error detail:', error);

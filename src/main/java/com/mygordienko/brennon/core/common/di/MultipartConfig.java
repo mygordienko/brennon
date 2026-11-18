@@ -1,5 +1,7 @@
 package com.mygordienko.brennon.core.common.di;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -28,13 +30,21 @@ public class MultipartConfig {
         return new StandardServletMultipartResolver() {
             private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.core.common.di.StandardServletMultipartResolverCustom");
             
+            private final List<String> pathsToDisableMultipart = List.of(
+            "/api/v1/tickets/attachments/upload"
+            );
+
             @Override
             public boolean isMultipart(HttpServletRequest request) {
-                if (request.getRequestURI().endsWith("/api/v1/tickets/attachments/upload")) {
-                    log.info("Custom isMultipart: {}", false);
+
+                var targetRequest = pathsToDisableMultipart.stream()
+                    .anyMatch(s -> request.getRequestURI().endsWith(s));
+
+                if (targetRequest) {
+                    log.debug("Custom isMultipart: {}", false);
                     return false;
                 }
-                log.info("Custom isMultipart: {}", true);
+                log.debug("Custom isMultipart: {}", true);
                 return super.isMultipart(request);
             }
         };
