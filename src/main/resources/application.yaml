@@ -80,3 +80,14 @@ brennon:
           credentials:
             accessKeyId: "rustfsadmin"
             secretAccessKey: "rustfsadminpassword"
+  profile:
+    images:
+      storage:
+        active: "s3"
+        local:
+          basefolder: "/brennon-profile"
+        s3:
+          endpoint: "http://localhost:9000"
+          credentials:
+            accessKeyId: "rustfsadmin"
+            secretAccessKey: "rustfsadminpassword"

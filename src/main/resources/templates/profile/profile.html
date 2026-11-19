@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="#{profile.title}">Profile</title>
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <main class="flex-1 flex flex-col p-6 md:p-10 overflow-hidden relative">
+            <h1 class="text-2xl font-bold text-(--color-content-text-main) mb-6" th:text="#{profile.title}">Profile</h1>
+
+            <div th:if="${param.updated != null}"
+                 class="mb-6 rounded-md border border-(--color-control-border) bg-(--color-brand-blue)/10 px-4 py-3 text-sm text-(--color-content-text-main)"
+                 th:text="#{profile.image.updated}">
+                Profile image updated
+            </div>
+
+            <div class="flex flex-col items-center mt-4 mb-10">
+                <div class="w-40 h-40 rounded-full border-2 border-[#3b82f6] flex items-center justify-center mb-4 bg-[#1a1a1a] overflow-hidden">
+                    <img th:if="${currentUser.hasProfileImage()}"
+                         th:src="@{/api/v1/profile/image}"
+                         alt="Profile image"
+                         class="w-full h-full object-cover" />
+                    <svg th:unless="${currentUser.hasProfileImage()}" class="w-24 h-24 text-(--color-brand-blue)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold" th:text="${currentUser.fullName()}">John Doe</h2>
+                <p class="text-sm text-(--color-brand-blue) italic" th:text="${currentUser.email()}">User</p>
+            </div>
+
+            <form th:action="@{/profile/image}" th:object="${profileImageForm}" method="post" class="flex flex-col space-y-6">
+                <div class="space-y-2">
+                    <div id="custom-upload-picker"
+                         class="text-(--color-brand-blue) hover:text-(--color-content-text-main) w-fit rounded-md py-2 text-sm font-medium shadow-sm transition-colors"></div>
+
+                    <ul id="custom-file-list" class="divide-y divide-(--color-control-border) border border-(--color-control-border) rounded-lg hidden">
+                        <!-- JavaScript will inject <li> items here -->
+                    </ul>
+                </div>
+
+                <input type="hidden" id="concatenated-file-ids" th:field="*{fileId}" />
+                
+
+                <div class="flex flex-col md:flex-row">
+                    <div th:if="${#fields.hasErrors('fileId')}" class="text-(--color-error-text) text-sm font-medium" th:errors="*{fileId}">Validation error</div>
+
+                    <div class="flex space-x-4 ml-auto">
+                        <button type="submit"
+                                th:text="#{common.action.save}"
+                                class="bg-blue-500 hover:bg-(--color-button-regular-hover) text-(--color-content-text-main) rounded-md px-8 py-2 text-sm font-medium shadow-sm transition-colors">
+                            Save
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </th:block>
+    <th:block layout:fragment="script-content">
+        <th:block th:replace="~{fragments/scripts :: uppyLoader(@{/api/v1/profile/images/upload}, 1, 'custom-upload-picker', 'custom-file-list', #{profile.choosefile})}"></th:block>
+    </th:block>
+</body>
+</html>

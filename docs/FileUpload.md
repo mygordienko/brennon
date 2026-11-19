@@ -8,7 +8,8 @@ public MultipartResolver multipartResolver() {
     return new StandardServletMultipartResolver() {
         @Override
         public boolean isMultipart(HttpServletRequest request) {
-            if (request.getRequestURI().endsWith("/api/v1/tickets/attachments/upload")) {
+            if (request.getRequestURI().endsWith("/api/v1/tickets/attachments/upload")
+                    || request.getRequestURI().endsWith("/api/v1/profile/images/upload")) {
                 return false;
             }
             return super.isMultipart(request);

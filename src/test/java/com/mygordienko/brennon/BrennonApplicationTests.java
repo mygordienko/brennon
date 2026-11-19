@@ -1,10 +1,20 @@
-	package com.mygordienko.brennon;
+package com.mygordienko.brennon;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -13,7 +23,11 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 @SpringBootTest
+@AutoConfigureMockMvc
 class BrennonApplicationTests {
+
+	@Autowired
+	MockMvc mockMvc;
 
 	@Container
 	@ServiceConnection
@@ -46,9 +60,30 @@ class BrennonApplicationTests {
         registry.add("brennon.ticket.attachments.storage.s3.endpoint", () -> "http://%s:%s".formatted(host, mappedPort));
         registry.add("brennon.ticket.attachments.storage.s3.credentials.accessKeyId", () -> accessKeyId);
 		registry.add("brennon.ticket.attachments.storage.s3.credentials.secretAccessKey", () -> secretAccessKey);
+        registry.add("brennon.profile.images.storage.s3.endpoint", () -> "http://%s:%s".formatted(host, mappedPort));
+        registry.add("brennon.profile.images.storage.s3.credentials.accessKeyId", () -> accessKeyId);
+        registry.add("brennon.profile.images.storage.s3.credentials.secretAccessKey", () -> secretAccessKey);
     }
 
 	@Test
 	void contextLoads() {
+	}
+
+	@Test
+	void profilePageRenders() throws Exception {
+		mockMvc.perform(get("/profile").with(user("john@mail.com").authorities(
+				new SimpleGrantedAuthority("user:read"),
+				new SimpleGrantedAuthority("user:write"))))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("Choose profile image")));
+	}
+
+	@Test
+	void currentUserProfileFragmentRenders() throws Exception {
+		mockMvc.perform(get("/current-user-profile").with(user("john@mail.com").authorities(
+				new SimpleGrantedAuthority("user:read"),
+				new SimpleGrantedAuthority("user:write"))))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("John Smith")));
 	}
 }

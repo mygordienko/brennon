@@ -31,7 +31,8 @@ public class MultipartConfig {
             private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.core.common.di.StandardServletMultipartResolverCustom");
             
             private final List<String> pathsToDisableMultipart = List.of(
-            "/api/v1/tickets/attachments/upload"
+            "/api/v1/tickets/attachments/upload",
+            "/api/v1/profile/images/upload"
             );
 
             @Override

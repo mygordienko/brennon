@@ -3,6 +3,7 @@ package com.mygordienko.brennon.ticket.di;
 import java.net.URI;
 import java.nio.file.Paths;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -98,7 +99,9 @@ public class TicketServiceConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "brennon.ticket.attachments.storage", name = "active", havingValue = "s3", matchIfMissing = false)
-    public S3Template s3Template(S3Client s3Client, S3Presigner s3Presigner) {
+    public S3Template s3Template(
+            @Qualifier("s3Client") S3Client s3Client,
+            @Qualifier("s3Presigner") S3Presigner s3Presigner) {
         InMemoryBufferingS3OutputStreamProvider outputStreamProvider =
                 new InMemoryBufferingS3OutputStreamProvider(s3Client, null);
 
@@ -110,7 +113,9 @@ public class TicketServiceConfiguration {
 
     @Bean
     @ConditionalOnProperty(prefix = "brennon.ticket.attachments.storage", name = "active", havingValue = "s3", matchIfMissing = false)
-    public TicketAttachmentStoragePort s3TicketAttachmentStoragePort(S3Template s3Template, S3Client s3Client) {
+    public TicketAttachmentStoragePort s3TicketAttachmentStoragePort(
+            @Qualifier("s3Template") S3Template s3Template,
+            @Qualifier("s3Client") S3Client s3Client) {
         return new S3TicketAttachmentStorage(s3Template, s3Client);
     }
 
