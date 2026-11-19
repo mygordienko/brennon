@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.ticket;
+package com.mygordienko.brennon.core.common;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

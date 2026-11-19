@@ -14,11 +14,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.ticket.FileId;
-import com.mygordienko.brennon.ticket.FileMeta;
+import com.mygordienko.brennon.core.common.FileId;
+import com.mygordienko.brennon.core.common.FileMeta;
+import com.mygordienko.brennon.core.common.ResourceBundle;
 import com.mygordienko.brennon.ticket.TicketAttachmentStorageException;
 import com.mygordienko.brennon.ticket.TicketId;
-import com.mygordienko.brennon.ticket.internal.ResourceBundle;
 import com.mygordienko.brennon.ticket.internal.TicketAttachmentStoragePort;
 
 public class LocalFileSystemTicketAttachmentStorage implements TicketAttachmentStoragePort {

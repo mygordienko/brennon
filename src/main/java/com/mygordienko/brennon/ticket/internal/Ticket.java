@@ -19,8 +19,8 @@ import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
+import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.profile.BrennonUserProfile;
-import com.mygordienko.brennon.ticket.FileId;
 import com.mygordienko.brennon.ticket.MissingTicketReplyException;
 import com.mygordienko.brennon.ticket.TicketAttachmentAddedEvent;
 import com.mygordienko.brennon.ticket.TicketAttachmentId;

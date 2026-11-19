@@ -8,8 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import com.mygordienko.brennon.core.common.FileId;
+import com.mygordienko.brennon.core.common.ResourceBundle;
 import com.mygordienko.brennon.profile.BrennonUserProfileInfoApi;
-import com.mygordienko.brennon.ticket.FileId;
 import com.mygordienko.brennon.ticket.MissingTicketAttachmentException;
 import com.mygordienko.brennon.ticket.MissingTicketException;
 import com.mygordienko.brennon.ticket.TicketAttachmentAddedEvent;

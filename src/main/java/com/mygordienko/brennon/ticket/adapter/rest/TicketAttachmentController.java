@@ -21,9 +21,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mygordienko.brennon.core.common.ResourceBundle;
+import com.mygordienko.brennon.core.common.adapter.FileContentValidator;
 import com.mygordienko.brennon.ticket.TicketAttachmentId;
 import com.mygordienko.brennon.ticket.TicketId;
-import com.mygordienko.brennon.ticket.internal.ResourceBundle;
 import com.mygordienko.brennon.ticket.internal.TicketAttachmentService;
 
 import jakarta.servlet.http.HttpServletRequest;

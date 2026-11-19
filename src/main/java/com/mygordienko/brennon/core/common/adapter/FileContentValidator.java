@@ -1,4 +1,4 @@
-package com.mygordienko.brennon.ticket.adapter.rest;
+package com.mygordienko.brennon.core.common.adapter;
 
 import java.io.IOException;
 import java.io.InputStream;

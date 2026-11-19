@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.common.ClockManager;
+import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.profile.BrennonUserProfileInfoApi;
-import com.mygordienko.brennon.ticket.FileId;
 import com.mygordienko.brennon.ticket.MissingTicketAttachmentException;
 import com.mygordienko.brennon.ticket.MissingTicketException;
 import com.mygordienko.brennon.ticket.TicketAssignMeCommand;

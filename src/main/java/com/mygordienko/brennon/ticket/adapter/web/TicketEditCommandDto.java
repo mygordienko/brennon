@@ -3,7 +3,7 @@ package com.mygordienko.brennon.ticket.adapter.web;
 import java.util.Collection;
 import java.util.List;
 
-import com.mygordienko.brennon.ticket.FileId;
+import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.ticket.TicketAttachmentId;
 import com.mygordienko.brennon.ticket.TicketEditCommand;
 import com.mygordienko.brennon.ticket.TicketId;

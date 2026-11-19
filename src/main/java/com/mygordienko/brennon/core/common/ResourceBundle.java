@@ -1,8 +1,6 @@
-package com.mygordienko.brennon.ticket.internal;
+package com.mygordienko.brennon.core.common;
 
 import org.springframework.core.io.Resource;
-
-import com.mygordienko.brennon.ticket.FileMeta;
 
 public record ResourceBundle(
     Resource resource,

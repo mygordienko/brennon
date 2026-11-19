@@ -12,11 +12,11 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 
 import com.mygordienko.brennon.core.auth.BrennonUserAccountApi;
 import com.mygordienko.brennon.core.common.ClockManager;
+import com.mygordienko.brennon.core.common.adapter.FileContentValidator;
 import com.mygordienko.brennon.profile.BrennonUserProfileInfoApi;
 import com.mygordienko.brennon.profile.internal.BrennonUserProfileService;
 import com.mygordienko.brennon.ticket.adapter.jdbc.JdbcTicketStorage;
 import com.mygordienko.brennon.ticket.adapter.jdbc.TicketCrudRepository;
-import com.mygordienko.brennon.ticket.adapter.rest.FileContentValidator;
 import com.mygordienko.brennon.ticket.adapter.storage.LocalFileSystemTicketAttachmentStorage;
 import com.mygordienko.brennon.ticket.adapter.storage.S3TicketAttachmentStorage;
 import com.mygordienko.brennon.ticket.internal.TicketAttachmentService;
