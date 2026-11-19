@@ -1,4 +1,5 @@
 <configuration>
+    <!-- NOTE: this configuration enables only console appender for tests, the main config will fail in CI due to file appenders-->
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
 
