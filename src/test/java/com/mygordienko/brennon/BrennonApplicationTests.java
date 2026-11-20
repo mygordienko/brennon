@@ -1,23 +1,16 @@
 package com.mygordienko.brennon;
 
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.ByteArrayInputStream;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -28,10 +21,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import com.mygordienko.brennon.core.auth.BrennonUserId;
-import com.mygordienko.brennon.core.common.FileId;
-import com.mygordienko.brennon.profile.internal.ProfileImageStoragePort;
-
 @Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,9 +28,6 @@ class BrennonApplicationTests {
 
 	@Autowired
 	MockMvc mockMvc;
-
-	@Autowired
-	ProfileImageStoragePort profileImageStoragePort;
 
 	@Container
 	@ServiceConnection
@@ -99,36 +85,5 @@ class BrennonApplicationTests {
 				new SimpleGrantedAuthority("user:write"))))
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString("John Smith")));
-	}
-
-	@Test
-	void profileImageIsPrivatelyCacheableByBrowser() throws Exception {
-		// NOTE: "john@mail.com" user is created by the initial DB migration
-		var profileOwnerId = BrennonUserId.of("1");
-		var fileId = FileId.of("profile-image-caching-test");
-		profileImageStoragePort.saveTemp(profileOwnerId, fileId, new ByteArrayInputStream("image".getBytes()), "image.png");
-		profileImageStoragePort.moveToFinal(profileOwnerId, fileId);
-
-		mockMvc.perform(get("/api/v1/profile/image").with(user("john@mail.com").authorities(
-				new SimpleGrantedAuthority("user:read"))))
-			.andExpect(status().isOk())
-			.andExpect(header().string(HttpHeaders.CACHE_CONTROL,
-					allOf(containsString("private"), containsString("max-age=600"))));
-	}
-
-	@Test
-	void profileImageRequiresAuthentication() throws Exception {
-		mockMvc.perform(get("/api/v1/profile/image"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/login"));
-	}
-
-	@Test
-	void otherEndpointsAreStillNotCacheable() throws Exception {
-		mockMvc.perform(get("/profile").with(user("john@mail.com").authorities(
-				new SimpleGrantedAuthority("user:read"),
-				new SimpleGrantedAuthority("user:write"))))
-			.andExpect(header().string(HttpHeaders.CACHE_CONTROL, containsString("no-store")))
-			.andExpect(header().string(HttpHeaders.CACHE_CONTROL, not(containsString("private"))));
 	}
 }

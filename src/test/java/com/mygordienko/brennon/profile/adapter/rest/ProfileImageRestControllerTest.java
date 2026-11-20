@@ -1,65 +1,89 @@
 package com.mygordienko.brennon.profile.adapter.rest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.unit.DataSize;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
+import com.mygordienko.brennon.core.auth.di.CoreSecurityConfiguration;
 import com.mygordienko.brennon.core.common.FileMeta;
 import com.mygordienko.brennon.core.common.ResourceBundle;
 import com.mygordienko.brennon.core.common.adapter.FileContentValidator;
+import com.mygordienko.brennon.profile.di.ProfileImageHttpCachingConfiguration;
 import com.mygordienko.brennon.profile.internal.ProfileImageService;
 
+/**
+ * NOTE: feature-specific security configuration is imported to verify that it does not clash with
+ * the caching headers produced by the controller.
+ */
+@WebMvcTest(ProfileImageRestController.class)
+@Import({CoreSecurityConfiguration.class, ProfileImageHttpCachingConfiguration.class})
 public class ProfileImageRestControllerTest {
 
-    private final ProfileImageService profileImageService = mock(ProfileImageService.class);
+    @Autowired
+    private MockMvc mockMvc;
 
-    private ProfileImageRestController controller;
+    @MockitoBean
+    private ProfileImageService profileImageService;
 
-    @BeforeEach
-    public void setUp() {
-        controller = new ProfileImageRestController(
-                profileImageService,
-                mock(FileContentValidator.class),
-                DataSize.ofMegabytes(5),
-                DataSize.ofMegabytes(5));
-    }
+    @MockitoBean
+    private FileContentValidator fileContentValidator;
+
+    /**
+     * NOTE: replace the origin UserDetailsService bean from CoreSecurityConfig
+     */
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     @Test
     @DisplayName("Profile image is privately cached by the browser")
-    public void givenProfileImage_whenImageRequested_thenResponseIsPrivatelyCacheable() {
+    public void givenProfileImage_whenImageRequested_thenResponseIsPrivatelyCacheable() throws Exception {
         when(profileImageService.getCurrentUserProfileImage())
                 .thenReturn(Optional.of(new ResourceBundle(
                         new ByteArrayResource("image".getBytes()), new FileMeta("image.png"))));
 
-        var response = controller.getImage();
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getHeaders().getCacheControl())
-                .contains("private")
-                .contains("max-age=600")
-                .doesNotContain("no-store");
-        // NOTE: image is per user
-        assertThat(response.getHeaders().getVary()).contains(HttpHeaders.COOKIE);
+        mockMvc.perform(get("/api/v1/profile/image").with(user("john")
+                        .authorities(new SimpleGrantedAuthority("user:read"))))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL,
+                        allOf(containsString("private"), containsString("max-age=600"))))
+                // NOTE: image is per user
+                .andExpect(header().string(HttpHeaders.VARY, containsString(HttpHeaders.COOKIE)))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "image/png"));
     }
 
     @Test
     @DisplayName("Absent profile image must not be cached")
-    public void givenNoProfileImage_whenImageRequested_thenResponseIsNotCacheable() {
+    public void givenNoProfileImage_whenImageRequested_thenResponseIsNotCacheable() throws Exception {
         when(profileImageService.getCurrentUserProfileImage()).thenReturn(Optional.empty());
 
-        var response = controller.getImage();
+        mockMvc.perform(get("/api/v1/profile/image").with(user("john")
+                        .authorities(new SimpleGrantedAuthority("user:read"))))
+                .andExpect(status().isNotFound())
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"));
+    }
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getHeaders().getCacheControl()).isEqualTo("no-store");
+    @Test
+    @DisplayName("Profile image is not available without authentication")
+    public void givenNoAuthentication_whenImageRequested_thenAccessIsDenied() throws Exception {
+        mockMvc.perform(get("/api/v1/profile/image"))
+                .andExpect(status().isForbidden());
     }
 }
