@@ -1,6 +1,7 @@
 package com.mygordienko.brennon.profile.adapter.rest;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -45,6 +47,13 @@ public class ProfileImageRestController {
     }
 
     private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.profile.adapter.rest.ProfileImageRestController");
+
+    /**
+     * NOTE: profile image is cached by the browser only, see `ProfileImageHttpCachingConfiguration`
+     * for the security part of the caching policy. The image URL is stable, so a freshly uploaded
+     * image may be served from the browser cache until it expires.
+     */
+    private static final Duration PROFILE_IMAGE_CACHE_MAX_AGE = Duration.ofMinutes(10);
 
     private final ProfileImageService profileImageService;
     private final FileContentValidator fileContentValidator;
@@ -99,7 +108,9 @@ public class ProfileImageRestController {
     public ResponseEntity<Resource> getImage() {
         return profileImageService.getCurrentUserProfileImage()
                 .map(ProfileImageRestController::toResponse)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound()
+                        .cacheControl(CacheControl.noStore())
+                        .build());
     }
 
     private static ResponseEntity<Resource> toResponse(ResourceBundle bundle) {
@@ -108,6 +119,9 @@ public class ProfileImageRestController {
                 .orElse(MediaType.APPLICATION_OCTET_STREAM);
 
         return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(PROFILE_IMAGE_CACHE_MAX_AGE).cachePrivate())
+                // NOTE: image is per user, make sure another user of the same browser gets its own image
+                .varyBy(HttpHeaders.COOKIE)
                 .contentType(mediaType)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         ContentDisposition.inline().filename(fileName).build().toString())
