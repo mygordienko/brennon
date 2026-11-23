@@ -37,4 +37,8 @@ public class BrennonUserProfileService implements BrennonUserProfileInfoApi {
         return userStoragePort.getByLogin(username)
         .orElseThrow(() -> MissingUserException.forLogin(username));
     }
+
+    public BrennonUserProfile save(BrennonUserProfile profile) {
+        return userStoragePort.save(profile);
+    }
 }

@@ -11,6 +11,6 @@ import com.mygordienko.brennon.profile.ProfileImageStorageException;
 public interface ProfileImageStoragePort {
     void saveTemp(BrennonUserId user, FileId fileId, InputStream is, String fileName) throws ProfileImageStorageException;
     void moveToFinal(BrennonUserId user, FileId fileId) throws ProfileImageStorageException;
-    boolean exists(BrennonUserId user) throws ProfileImageStorageException;
-    Optional<ResourceBundle> getImageResource(BrennonUserId user) throws ProfileImageStorageException;
+    void delete(BrennonUserId user, FileId fileId) throws ProfileImageStorageException;
+    Optional<ResourceBundle> getImageResource(BrennonUserId user, FileId fileId) throws ProfileImageStorageException;
 }

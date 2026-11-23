@@ -17,6 +17,10 @@ create table user_profiles (
     username varchar unique not null,
 	first_name varchar not null,
     last_name varchar not null,
+    profile_image_file_id varchar,
+    version int not null default 0,
+    created timestamptz not null default now(),
+    updated timestamptz not null default now(),
     constraint fk_profile_username foreign key(username) references user_logins(username)
 );
 

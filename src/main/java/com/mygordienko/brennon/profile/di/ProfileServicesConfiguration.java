@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 
 import com.mygordienko.brennon.core.auth.BrennonUserAccountApi;
+import com.mygordienko.brennon.core.common.ClockManager;
+import com.mygordienko.brennon.profile.adapter.jdbc.BrennonUserProfileCrudRepository;
 import com.mygordienko.brennon.profile.adapter.jdbc.JdbcBrennonUserProfileStorage;
 import com.mygordienko.brennon.profile.adapter.storage.LocalFileSystemProfileImageStorage;
 import com.mygordienko.brennon.profile.adapter.storage.S3ProfileImageStorage;
@@ -32,8 +34,10 @@ import tools.jackson.databind.json.JsonMapper;
 @Configuration
 public class ProfileServicesConfiguration {
     @Bean
-    public JdbcBrennonUserProfileStorage userProfileStoragePort(JdbcAggregateTemplate jdbcTemplate) {
-        return new JdbcBrennonUserProfileStorage(jdbcTemplate);
+    public JdbcBrennonUserProfileStorage userProfileStoragePort(
+            JdbcAggregateTemplate jdbcTemplate,
+            BrennonUserProfileCrudRepository springRepository) {
+        return new JdbcBrennonUserProfileStorage(jdbcTemplate, springRepository);
     }
 
     @Bean
@@ -46,8 +50,9 @@ public class ProfileServicesConfiguration {
     @Bean
     public ProfileImageService profileImageService(
             ProfileImageStoragePort profileImageStoragePort,
-            BrennonUserProfileService userProfileService) {
-        return new ProfileImageService(profileImageStoragePort, userProfileService);
+            BrennonUserProfileService userProfileService,
+            ClockManager clockManager) {
+        return new ProfileImageService(profileImageStoragePort, userProfileService, clockManager);
     }
 
     @Bean

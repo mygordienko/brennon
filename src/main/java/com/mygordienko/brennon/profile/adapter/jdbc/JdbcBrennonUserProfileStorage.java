@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserLogin;
@@ -15,11 +16,15 @@ import com.mygordienko.brennon.profile.BrennonUserProfile;
 import com.mygordienko.brennon.profile.internal.BrennonUserProfilePort;
 
 public class JdbcBrennonUserProfileStorage implements BrennonUserProfilePort {
-    public JdbcBrennonUserProfileStorage(JdbcAggregateTemplate jdbcAggregateTemplate) {
+    public JdbcBrennonUserProfileStorage(
+            JdbcAggregateTemplate jdbcAggregateTemplate,
+            BrennonUserProfileCrudRepository springRepository) {
         this.jdbcAggregateTemplate = jdbcAggregateTemplate;
+        this.springRepository = springRepository;
     }
 
     private final JdbcAggregateTemplate jdbcAggregateTemplate;
+    private final BrennonUserProfileCrudRepository springRepository;
 
 
     @Override
@@ -40,5 +45,12 @@ public class JdbcBrennonUserProfileStorage implements BrennonUserProfilePort {
         return jdbcAggregateTemplate.findAll(query, BrennonUserProfile.class).stream()
             .sorted(Comparator.comparing(BrennonUserProfile::getId))
             .toList();
+    }
+
+    @Override
+    @Transactional
+    public BrennonUserProfile save(BrennonUserProfile profile) {
+        // NOTE: use Spring's repository to fire domain events on save
+        return springRepository.save(profile);
     }
 }

@@ -27,6 +27,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.di.BrennonUserDataJdbcConfiguration;
+import com.mygordienko.brennon.core.common.di.CommonDataJdbcConfiguration;
 import com.mygordienko.brennon.core.common.di.LiquibaseConfiguration;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
@@ -38,7 +39,7 @@ import com.mygordienko.brennon.ticket.di.TicketDataJdbcConfiguration;
 
 @DataJdbcTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({LiquibaseConfiguration.class, BrennonUserDataJdbcConfiguration.class, TicketDataJdbcConfiguration.class})
+@Import({LiquibaseConfiguration.class, CommonDataJdbcConfiguration.class, BrennonUserDataJdbcConfiguration.class, TicketDataJdbcConfiguration.class})
 public class JdbcTicketStorageTest {
 
     @Autowired
