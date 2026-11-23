@@ -32,5 +32,5 @@ The steps are described below:
 * Plan: Identify affected packages/modules/files in the repository and outline the approach. Present the plan to the user before implementing. Consider side effects on other parts of the system.
 * Implement: NO changes allowed in `main` branch. Create a new branch before introducing any changes.
 * Test: Run the specific tests affected by your changes. Write new tests for new behavior. Never run the full test suite — CI handles comprehensive testing.
-* Review: Before committing, delegate the review to the code-reviewer sub-agent (if available). The sub-agent has its own context window and reviews the uncommitted diff without bias from the implementation history. Maximum one round of review. Fix reported issues and proceed to commit.
+* Review: Before committing, delegate the review to the reviewer sub-agent (if available). The sub-agent has its own context window and reviews the uncommitted diff without bias from the implementation history. Maximum one round of review. Fix reported issues and proceed to commit.
 * Commit: see "Git conventions" above
