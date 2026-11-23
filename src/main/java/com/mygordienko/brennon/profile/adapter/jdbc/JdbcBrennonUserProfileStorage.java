@@ -16,11 +16,15 @@ import com.mygordienko.brennon.profile.BrennonUserProfile;
 import com.mygordienko.brennon.profile.internal.BrennonUserProfilePort;
 
 public class JdbcBrennonUserProfileStorage implements BrennonUserProfilePort {
-    public JdbcBrennonUserProfileStorage(JdbcAggregateTemplate jdbcAggregateTemplate) {
+    public JdbcBrennonUserProfileStorage(
+            JdbcAggregateTemplate jdbcAggregateTemplate,
+            BrennonUserProfileCrudRepository springRepository) {
         this.jdbcAggregateTemplate = jdbcAggregateTemplate;
+        this.springRepository = springRepository;
     }
 
     private final JdbcAggregateTemplate jdbcAggregateTemplate;
+    private final BrennonUserProfileCrudRepository springRepository;
 
 
     @Override
@@ -46,6 +50,7 @@ public class JdbcBrennonUserProfileStorage implements BrennonUserProfilePort {
     @Override
     @Transactional
     public BrennonUserProfile save(BrennonUserProfile profile) {
-        return jdbcAggregateTemplate.save(profile);
+        // NOTE: use Spring's repository to fire domain events on save
+        return springRepository.save(profile);
     }
 }

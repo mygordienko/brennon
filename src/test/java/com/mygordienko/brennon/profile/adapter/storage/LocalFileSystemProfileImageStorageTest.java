@@ -68,6 +68,23 @@ public class LocalFileSystemProfileImageStorageTest {
     }
 
     @Test
+    @DisplayName("Deletes stored image")
+    public void givenStoredImage_whenDeleted_thenImageIsNoLongerAvailable() throws Exception {
+        var storage = new LocalFileSystemProfileImageStorage(baseFolder);
+        var userId = BrennonUserId.of("user-1");
+        var fileId = FileId.of("file-1");
+
+        storage.saveTemp(userId, fileId, new ByteArrayInputStream("image".getBytes()), "profile.png");
+        storage.moveToFinal(userId, fileId);
+
+        Assertions.assertThat(storage.getImageResource(userId, fileId)).isPresent();
+
+        storage.delete(userId, fileId);
+
+        Assertions.assertThat(storage.getImageResource(userId, fileId)).isEmpty();
+    }
+
+    @Test
     @DisplayName("Returns empty image resource when no image is stored")
     public void givenNoImage_whenImageRequested_thenEmptyResultReturned() {
         var storage = new LocalFileSystemProfileImageStorage(baseFolder);

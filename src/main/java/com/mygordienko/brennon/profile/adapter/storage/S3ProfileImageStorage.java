@@ -84,6 +84,15 @@ public class S3ProfileImageStorage implements ProfileImageStoragePort {
     }
 
     @Override
+    public void delete(BrennonUserId user, FileId fileId) throws ProfileImageStorageException {
+        try {
+            s3Template.deleteObject(FINAL_BUCKET, getFinalPathForUser(user, fileId));
+        } catch (Exception e) {
+            throw new ProfileImageStorageException("Error deleting profile image", e);
+        }
+    }
+
+    @Override
     public Optional<ResourceBundle> getImageResource(BrennonUserId user, FileId fileId) throws ProfileImageStorageException {
         try {
             if (!s3Template.objectExists(FINAL_BUCKET, getFinalPathForUser(user, fileId))) {

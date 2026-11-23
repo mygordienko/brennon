@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.OffsetDateTime;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,9 @@ public class ProfileImagePageControllerTest {
     private UserDetailsService userDetailsService;
 
     private final BrennonUserProfile profile = new BrennonUserProfile(
-        BrennonUserId.of("1"), 3, BrennonUserLogin.of("john@mail.com"), "John", "Smith", null);
+        BrennonUserId.of("1"), 3, BrennonUserLogin.of("john@mail.com"), "John", "Smith", null,
+        OffsetDateTime.parse("2026-08-30T15:30:00+02:00"),
+        OffsetDateTime.parse("2026-08-30T15:30:00+02:00"));
 
     @Test
     @DisplayName("Renders aggregate version in the profile image form")

@@ -61,6 +61,17 @@ public class LocalFileSystemProfileImageStorage implements ProfileImageStoragePo
     }
 
     @Override
+    public void delete(BrennonUserId user, FileId fileId) throws ProfileImageStorageException {
+        var target = getFinalPathForUser(user, fileId);
+
+        try {
+            Files.deleteIfExists(target);
+        } catch (IOException e) {
+            throw new ProfileImageStorageException("Could not delete profile image for user: %s".formatted(user), e);
+        }
+    }
+
+    @Override
     public Optional<ResourceBundle> getImageResource(BrennonUserId user, FileId fileId) throws ProfileImageStorageException {
         var target = getFinalPathForUser(user, fileId);
 

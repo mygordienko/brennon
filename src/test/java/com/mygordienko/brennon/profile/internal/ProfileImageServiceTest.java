@@ -1,12 +1,16 @@
 package com.mygordienko.brennon.profile.internal;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -19,27 +23,34 @@ import org.springframework.core.io.ByteArrayResource;
 import com.mygordienko.brennon.core.auth.BrennonUserAccountApi;
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserLogin;
+import com.mygordienko.brennon.core.common.ClockManager;
 import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.core.common.FileMeta;
 import com.mygordienko.brennon.core.common.ResourceBundle;
 import com.mygordienko.brennon.profile.BrennonUserProfile;
 import com.mygordienko.brennon.profile.ProfileConcurrentModificationException;
+import com.mygordienko.brennon.profile.ProfileImageStorageException;
+import com.mygordienko.brennon.profile.ProfileImageUpdatedEvent;
 
 public class ProfileImageServiceTest {
 
     private final ProfileImageStoragePort profileImageStoragePort = mock(ProfileImageStoragePort.class);
     private final BrennonUserProfilePort userProfilePort = mock(BrennonUserProfilePort.class);
     private final BrennonUserAccountApi userAccountApi = mock(BrennonUserAccountApi.class);
+    private final ClockManager clockManager = mock(ClockManager.class);
 
     private final BrennonUserId userId = BrennonUserId.of("user-1");
     private final BrennonUserLogin login = BrennonUserLogin.of("john@mail.com");
+    private final Instant now = Instant.parse("2026-08-30T13:35:00Z");
 
     private ProfileImageService profileImageService;
 
     @BeforeEach
     public void setUp() {
-        var currentUser = new BrennonUserProfile(userId, 0, login, "John", "Smith", null);
+        var created = OffsetDateTime.parse("2026-08-30T15:30:00+02:00");
+        var currentUser = new BrennonUserProfile(userId, 0, login, "John", "Smith", null, created, created);
 
+        when(clockManager.now()).thenReturn(now);
         when(userAccountApi.getCurrentUsername()).thenReturn(Optional.of(login));
         when(userProfilePort.getByLogin(login)).thenReturn(Optional.of(currentUser));
         when(userProfilePort.getById(userId)).thenReturn(Optional.of(currentUser));
@@ -47,7 +58,7 @@ public class ProfileImageServiceTest {
             .thenAnswer(invocation -> invocation.getArgument(0));
 
         var userProfileService = new BrennonUserProfileService(userProfilePort, userAccountApi);
-        profileImageService = new ProfileImageService(profileImageStoragePort, userProfileService);
+        profileImageService = new ProfileImageService(profileImageStoragePort, userProfileService, clockManager);
     }
 
     @Test
@@ -74,6 +85,8 @@ public class ProfileImageServiceTest {
         verify(userProfilePort).save(profileCaptor.capture());
 
         Assertions.assertThat(profileCaptor.getValue().getProfileImageFileId()).contains(fileId);
+        Assertions.assertThat(profileCaptor.getValue().getUpdated())
+            .isEqualTo(OffsetDateTime.ofInstant(now, ZoneId.systemDefault()));
     }
 
     @Test
@@ -89,13 +102,60 @@ public class ProfileImageServiceTest {
     }
 
     @Test
+    @DisplayName("Evicts previous profile image after update")
+    public void givenPreviousImage_whenProfileImageUpdatedEventProcessed_thenPreviousFileDeleted() {
+        var previousFileId = FileId.of("file-1");
+        var newFileId = FileId.of("file-2");
+
+        profileImageService.processProfileImageUpdated(
+            new ProfileImageUpdatedEvent(userId, previousFileId, newFileId));
+
+        verify(profileImageStoragePort).delete(userId, previousFileId);
+    }
+
+    @Test
+    @DisplayName("Does not evict an image when there was no previous image")
+    public void givenNoPreviousImage_whenProfileImageUpdatedEventProcessed_thenNothingDeleted() {
+        profileImageService.processProfileImageUpdated(
+            new ProfileImageUpdatedEvent(userId, null, FileId.of("file-1")));
+
+        verify(profileImageStoragePort, never()).delete(any(), any());
+    }
+
+    @Test
+    @DisplayName("Does not evict the current image when file did not change")
+    public void givenSameImage_whenProfileImageUpdatedEventProcessed_thenNothingDeleted() {
+        var fileId = FileId.of("file-1");
+
+        profileImageService.processProfileImageUpdated(
+            new ProfileImageUpdatedEvent(userId, fileId, fileId));
+
+        verify(profileImageStoragePort, never()).delete(any(), any());
+    }
+
+    @Test
+    @DisplayName("Ignores storage errors during best-effort image eviction")
+    public void givenStorageFailure_whenProfileImageUpdatedEventProcessed_thenNoExceptionPropagated() {
+        var previousFileId = FileId.of("file-1");
+        var newFileId = FileId.of("file-2");
+
+        doThrow(new ProfileImageStorageException("storage unavailable"))
+            .when(profileImageStoragePort).delete(userId, previousFileId);
+
+        Assertions.assertThatCode(() -> profileImageService.processProfileImageUpdated(
+                new ProfileImageUpdatedEvent(userId, previousFileId, newFileId)))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
     @DisplayName("Checks and loads current user's profile image")
     public void givenCurrentUser_whenProfileImageQueried_thenDelegatesToStorageWithCurrentUserImageFile() {
         var fileId = FileId.of("file-1");
         var resourceBundle = new ResourceBundle(
             new ByteArrayResource("image".getBytes()), new FileMeta("image.png"));
+        var created = OffsetDateTime.parse("2026-08-30T15:30:00+02:00");
 
-        var currentUser = new BrennonUserProfile(userId, 0, login, "John", "Smith", fileId);
+        var currentUser = new BrennonUserProfile(userId, 0, login, "John", "Smith", fileId, created, created);
         when(userProfilePort.getByLogin(login)).thenReturn(Optional.of(currentUser));
         when(profileImageStoragePort.getImageResource(userId, fileId)).thenReturn(Optional.of(resourceBundle));
 
@@ -115,11 +175,12 @@ public class ProfileImageServiceTest {
     public void givenProfileId_whenProfileImageQueried_thenDelegatesToStorageWithProvidedUserAndImageFile() {
         var targetUserId = BrennonUserId.of("user-2");
         var fileId = FileId.of("file-2");
+        var created = OffsetDateTime.parse("2026-08-30T15:30:00+02:00");
         var resourceBundle = new ResourceBundle(
             new ByteArrayResource("image".getBytes()), new FileMeta("image.png"));
 
         when(userProfilePort.getById(targetUserId)).thenReturn(Optional.of(
-            new BrennonUserProfile(targetUserId, 0, login, "John", "Smith", fileId)));
+            new BrennonUserProfile(targetUserId, 0, login, "John", "Smith", fileId, created, created)));
         when(profileImageStoragePort.getImageResource(targetUserId, fileId)).thenReturn(Optional.of(resourceBundle));
 
         Assertions.assertThat(profileImageService.getProfileImage(targetUserId)).contains(resourceBundle);
