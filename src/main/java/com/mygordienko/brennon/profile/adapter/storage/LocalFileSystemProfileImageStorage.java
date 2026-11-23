@@ -93,7 +93,14 @@ public class LocalFileSystemProfileImageStorage implements ProfileImageStoragePo
     }
 
     private Path getFinalPathForUser(BrennonUserId userId) {
-        return baseFolder.resolve(profilesBaseFolder).resolve(userId.toString());
+        var profilesFolder = baseFolder.resolve(profilesBaseFolder).normalize();
+        var target = profilesFolder.resolve(userId.toString()).normalize();
+
+        if (!target.startsWith(profilesFolder) || target.equals(profilesFolder)) {
+            throw new IllegalArgumentException("Invalid profile image owner: %s".formatted(userId));
+        }
+
+        return target;
     }
 
     private void copyCustomAttributes(Path source, Path target) throws IOException {

@@ -75,4 +75,16 @@ public class ProfileImageServiceTest {
         Assertions.assertThat(profileImageService.currentUserHasProfileImage()).isTrue();
         Assertions.assertThat(profileImageService.getCurrentUserProfileImage()).contains(resourceBundle);
     }
+
+    @Test
+    @DisplayName("Loads profile image of an arbitrary user")
+    public void givenProfileId_whenProfileImageQueried_thenDelegatesToStorageWithProvidedId() {
+        var targetUserId = BrennonUserId.of("user-2");
+        var resourceBundle = new ResourceBundle(
+            new ByteArrayResource("image".getBytes()), new FileMeta("image.png"));
+
+        when(profileImageStoragePort.getImageResource(targetUserId)).thenReturn(Optional.of(resourceBundle));
+
+        Assertions.assertThat(profileImageService.getProfileImage(targetUserId)).contains(resourceBundle);
+    }
 }

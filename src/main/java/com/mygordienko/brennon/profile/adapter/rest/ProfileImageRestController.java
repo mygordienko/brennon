@@ -22,10 +22,12 @@ import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.common.ResourceBundle;
 import com.mygordienko.brennon.core.common.adapter.FileContentValidator;
 import com.mygordienko.brennon.profile.internal.ProfileImageService;
@@ -49,7 +51,7 @@ public class ProfileImageRestController {
     private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.profile.adapter.rest.ProfileImageRestController");
 
     /**
-     * NOTE: profile image is cached by the browser only, see `ProfileImageHttpCachingConfiguration`
+     * NOTE: profile images are cached by the browser only, see `ProfileImageHttpCachingConfiguration`
      * for the security part of the caching policy. The image URL is stable, so a freshly uploaded
      * image may be served from the browser cache until it expires.
      */
@@ -104,13 +106,24 @@ public class ProfileImageRestController {
         return new UploadedFileDto(fileId.toString());
     }
 
-    @GetMapping("/image")
-    public ResponseEntity<Resource> getImage() {
+    @GetMapping("/images/me")
+    public ResponseEntity<Resource> getCurrentUserImage() {
         return profileImageService.getCurrentUserProfileImage()
                 .map(ProfileImageRestController::toResponse)
-                .orElseGet(() -> ResponseEntity.notFound()
-                        .cacheControl(CacheControl.noStore())
-                        .build());
+                .orElseGet(ProfileImageRestController::notFoundResponse);
+    }
+
+    @GetMapping("/images/{profileId}")
+    public ResponseEntity<Resource> getImage(@PathVariable String profileId) {
+        return profileImageService.getProfileImage(BrennonUserId.of(profileId))
+                .map(ProfileImageRestController::toResponse)
+                .orElseGet(ProfileImageRestController::notFoundResponse);
+    }
+
+    private static ResponseEntity<Resource> notFoundResponse() {
+        return ResponseEntity.notFound()
+                .cacheControl(CacheControl.noStore())
+                .build();
     }
 
     private static ResponseEntity<Resource> toResponse(ResourceBundle bundle) {

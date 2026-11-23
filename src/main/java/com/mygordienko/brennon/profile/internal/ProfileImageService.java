@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.core.common.ResourceBundle;
 
@@ -47,5 +48,10 @@ public class ProfileImageService {
     public Optional<ResourceBundle> getCurrentUserProfileImage() {
         var currentUser = userProfileService.getCurrentUser();
         return profileImageStoragePort.getImageResource(currentUser.getId());
+    }
+
+    @PreAuthorize("hasAuthority('user:read')")
+    public Optional<ResourceBundle> getProfileImage(BrennonUserId profileId) {
+        return profileImageStoragePort.getImageResource(profileId);
     }
 }
