@@ -24,8 +24,6 @@ public class TicketDataJdbcConfiguration {
                     TicketIdConverters.TicketReplyIdToIntegerConverter.INSTANCE,
                     TicketIdConverters.TicketStatusToStringConverter.INSTANCE,
                     TicketIdConverters.StringToTicketStatusConverter.INSTANCE,
-                    TicketIdConverters.FileIdToStringConverter.INSTANCE,
-                    TicketIdConverters.StringToFileIdConverter.INSTANCE,
                     TicketIdConverters.IntegerToTicketAttachmentIdConverter.INSTANCE,
                     TicketIdConverters.TicketAttachmentIdToIntegerConverter.INSTANCE
                 );

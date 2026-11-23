@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.mygordienko.brennon.core.common.FileId;
+import com.mygordienko.brennon.profile.BrennonUserProfile;
 import com.mygordienko.brennon.profile.ProfileImageStorageException;
 import com.mygordienko.brennon.profile.internal.BrennonUserProfileService;
 import com.mygordienko.brennon.profile.internal.ProfileImageService;
@@ -27,8 +28,9 @@ public class ProfileImagePageController {
 
     @GetMapping("/profile")
     public String getProfile(Model model) {
-        populateModel(model);
-        model.addAttribute("profileImageForm", new ChangeProfileImageCommandDto());
+        var userProfile = userProfileService.getCurrentUser();
+        populateModel(model, userProfile);
+        model.addAttribute("profileImageForm", new ChangeProfileImageCommandDto(userProfile.getVersion(), null));
         return "profile/profile";
     }
 
@@ -38,28 +40,32 @@ public class ProfileImagePageController {
             BindingResult bindingResult,
             Model model) {
         if (bindingResult.hasErrors()) {
-            populateModel(model);
+            profileImageForm.setVersion(populateModel(model).getVersion());
             return "profile/profile";
         }
 
         try {
-            profileImageService.saveProfileImage(FileId.of(profileImageForm.getFileId()));
+            profileImageService.saveProfileImage(FileId.of(profileImageForm.getFileId()), profileImageForm.getVersion());
         } catch (IllegalArgumentException | ProfileImageStorageException e) {
             bindingResult.rejectValue("fileId", "profileImageForm.fileId.invalid");
-            populateModel(model);
+            profileImageForm.setVersion(populateModel(model).getVersion());
             return "profile/profile";
         }
 
         return "redirect:/profile?updated=true";
     }
 
-    private void populateModel(Model model) {
+    private BrennonUserProfile populateModel(Model model) {
         var userProfile = userProfileService.getCurrentUser();
+        populateModel(model, userProfile);
+        return userProfile;
+    }
 
+    private void populateModel(Model model, BrennonUserProfile userProfile) {
         model.addAttribute("currentUser", new CurrentUserProfileDto(
             userProfile.getId().toString(),
             userProfile.getFullName(),
             userProfile.getLogin().toString(),
-            profileImageService.currentUserHasProfileImage()));
+            userProfile.getProfileImageFileId().isPresent()));
     }
 }

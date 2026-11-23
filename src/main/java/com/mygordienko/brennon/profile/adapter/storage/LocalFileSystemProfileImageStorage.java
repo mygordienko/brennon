@@ -48,7 +48,7 @@ public class LocalFileSystemProfileImageStorage implements ProfileImageStoragePo
     @Override
     public void moveToFinal(BrennonUserId user, FileId fileId) throws ProfileImageStorageException {
         var source = getTempPathForUser(user, fileId);
-        var target = getFinalPathForUser(user);
+        var target = getFinalPathForUser(user, fileId);
 
         try (var is = Files.newInputStream(source)) {
             Files.createDirectories(target.getParent());
@@ -61,13 +61,8 @@ public class LocalFileSystemProfileImageStorage implements ProfileImageStoragePo
     }
 
     @Override
-    public boolean exists(BrennonUserId user) throws ProfileImageStorageException {
-        return Files.exists(getFinalPathForUser(user));
-    }
-
-    @Override
-    public Optional<ResourceBundle> getImageResource(BrennonUserId user) throws ProfileImageStorageException {
-        var target = getFinalPathForUser(user);
+    public Optional<ResourceBundle> getImageResource(BrennonUserId user, FileId fileId) throws ProfileImageStorageException {
+        var target = getFinalPathForUser(user, fileId);
 
         if (!Files.exists(target)) {
             return Optional.empty();
@@ -92,9 +87,9 @@ public class LocalFileSystemProfileImageStorage implements ProfileImageStoragePo
         return baseFolder.resolve(tmpBaseFolder).resolve(userId.toString()).resolve(fileId.toString());
     }
 
-    private Path getFinalPathForUser(BrennonUserId userId) {
+    private Path getFinalPathForUser(BrennonUserId userId, FileId fileId) {
         var profilesFolder = baseFolder.resolve(profilesBaseFolder).normalize();
-        var target = profilesFolder.resolve(userId.toString()).normalize();
+        var target = profilesFolder.resolve(userId.toString()).resolve(fileId.toString()).normalize();
 
         if (!target.startsWith(profilesFolder) || target.equals(profilesFolder)) {
             throw new IllegalArgumentException("Invalid profile image owner: %s".formatted(userId));

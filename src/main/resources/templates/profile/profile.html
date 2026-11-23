@@ -41,10 +41,11 @@
                 </div>
 
                 <input type="hidden" id="concatenated-file-ids" th:field="*{fileId}" />
-                
+                <input type="hidden" th:field="*{version}" />
 
                 <div class="flex flex-col md:flex-row">
                     <div th:if="${#fields.hasErrors('fileId')}" class="text-(--color-error-text) text-sm font-medium" th:errors="*{fileId}">Validation error</div>
+                    <div th:if="${#fields.hasErrors('version')}" class="text-(--color-error-text) text-sm font-medium" th:errors="*{version}">Validation error</div>
 
                     <div class="flex space-x-4 ml-auto">
                         <button type="submit"

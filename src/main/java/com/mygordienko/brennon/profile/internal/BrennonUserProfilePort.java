@@ -20,4 +20,10 @@ public interface BrennonUserProfilePort {
      */
     List<BrennonUserProfile> getByIds(Collection<BrennonUserId> userIds);
     Optional<BrennonUserProfile> getByLogin(BrennonUserLogin login);
+    /**
+     * Persists the aggregate, bumping its version.
+     * @param profile aggregate to save.
+     * @return Saved aggregate.
+     */
+    BrennonUserProfile save(BrennonUserProfile profile);
 }

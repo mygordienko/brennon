@@ -74,7 +74,7 @@ public class S3ProfileImageStorage implements ProfileImageStoragePort {
                     .sourceBucket(TMP_BUCKET)
                     .sourceKey(getTmpPathForUser(user, fileId))
                     .destinationBucket(FINAL_BUCKET)
-                    .destinationKey(getFinalPathForUser(user))
+                    .destinationKey(getFinalPathForUser(user, fileId))
                     .build();
 
             s3Client.copyObject(copyRequest);
@@ -84,22 +84,13 @@ public class S3ProfileImageStorage implements ProfileImageStoragePort {
     }
 
     @Override
-    public boolean exists(BrennonUserId user) throws ProfileImageStorageException {
+    public Optional<ResourceBundle> getImageResource(BrennonUserId user, FileId fileId) throws ProfileImageStorageException {
         try {
-            return s3Template.objectExists(FINAL_BUCKET, getFinalPathForUser(user));
-        } catch (Exception e) {
-            throw new ProfileImageStorageException("Error checking profile image existence", e);
-        }
-    }
-
-    @Override
-    public Optional<ResourceBundle> getImageResource(BrennonUserId user) throws ProfileImageStorageException {
-        try {
-            if (!s3Template.objectExists(FINAL_BUCKET, getFinalPathForUser(user))) {
+            if (!s3Template.objectExists(FINAL_BUCKET, getFinalPathForUser(user, fileId))) {
                 return Optional.empty();
             }
 
-            var s3Resource = s3Template.download(FINAL_BUCKET, getFinalPathForUser(user));
+            var s3Resource = s3Template.download(FINAL_BUCKET, getFinalPathForUser(user, fileId));
             var fileName = s3Resource.metadata().get(ORIG_FILE_NAME_CUSTOM_ATTRIBUTE);
 
             return Optional.of(new ResourceBundle(s3Resource, new FileMeta(fileName)));
@@ -112,7 +103,7 @@ public class S3ProfileImageStorage implements ProfileImageStoragePort {
         return "%s/%s".formatted(userId, fileId);
     }
 
-    private String getFinalPathForUser(BrennonUserId userId) {
-        return userId.toString();
+    private String getFinalPathForUser(BrennonUserId userId, FileId fileId) {
+        return "%s/%s".formatted(userId, fileId);
     }
 }

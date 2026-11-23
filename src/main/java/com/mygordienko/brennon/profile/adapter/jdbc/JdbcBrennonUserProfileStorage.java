@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.data.jdbc.core.JdbcAggregateTemplate;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserLogin;
@@ -40,5 +41,11 @@ public class JdbcBrennonUserProfileStorage implements BrennonUserProfilePort {
         return jdbcAggregateTemplate.findAll(query, BrennonUserProfile.class).stream()
             .sorted(Comparator.comparing(BrennonUserProfile::getId))
             .toList();
+    }
+
+    @Override
+    @Transactional
+    public BrennonUserProfile save(BrennonUserProfile profile) {
+        return jdbcAggregateTemplate.save(profile);
     }
 }

@@ -4,7 +4,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 
-import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.ticket.TicketAttachmentId;
 import com.mygordienko.brennon.ticket.TicketId;
 import com.mygordienko.brennon.ticket.TicketReplyId;
@@ -93,26 +92,6 @@ public class TicketIdConverters {
         @Override
         public TicketAttachmentId convert(Integer source) {
             return TicketAttachmentId.of(source);
-        }
-    }
-
-
-
-    @WritingConverter
-    public enum FileIdToStringConverter implements Converter<FileId, String> {
-        INSTANCE;
-        @Override
-        public String convert(FileId source) {
-            return source.getValue();
-        }
-    }
-
-    @ReadingConverter
-    public enum StringToFileIdConverter implements Converter<String, FileId> {
-        INSTANCE;
-        @Override
-        public FileId convert(String source) {
-            return FileId.of(source);
         }
     }
 }
