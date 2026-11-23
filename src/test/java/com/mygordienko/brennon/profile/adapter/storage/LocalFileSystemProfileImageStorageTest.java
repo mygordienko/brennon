@@ -3,10 +3,10 @@ package com.mygordienko.brennon.profile.adapter.storage;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.assertj.core.api.Assertions;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.common.FileId;

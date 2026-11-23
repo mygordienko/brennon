@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -28,6 +29,9 @@ class BrennonApplicationTests {
 
 	@Autowired
 	MockMvc mockMvc;
+
+	@Autowired
+	JdbcTemplate jdbcTemplate;
 
 	@Container
 	@ServiceConnection
@@ -85,5 +89,26 @@ class BrennonApplicationTests {
 				new SimpleGrantedAuthority("user:write"))))
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString("John Smith")));
+	}
+
+	@Test
+	void ticketDetailsWithReplyRendersReplyAuthorAvatar() throws Exception {
+		var ticketId = 9001L;
+		jdbcTemplate.update("""
+				insert into tickets (id, subject, text, status, author_id, version, created, updated, last_attachment_id, last_reply_id)
+				values (?, ?, ?, ?, ?, ?, now(), now(), 0, 1)
+				""", ticketId, "Ticket with reply", "Ticket text", "0010", "1", 0);
+		jdbcTemplate.update("""
+				insert into ticket_replies (id, ticket_id, text, author_id, created, updated)
+				values (?, ?, ?, ?, now(), now())
+				""", 1, ticketId, "Reply text", "2");
+
+		mockMvc.perform(get("/tickets/" + ticketId).with(user("john@mail.com").authorities(
+				new SimpleGrantedAuthority("user:read"),
+				new SimpleGrantedAuthority("user:write"),
+				new SimpleGrantedAuthority("support:read"),
+				new SimpleGrantedAuthority("support:write"))))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("/api/v1/profile/images/2")));
 	}
 }

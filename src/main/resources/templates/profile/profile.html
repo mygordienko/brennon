@@ -19,7 +19,7 @@
             <div class="flex flex-col items-center mt-4 mb-10">
                 <div class="w-40 h-40 rounded-full border-2 border-[#3b82f6] flex items-center justify-center mb-4 bg-[#1a1a1a] overflow-hidden">
                     <img th:if="${currentUser.hasProfileImage()}"
-                         th:src="@{/api/v1/profile/image}"
+                         th:src="@{/api/v1/profile/images/me}"
                          alt="Profile image"
                          class="w-full h-full object-cover" />
                     <svg th:unless="${currentUser.hasProfileImage()}" class="w-24 h-24 text-(--color-brand-blue)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
