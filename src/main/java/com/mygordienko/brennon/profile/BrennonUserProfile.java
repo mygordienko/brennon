@@ -93,6 +93,10 @@ public class BrennonUserProfile extends AbstractAggregateRoot<BrennonUserProfile
             throw new IllegalArgumentException("Profile image file ID is required");
         }
 
+        if (fileId.equals(this.profileImageFileId)) {
+            throw new IllegalArgumentException("Profile image is already set to file %s".formatted(fileId));
+        }
+
         var previousFileId = this.profileImageFileId;
         this.profileImageFileId = fileId;
         this.updated = updated;

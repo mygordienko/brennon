@@ -52,6 +52,18 @@ public class BrennonUserProfileTest {
     }
 
     @Test
+    @DisplayName("Rejects profile image update to the current image file")
+    public void givenProfile_whenSameProfileImageUpdated_thenIllegalArgumentReported() {
+        var fileId = FileId.of("file-1");
+        var profile = newProfile(fileId);
+
+        Assertions.assertThatThrownBy(() -> profile.updateProfileImage(userId, fileId, updated))
+            .isInstanceOf(IllegalArgumentException.class);
+
+        Assertions.assertThat(profile.getProfileImageFileId()).contains(fileId);
+    }
+
+    @Test
     @DisplayName("Rejects missing profile image file reference")
     public void givenProfile_whenNullProfileImageUpdated_thenIllegalArgumentReported() {
         var profile = newProfile(null);

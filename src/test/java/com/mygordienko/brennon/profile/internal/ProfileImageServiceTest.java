@@ -123,17 +123,6 @@ public class ProfileImageServiceTest {
     }
 
     @Test
-    @DisplayName("Does not evict the current image when file did not change")
-    public void givenSameImage_whenProfileImageUpdatedEventProcessed_thenNothingDeleted() {
-        var fileId = FileId.of("file-1");
-
-        profileImageService.processProfileImageUpdated(
-            new ProfileImageUpdatedEvent(userId, fileId, fileId));
-
-        verify(profileImageStoragePort, never()).delete(any(), any());
-    }
-
-    @Test
     @DisplayName("Ignores storage errors during best-effort image eviction")
     public void givenStorageFailure_whenProfileImageUpdatedEventProcessed_thenNoExceptionPropagated() {
         var previousFileId = FileId.of("file-1");

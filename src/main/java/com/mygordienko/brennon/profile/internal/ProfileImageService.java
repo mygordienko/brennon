@@ -76,7 +76,7 @@ public class ProfileImageService {
         log.debug("processProfileImageUpdated profile: {} previous file: {} new file: {}",
                 event.profileId(), event.previousFileId(), event.newFileId());
 
-        if (event.previousFileId() == null || event.previousFileId().equals(event.newFileId())) {
+        if (event.previousFileId() == null) {
             return;
         }
 
