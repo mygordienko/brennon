@@ -153,8 +153,8 @@ public class ProfileImageServiceTest {
     }
 
     @Test
-    @DisplayName("Rejects request for a profile image that is not current")
-    public void givenOutdatedImageFile_whenProfileImageQueried_thenIllegalArgumentReported() {
+    @DisplayName("Returns no image for a profile image that is not current")
+    public void givenOutdatedImageFile_whenProfileImageQueried_thenEmptyResultReturned() {
         var targetUserId = BrennonUserId.of("user-2");
         var currentFileId = FileId.of("file-2");
         var requestedFileId = FileId.of("file-1");
@@ -163,8 +163,7 @@ public class ProfileImageServiceTest {
         when(userProfilePort.getById(targetUserId)).thenReturn(Optional.of(
             new BrennonUserProfile(targetUserId, 0, login, "John", "Smith", currentFileId, created, created)));
 
-        Assertions.assertThatThrownBy(() -> profileImageService.getProfileImage(targetUserId, requestedFileId))
-            .isInstanceOf(IllegalArgumentException.class);
+        Assertions.assertThat(profileImageService.getProfileImage(targetUserId, requestedFileId)).isEmpty();
 
         verify(profileImageStoragePort, never()).getImageResource(any(), any());
     }

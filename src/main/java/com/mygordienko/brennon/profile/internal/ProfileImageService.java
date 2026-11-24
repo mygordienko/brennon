@@ -99,8 +99,9 @@ public class ProfileImageService {
             }
 
             if (!currentFileId.get().equals(fileId)) {
-                throw new IllegalArgumentException(
-                        "Profile image %s is not current for profile %s".formatted(fileId, profileId));
+                log.warn("Requested profile image {} is not current for profile {} (current: {})",
+                        fileId, profileId, currentFileId.get());
+                return Optional.empty();
             }
 
             return profileImageStoragePort.getImageResource(profileId, fileId);

@@ -84,14 +84,15 @@ public class ProfileImageRestControllerTest {
     }
 
     @Test
-    @DisplayName("Requested image must be the current profile image")
-    public void givenOutdatedImageFile_whenImageRequested_thenBadRequestReturned() throws Exception {
+    @DisplayName("Outdated profile image must not be served or cached")
+    public void givenOutdatedImageFile_whenImageRequested_thenNotFoundReturned() throws Exception {
         when(profileImageService.getProfileImage(BrennonUserId.of("2"), FileId.of("file-1")))
-                .thenThrow(new IllegalArgumentException("Profile image is not current"));
+                .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/v1/profile/2/images/file-1").with(user("john")
                         .authorities(new SimpleGrantedAuthority("user:read"))))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"));
     }
 
     @Test

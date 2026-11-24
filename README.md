@@ -116,6 +116,20 @@ management:
 
 * To achieve pure streaming file upload the default Spring's multipart data processing must be disabled (globally via properties or for specific endpoints via custom bean, see `MultipartConfig`). By default when using `@RequestParam` with `MultipartFile` the request body will be cached in temp files or memory (if small enough). Note that Spring Security can interfere and trigger request body to be cached, ex. when checking CSRF token passed via hidden form field, pass it via headers then. Here we use Uppy library for file upload and we do it via separate Ajax request to dedicated REST controller, CSRF token is passed in headers, see [scripts.html](src/main/resources/templates/ticket/fragments/scripts.html). see [FileUpload.md](./docs/FileUpload.md) for more info.
 
+* Missing avatar handling using `hidden` class manipulation to cover both "no avatar" and "missing avatar file" cases:
+
+  ```html
+  <img th:if="${currentUser.profileImageUrl() != null}"
+               th:src="${currentUser.profileImageUrl()}"
+               th:alt="${currentUser.fullName()}"
+               class="hidden w-full h-full object-cover"
+               onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden')"
+               onerror="this.remove()" />
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-(--color-brand-blue)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+  </svg>
+  ```
+
 * DB indexes created for offset pagination. Deep pagination is not expected (users go down to 100th page). Sorting by `created` is supported, but considered much less common than by `updated`.
 
 * [current-user-profile.html](src/main/resources/templates/core/current-user-profile.html) 
