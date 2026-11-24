@@ -102,6 +102,7 @@ class BrennonApplicationTests {
 				insert into ticket_replies (id, ticket_id, text, author_id, created, updated)
 				values (?, ?, ?, ?, now(), now())
 				""", 1, ticketId, "Reply text", "2");
+		jdbcTemplate.update("update user_profiles set profile_image_file_id = ? where id = ?", "file-2", "2");
 
 		mockMvc.perform(get("/tickets/" + ticketId).with(user("john@mail.com").authorities(
 				new SimpleGrantedAuthority("user:read"),
@@ -109,6 +110,6 @@ class BrennonApplicationTests {
 				new SimpleGrantedAuthority("support:read"),
 				new SimpleGrantedAuthority("support:write"))))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("/api/v1/profile/images/2")));
+			.andExpect(content().string(containsString("/api/v1/profile/2/images/file-2")));
 	}
 }

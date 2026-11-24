@@ -129,7 +129,8 @@
                     <div class="flex gap-4" th:each="reply : ${ticket.replies()}">
                         <!-- Avatar -->
                         <div class="flex-shrink-0 w-12 h-12 rounded-full border-2 border-(--color-control-border) flex items-center justify-center bg-transparent overflow-hidden">
-                            <img th:src="@{/api/v1/profile/images/{profileId}(profileId=${reply.authorId})}"
+                            <img th:if="${reply.profileImageUrl() != null}"
+                                 th:src="${reply.profileImageUrl()}"
                                  th:alt="${reply.authorFullName()}"
                                  class="hidden w-full h-full object-cover"
                                  onload="this.classList.remove('hidden'); this.nextElementSibling.classList.add('hidden')"

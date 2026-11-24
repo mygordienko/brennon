@@ -137,31 +137,8 @@ public class ProfileImageServiceTest {
     }
 
     @Test
-    @DisplayName("Checks and loads current user's profile image")
-    public void givenCurrentUser_whenProfileImageQueried_thenDelegatesToStorageWithCurrentUserImageFile() {
-        var fileId = FileId.of("file-1");
-        var resourceBundle = new ResourceBundle(
-            new ByteArrayResource("image".getBytes()), new FileMeta("image.png"));
-        var created = OffsetDateTime.parse("2026-08-30T15:30:00+02:00");
-
-        var currentUser = new BrennonUserProfile(userId, 0, login, "John", "Smith", fileId, created, created);
-        when(userProfilePort.getByLogin(login)).thenReturn(Optional.of(currentUser));
-        when(profileImageStoragePort.getImageResource(userId, fileId)).thenReturn(Optional.of(resourceBundle));
-
-        Assertions.assertThat(profileImageService.currentUserHasProfileImage()).isTrue();
-        Assertions.assertThat(profileImageService.getCurrentUserProfileImage()).contains(resourceBundle);
-    }
-
-    @Test
-    @DisplayName("Reports no profile image when the aggregate has no image file")
-    public void givenCurrentUserWithoutImage_whenProfileImageQueried_thenNoImageReported() {
-        Assertions.assertThat(profileImageService.currentUserHasProfileImage()).isFalse();
-        Assertions.assertThat(profileImageService.getCurrentUserProfileImage()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Loads profile image of an arbitrary user")
-    public void givenProfileId_whenProfileImageQueried_thenDelegatesToStorageWithProvidedUserAndImageFile() {
+    @DisplayName("Loads current profile image when requested file is the current one")
+    public void givenCurrentImageFile_whenProfileImageQueried_thenDelegatesToStorage() {
         var targetUserId = BrennonUserId.of("user-2");
         var fileId = FileId.of("file-2");
         var created = OffsetDateTime.parse("2026-08-30T15:30:00+02:00");
@@ -172,7 +149,31 @@ public class ProfileImageServiceTest {
             new BrennonUserProfile(targetUserId, 0, login, "John", "Smith", fileId, created, created)));
         when(profileImageStoragePort.getImageResource(targetUserId, fileId)).thenReturn(Optional.of(resourceBundle));
 
-        Assertions.assertThat(profileImageService.getProfileImage(targetUserId)).contains(resourceBundle);
+        Assertions.assertThat(profileImageService.getProfileImage(targetUserId, fileId)).contains(resourceBundle);
+    }
+
+    @Test
+    @DisplayName("Returns no image for a profile image that is not current")
+    public void givenOutdatedImageFile_whenProfileImageQueried_thenEmptyResultReturned() {
+        var targetUserId = BrennonUserId.of("user-2");
+        var currentFileId = FileId.of("file-2");
+        var requestedFileId = FileId.of("file-1");
+        var created = OffsetDateTime.parse("2026-08-30T15:30:00+02:00");
+
+        when(userProfilePort.getById(targetUserId)).thenReturn(Optional.of(
+            new BrennonUserProfile(targetUserId, 0, login, "John", "Smith", currentFileId, created, created)));
+
+        Assertions.assertThat(profileImageService.getProfileImage(targetUserId, requestedFileId)).isEmpty();
+
+        verify(profileImageStoragePort, never()).getImageResource(any(), any());
+    }
+
+    @Test
+    @DisplayName("Returns no image when profile has no image set")
+    public void givenProfileWithoutImage_whenProfileImageQueried_thenEmptyResultReturned() {
+        Assertions.assertThat(profileImageService.getProfileImage(userId, FileId.of("file-1"))).isEmpty();
+
+        verify(profileImageStoragePort, never()).getImageResource(any(), any());
     }
 
     @Test
@@ -182,6 +183,6 @@ public class ProfileImageServiceTest {
 
         when(userProfilePort.getById(targetUserId)).thenReturn(Optional.empty());
 
-        Assertions.assertThat(profileImageService.getProfileImage(targetUserId)).isEmpty();
+        Assertions.assertThat(profileImageService.getProfileImage(targetUserId, FileId.of("file-1"))).isEmpty();
     }
 }

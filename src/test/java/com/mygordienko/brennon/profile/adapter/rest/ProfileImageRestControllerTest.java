@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.di.CoreSecurityConfiguration;
+import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.core.common.FileMeta;
 import com.mygordienko.brennon.core.common.ResourceBundle;
 import com.mygordienko.brennon.core.common.adapter.FileContentValidator;
@@ -54,71 +55,50 @@ public class ProfileImageRestControllerTest {
     private UserDetailsService userDetailsService;
 
     @Test
-    @DisplayName("Current user profile image is privately cached by the browser")
-    public void givenProfileImage_whenCurrentUserImageRequested_thenResponseIsPrivatelyCacheable() throws Exception {
-        when(profileImageService.getCurrentUserProfileImage())
+    @DisplayName("Profile image is privately cached by the browser for one month")
+    public void givenProfileImage_whenImageRequested_thenResponseIsPrivatelyCacheable() throws Exception {
+        when(profileImageService.getProfileImage(BrennonUserId.of("2"), FileId.of("file-1")))
                 .thenReturn(Optional.of(new ResourceBundle(
                         new ByteArrayResource("image".getBytes()), new FileMeta("image.png"))));
 
-        mockMvc.perform(get("/api/v1/profile/images/me").with(user("john")
+        mockMvc.perform(get("/api/v1/profile/2/images/file-1").with(user("john")
                         .authorities(new SimpleGrantedAuthority("user:read"))))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CACHE_CONTROL,
-                        allOf(containsString("private"), containsString("max-age=600"))))
+                        allOf(containsString("private"), containsString("max-age=2592000"))))
                 // NOTE: image is per user
                 .andExpect(header().string(HttpHeaders.VARY, containsString(HttpHeaders.COOKIE)))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "image/png"));
     }
 
     @Test
-    @DisplayName("Profile image of another user is privately cached by the browser")
-    public void givenProfileImage_whenOtherUserImageRequested_thenResponseIsPrivatelyCacheable() throws Exception {
-        when(profileImageService.getProfileImage(BrennonUserId.of("2")))
-                .thenReturn(Optional.of(new ResourceBundle(
-                        new ByteArrayResource("image".getBytes()), new FileMeta("image.png"))));
+    @DisplayName("Absent profile image must not be cached")
+    public void givenNoProfileImage_whenImageRequested_thenResponseIsNotCacheable() throws Exception {
+        when(profileImageService.getProfileImage(BrennonUserId.of("2"), FileId.of("file-1")))
+                .thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/v1/profile/images/2").with(user("john")
-                        .authorities(new SimpleGrantedAuthority("user:read"))))
-                .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.CACHE_CONTROL,
-                        allOf(containsString("private"), containsString("max-age=600"))))
-                .andExpect(header().string(HttpHeaders.VARY, containsString(HttpHeaders.COOKIE)))
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, "image/png"));
-    }
-
-    @Test
-    @DisplayName("Absent current user profile image must not be cached")
-    public void givenNoProfileImage_whenCurrentUserImageRequested_thenResponseIsNotCacheable() throws Exception {
-        when(profileImageService.getCurrentUserProfileImage()).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/v1/profile/images/me").with(user("john")
+        mockMvc.perform(get("/api/v1/profile/2/images/file-1").with(user("john")
                         .authorities(new SimpleGrantedAuthority("user:read"))))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"));
     }
 
     @Test
-    @DisplayName("Absent profile image of another user must not be cached")
-    public void givenNoProfileImage_whenOtherUserImageRequested_thenResponseIsNotCacheable() throws Exception {
-        when(profileImageService.getProfileImage(BrennonUserId.of("2"))).thenReturn(Optional.empty());
+    @DisplayName("Outdated profile image must not be served or cached")
+    public void givenOutdatedImageFile_whenImageRequested_thenNotFoundReturned() throws Exception {
+        when(profileImageService.getProfileImage(BrennonUserId.of("2"), FileId.of("file-1")))
+                .thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/v1/profile/images/2").with(user("john")
+        mockMvc.perform(get("/api/v1/profile/2/images/file-1").with(user("john")
                         .authorities(new SimpleGrantedAuthority("user:read"))))
                 .andExpect(status().isNotFound())
                 .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"));
     }
 
     @Test
-    @DisplayName("Current user profile image is not available without authentication")
-    public void givenNoAuthentication_whenCurrentUserImageRequested_thenAccessIsDenied() throws Exception {
-        mockMvc.perform(get("/api/v1/profile/images/me"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("Profile image of another user is not available without authentication")
-    public void givenNoAuthentication_whenOtherUserImageRequested_thenAccessIsDenied() throws Exception {
-        mockMvc.perform(get("/api/v1/profile/images/2"))
+    @DisplayName("Profile image is not available without authentication")
+    public void givenNoAuthentication_whenImageRequested_thenAccessIsDenied() throws Exception {
+        mockMvc.perform(get("/api/v1/profile/2/images/file-1"))
                 .andExpect(status().isForbidden());
     }
 }

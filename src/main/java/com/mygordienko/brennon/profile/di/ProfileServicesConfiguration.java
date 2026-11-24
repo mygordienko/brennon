@@ -14,6 +14,7 @@ import com.mygordienko.brennon.core.auth.BrennonUserAccountApi;
 import com.mygordienko.brennon.core.common.ClockManager;
 import com.mygordienko.brennon.profile.adapter.jdbc.BrennonUserProfileCrudRepository;
 import com.mygordienko.brennon.profile.adapter.jdbc.JdbcBrennonUserProfileStorage;
+import com.mygordienko.brennon.profile.adapter.rest.ProfileImageUrlResolver;
 import com.mygordienko.brennon.profile.adapter.storage.LocalFileSystemProfileImageStorage;
 import com.mygordienko.brennon.profile.adapter.storage.S3ProfileImageStorage;
 import com.mygordienko.brennon.profile.internal.BrennonUserProfilePort;
@@ -45,6 +46,11 @@ public class ProfileServicesConfiguration {
         BrennonUserProfilePort userProfileStoragePort,
         BrennonUserAccountApi userAccountApi) {
         return new BrennonUserProfileService(userProfileStoragePort, userAccountApi);
+    }
+
+    @Bean
+    public ProfileImageUrlResolver profileImageUrlResolver() {
+        return new ProfileImageUrlResolver();
     }
 
     @Bean

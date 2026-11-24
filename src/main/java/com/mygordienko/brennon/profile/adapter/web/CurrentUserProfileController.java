@@ -4,20 +4,20 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.mygordienko.brennon.profile.adapter.rest.ProfileImageUrlResolver;
 import com.mygordienko.brennon.profile.internal.BrennonUserProfileService;
-import com.mygordienko.brennon.profile.internal.ProfileImageService;
 
 @Controller
 public class CurrentUserProfileController {
     public CurrentUserProfileController(
             BrennonUserProfileService userProfileService,
-            ProfileImageService profileImageService) {
+            ProfileImageUrlResolver profileImageUrlResolver) {
         this.userProfileService = userProfileService;
-        this.profileImageService = profileImageService;
+        this.profileImageUrlResolver = profileImageUrlResolver;
     }
 
     private final BrennonUserProfileService userProfileService;
-    private final ProfileImageService profileImageService;
+    private final ProfileImageUrlResolver profileImageUrlResolver;
 
     @GetMapping("/current-user-profile")
     public String getProfileInfo(Model model) {
@@ -27,7 +27,7 @@ public class CurrentUserProfileController {
             userProfile.getId().toString(),
             userProfile.getFullName(),
             userProfile.getLogin().toString(),
-            profileImageService.currentUserHasProfileImage());
+            profileImageUrlResolver.resolve(userProfile).orElse(null));
         model.addAttribute("currentUser", dto);
         return "profile/current-user-profile :: currentUserProfile";
     }

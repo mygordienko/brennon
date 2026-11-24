@@ -13,7 +13,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +29,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.mygordienko.brennon.core.auth.BrennonUserId;
 import com.mygordienko.brennon.core.auth.BrennonUserLogin;
 import com.mygordienko.brennon.core.auth.di.CoreSecurityConfiguration;
+import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.core.common.di.ThymeleafCustomConfiguration;
 import com.mygordienko.brennon.profile.BrennonUserProfile;
 import com.mygordienko.brennon.profile.ProfileConcurrentModificationException;
+import com.mygordienko.brennon.profile.adapter.rest.ProfileImageUrlResolver;
 import com.mygordienko.brennon.profile.internal.BrennonUserProfileService;
 import com.mygordienko.brennon.profile.internal.ProfileImageService;
 
@@ -46,6 +50,9 @@ public class ProfileImagePageControllerTest {
     @MockitoBean
     private BrennonUserProfileService userProfileService;
 
+    @MockitoBean
+    private ProfileImageUrlResolver profileImageUrlResolver;
+
     /**
      * NOTE: replace the origin UserDetailsService bean from CoreSecurityConfig
      */
@@ -56,6 +63,11 @@ public class ProfileImagePageControllerTest {
         BrennonUserId.of("1"), 3, BrennonUserLogin.of("john@mail.com"), "John", "Smith", null,
         OffsetDateTime.parse("2026-08-30T15:30:00+02:00"),
         OffsetDateTime.parse("2026-08-30T15:30:00+02:00"));
+
+    @BeforeEach
+    public void setUp() {
+        when(profileImageUrlResolver.resolve(profile)).thenReturn(Optional.empty());
+    }
 
     @Test
     @DisplayName("Renders aggregate version in the profile image form")
@@ -68,6 +80,26 @@ public class ProfileImagePageControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("name=\"version\"")))
             .andExpect(content().string(containsString("value=\"3\"")));
+    }
+
+    @Test
+    @DisplayName("Renders backend-composed profile image URL")
+    public void givenProfileWithImage_whenProfilePageRequested_thenProfileImageUrlRendered() throws Exception {
+        var imageUrl = "/api/v1/profile/1/images/file-1";
+        var profileWithImage = new BrennonUserProfile(
+            BrennonUserId.of("1"), 3, BrennonUserLogin.of("john@mail.com"), "John", "Smith",
+            FileId.of("file-1"),
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"),
+            OffsetDateTime.parse("2026-08-30T15:30:00+02:00"));
+
+        when(userProfileService.getCurrentUser()).thenReturn(profileWithImage);
+        when(profileImageUrlResolver.resolve(profileWithImage)).thenReturn(Optional.of(imageUrl));
+
+        mockMvc.perform(get("/profile").with(user("john@mail.com").authorities(
+                new SimpleGrantedAuthority("user:read"),
+                new SimpleGrantedAuthority("user:write"))))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("src=\"%s\"".formatted(imageUrl))));
     }
 
     @Test

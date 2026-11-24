@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mygordienko.brennon.core.common.adapter.HtmxClientEventTriggerHeaderBuilder;
+import com.mygordienko.brennon.profile.adapter.rest.ProfileImageUrlResolver;
 import com.mygordienko.brennon.ticket.MissingTicketReplyException;
 import com.mygordienko.brennon.ticket.TicketDetailsView;
 import com.mygordienko.brennon.ticket.TicketId;
@@ -36,13 +37,15 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class TicketController {
-    public TicketController(TicketService ticketService) {
+    public TicketController(TicketService ticketService, ProfileImageUrlResolver profileImageUrlResolver) {
         this.ticketService = ticketService;
+        this.profileImageUrlResolver = profileImageUrlResolver;
     }
 
     private static final Logger log = LoggerFactory.getLogger("com.mygordienko.brennon.ticket.adapter.web.TicketController");
 
     private final TicketService ticketService;
+    private final ProfileImageUrlResolver profileImageUrlResolver;
 
     @GetMapping("/tickets/my")
     public String getMyTickets(
@@ -466,6 +469,7 @@ public class TicketController {
                 .map(reply -> new TicketReplyDto(
                         reply.getId().toString(), 
                         reply.getAuthor().getId().toString(), 
+                        profileImageUrlResolver.resolve(reply.getAuthor()).orElse(null),
                         reply.getText(), 
                         reply.getAuthor().getFullName(), 
                         reply.getCreated().atZoneSameInstant(zoneId).toOffsetDateTime(), 

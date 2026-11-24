@@ -4,6 +4,6 @@ public record CurrentUserProfileDto(
     String id,
     String fullName,
     String email,
-    boolean hasProfileImage
+    String profileImageUrl
 ) {
 }

@@ -89,24 +89,22 @@ public class ProfileImageService {
     }
 
     @PreAuthorize("hasAuthority('user:read')")
-    public boolean currentUserHasProfileImage() {
-        var currentUser = userProfileService.getCurrentUser();
-        return currentUser.getProfileImageFileId().isPresent();
-    }
-
-    @PreAuthorize("hasAuthority('user:read')")
-    public Optional<ResourceBundle> getCurrentUserProfileImage() {
-        var currentUser = userProfileService.getCurrentUser();
-        return currentUser.getProfileImageFileId()
-                .flatMap(fileId -> profileImageStoragePort.getImageResource(currentUser.getId(), fileId));
-    }
-
-    @PreAuthorize("hasAuthority('user:read')")
-    public Optional<ResourceBundle> getProfileImage(BrennonUserId profileId) {
+    public Optional<ResourceBundle> getProfileImage(BrennonUserId profileId, FileId fileId) {
         try {
             var profile = userProfileService.getUser(profileId);
-            return profile.getProfileImageFileId()
-                    .flatMap(fileId -> profileImageStoragePort.getImageResource(profileId, fileId));
+            var currentFileId = profile.getProfileImageFileId();
+
+            if (currentFileId.isEmpty()) {
+                return Optional.empty();
+            }
+
+            if (!currentFileId.get().equals(fileId)) {
+                log.warn("Requested profile image {} is not current for profile {} (current: {})",
+                        fileId, profileId, currentFileId.get());
+                return Optional.empty();
+            }
+
+            return profileImageStoragePort.getImageResource(profileId, fileId);
         } catch (MissingUserException e) {
             return Optional.empty();
         }
