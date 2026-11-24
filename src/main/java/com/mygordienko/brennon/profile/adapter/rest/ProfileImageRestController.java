@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mygordienko.brennon.core.auth.BrennonUserId;
+import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.core.common.ResourceBundle;
 import com.mygordienko.brennon.core.common.adapter.FileContentValidator;
 import com.mygordienko.brennon.profile.internal.ProfileImageService;
@@ -52,10 +53,10 @@ public class ProfileImageRestController {
 
     /**
      * NOTE: profile images are cached by the browser only, see `ProfileImageHttpCachingConfiguration`
-     * for the security part of the caching policy. The image URL is stable, so a freshly uploaded
-     * image may be served from the browser cache until it expires.
+     * for the security part of the caching policy. The image file ID is part of the URL, so a freshly
+     * uploaded image gets a new URL and is not served from the browser cache.
      */
-    private static final Duration PROFILE_IMAGE_CACHE_MAX_AGE = Duration.ofMinutes(10);
+    private static final Duration PROFILE_IMAGE_CACHE_MAX_AGE = Duration.ofDays(30);
 
     private final ProfileImageService profileImageService;
     private final FileContentValidator fileContentValidator;
@@ -106,16 +107,9 @@ public class ProfileImageRestController {
         return new UploadedFileDto(fileId.toString());
     }
 
-    @GetMapping("/images/me")
-    public ResponseEntity<Resource> getCurrentUserImage() {
-        return profileImageService.getCurrentUserProfileImage()
-                .map(ProfileImageRestController::toResponse)
-                .orElseGet(ProfileImageRestController::notFoundResponse);
-    }
-
-    @GetMapping("/images/{profileId}")
-    public ResponseEntity<Resource> getImage(@PathVariable String profileId) {
-        return profileImageService.getProfileImage(BrennonUserId.of(profileId))
+    @GetMapping("/{profileId}/images/{fileId}")
+    public ResponseEntity<Resource> getImage(@PathVariable String profileId, @PathVariable String fileId) {
+        return profileImageService.getProfileImage(BrennonUserId.of(profileId), FileId.of(fileId))
                 .map(ProfileImageRestController::toResponse)
                 .orElseGet(ProfileImageRestController::notFoundResponse);
     }

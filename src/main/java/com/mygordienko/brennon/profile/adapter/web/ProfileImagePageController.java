@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.mygordienko.brennon.core.common.FileId;
 import com.mygordienko.brennon.profile.BrennonUserProfile;
 import com.mygordienko.brennon.profile.ProfileImageStorageException;
+import com.mygordienko.brennon.profile.adapter.rest.ProfileImageUrlResolver;
 import com.mygordienko.brennon.profile.internal.BrennonUserProfileService;
 import com.mygordienko.brennon.profile.internal.ProfileImageService;
 
@@ -18,13 +19,16 @@ import com.mygordienko.brennon.profile.internal.ProfileImageService;
 public class ProfileImagePageController {
     public ProfileImagePageController(
             ProfileImageService profileImageService,
-            BrennonUserProfileService userProfileService) {
+            BrennonUserProfileService userProfileService,
+            ProfileImageUrlResolver profileImageUrlResolver) {
         this.profileImageService = profileImageService;
         this.userProfileService = userProfileService;
+        this.profileImageUrlResolver = profileImageUrlResolver;
     }
 
     private final ProfileImageService profileImageService;
     private final BrennonUserProfileService userProfileService;
+    private final ProfileImageUrlResolver profileImageUrlResolver;
 
     @GetMapping("/profile")
     public String getProfile(Model model) {
@@ -66,6 +70,6 @@ public class ProfileImagePageController {
             userProfile.getId().toString(),
             userProfile.getFullName(),
             userProfile.getLogin().toString(),
-            userProfile.getProfileImageFileId().isPresent()));
+            profileImageUrlResolver.resolve(userProfile).orElse(null)));
     }
 }

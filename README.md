@@ -112,7 +112,7 @@ management:
 
 ## Things to note
 
-* Custom caching policy for user profile images. See `ProfileImageRestController` and `ProfileImageHttpCachingConfiguration`. By default Spring Security adds response headers to prevent data from being cached. If we want to override that we have to add custom `SecurityFilterChain`.
+* Custom caching policy for user profile images. See `ProfileImageRestController` and `ProfileImageHttpCachingConfiguration`. By default Spring Security adds response headers to prevent data from being cached. If we want to override that we have to add custom `SecurityFilterChain`. Profile image URLs include the image file ID, so a new image gets a new URL and browsers can cache images for a long time.
 
 * To achieve pure streaming file upload the default Spring's multipart data processing must be disabled (globally via properties or for specific endpoints via custom bean, see `MultipartConfig`). By default when using `@RequestParam` with `MultipartFile` the request body will be cached in temp files or memory (if small enough). Note that Spring Security can interfere and trigger request body to be cached, ex. when checking CSRF token passed via hidden form field, pass it via headers then. Here we use Uppy library for file upload and we do it via separate Ajax request to dedicated REST controller, CSRF token is passed in headers, see [scripts.html](src/main/resources/templates/ticket/fragments/scripts.html). see [FileUpload.md](./docs/FileUpload.md) for more info.
 
